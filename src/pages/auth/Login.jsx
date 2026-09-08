@@ -247,7 +247,7 @@ export default function Login({ onNavigateToRegister }) {
             {/* Footer */}
             <div className="flex items-center justify-between border-t border-slate-800 pt-5 text-xs text-slate-500">
               <span>© 2026 Smart LMS</span>
-              <span>support@smartlms.edu</span>
+              <span>support@lms.edu</span>
             </div>
           </div>
         </aside>
@@ -262,7 +262,7 @@ export default function Login({ onNavigateToRegister }) {
               </div>
 
               <div className="font-serif text-lg font-semibold">
-                Smart LMS
+                School Management System 
               </div>
             </div>
 
