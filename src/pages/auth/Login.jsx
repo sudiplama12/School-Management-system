@@ -202,10 +202,10 @@ export default function Login({ onNavigateToRegister }) {
 
                 <div>
                   <div className="font-serif text-xl font-semibold tracking-tight">
-                    Smart LMS
+                    School
                   </div>
                   <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
-                    Learning Management
+                    Management System
                   </div>
                 </div>
               </div>
