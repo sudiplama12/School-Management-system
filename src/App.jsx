@@ -7,7 +7,13 @@ import StudentDashboard, {
   DashboardHome,
 } from "./pages/StudentDashboard";
 
+import Profile from "./pages/student/Profile";
+import Notice from "./pages/student/notice";
+import Fee from "./pages/student/fee";
+import Library from "./pages/student/library";
+
 import ProtectedRoute from "./components/ProtectedRoute";
+
 // Temporary page component
 function Placeholder({ title }) {
   return (
@@ -28,12 +34,15 @@ export default function App() {
     <BrowserRouter>
       <Routes>
 
-        {/* ================= LOGIN ================= */}
+        {/* ================= LOGIN & REGISTER ================= */}
+
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />}
-/>
+
+        <Route path="/register" element={<Register />} />
+
 
         {/* ================= STUDENT ================= */}
+
         <Route
           path="/student"
           element={
@@ -42,62 +51,115 @@ export default function App() {
             </ProtectedRoute>
           }
         >
+
           {/* Dashboard */}
-          <Route index element={<DashboardHome />} />
+          <Route
+            index
+            element={<DashboardHome />}
+          />
+
 
           {/* Profile */}
           <Route
             path="profile"
-            element={<Placeholder title="Student Profile" />}
+            element={<Profile />}
           />
+
 
           {/* Jobs */}
           <Route
             path="jobs"
-            element={<Placeholder title="Jobs & Internships" />}
+            element={
+              <Placeholder title="Jobs & Internships" />
+            }
           />
+
 
           {/* Job Details */}
           <Route
             path="jobs/:id"
-            element={<Placeholder title="Job Details" />}
+            element={
+              <Placeholder title="Job Details" />
+            }
           />
+
 
           {/* Applications */}
           <Route
             path="applications"
-            element={<Placeholder title="My Applications" />}
+            element={
+              <Placeholder title="My Applications" />
+            }
           />
+
+
+          {/* Fee */}
+          <Route
+            path="fee"
+            element={<Fee />}
+          />
+
+
+          {/* Library */}
+          <Route
+            path="library"
+            element={<Library />}
+          />
+
+
+          {/* Notices */}
+          <Route
+            path="notices"
+            element={<Notice />}
+          />
+
 
           {/* Home Location */}
           <Route
             path="location"
-            element={<Placeholder title="Home Location" />}
+            element={
+              <Placeholder title="Home Location" />
+            }
           />
+
 
           {/* Assignments */}
           <Route
             path="assignments"
-            element={<Placeholder title="Assignments" />}
+            element={
+              <Placeholder title="Assignments" />
+            }
           />
+
 
           {/* Settings */}
           <Route
             path="settings"
-            element={<Placeholder title="Settings" />}
+            element={
+              <Placeholder title="Settings" />
+            }
           />
+
         </Route>
 
+
         {/* ================= DEFAULT ================= */}
+
         <Route
           path="/"
-          element={<Navigate to="/login" replace />}
+          element={
+            <Navigate to="/login" replace />
+          }
         />
 
+
         {/* ================= 404 ================= */}
+
         <Route
           path="*"
-          element={<Navigate to="/login" replace />}
+          element={
+            <Navigate to="/login" replace />
+          }
         />
 
       </Routes>

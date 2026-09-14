@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Check } from "lucide-react";
 
 const ROLES = {
@@ -94,6 +95,7 @@ export default function Register({ onNavigateToLogin }) {
   const [status, setStatus] = useState("idle");
   const current = ROLES[role];
   const isAdmin = role === "admin";
+  const navigate = useNavigate();
 
   function handleRoleChange(key) {
     setRole(key);
@@ -153,9 +155,8 @@ export default function Register({ onNavigateToLogin }) {
                 key={key}
                 type="button"
                 onClick={() => handleRoleChange(key)}
-                className={`relative pb-3.5 text-sm font-medium whitespace-nowrap flex items-center gap-1.5 ${
-                  role === key ? "text-slate-900" : "text-slate-500"
-                }`}
+                className={`relative pb-3.5 text-sm font-medium whitespace-nowrap flex items-center gap-1.5 ${role === key ? "text-slate-900" : "text-slate-500"
+                  }`}
               >
                 <span className={`font-serif italic text-xs ${role === key ? "text-amber-700" : "text-slate-400"}`}>
                   {r.num}
@@ -234,8 +235,8 @@ export default function Register({ onNavigateToLogin }) {
                   {status === "working"
                     ? "Creating account…"
                     : status === "done"
-                    ? "Account created"
-                    : "Create account"}
+                      ? "Account created"
+                      : "Create account"}
                 </button>
               </form>
 
@@ -243,7 +244,7 @@ export default function Register({ onNavigateToLogin }) {
                 Already have an account?{" "}
                 <button
                   type="button"
-                  onClick={onNavigateToLogin}
+                  onClick={() => navigate("/login")}
                   className="font-medium text-amber-700 hover:underline"
                 >
                   Log in instead

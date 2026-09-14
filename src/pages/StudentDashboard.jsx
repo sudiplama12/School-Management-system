@@ -14,6 +14,7 @@ import {
   Bell,
   Search,
   BookOpen,
+  CreditCard,
   CalendarCheck,
   ClipboardList,
   ArrowUpRight,
@@ -48,6 +49,21 @@ const navigation = [
     path: "/student/location",
     icon: MapPin,
   },
+  {
+    name: "Notices",
+    path: "/student/notices",
+    icon: Bell,
+  },
+  {
+    name: "Library",
+    path: "/student/library",
+    icon: BookOpen,
+  },
+  {
+  name: "Fee",
+  path: "/student/fee",
+  icon: CreditCard,
+},
 ];
 
 const assignments = [
