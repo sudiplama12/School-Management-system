@@ -44,11 +44,7 @@ const navigation = [
     path: "/student/applications",
     icon: FileText,
   },
-  {
-    name: "Home Location",
-    path: "/student/location",
-    icon: MapPin,
-  },
+  
   {
     name: "Notices",
     path: "/student/notices",

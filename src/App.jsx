@@ -1,20 +1,46 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
+// =====================================================
+// PUBLIC PAGES
+// =====================================================
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
+// =====================================================
+// STUDENT PAGES
+// =====================================================
 import StudentDashboard, {
   DashboardHome,
 } from "./pages/StudentDashboard";
 
 import Profile from "./pages/student/Profile";
-import Notice from "./pages/student/notice";
-import Fee from "./pages/student/fee";
+import Jobs from "./pages/student/Jobs";
+import Fee from "./pages/student/Fee";
 import Library from "./pages/student/library";
+import StudentAssignments from "./pages/student/Assignments";
+import TakeAssignment from "./pages/student/TakeAssignment";
+import StudentNotices from "./pages/student/Notices";
 
+// =====================================================
+// TEACHER PAGES
+// =====================================================
+import TeacherDashboard, {
+  TeacherHome,
+} from "./pages/teacher/TeacherDashboard";
+
+import Students from "./pages/teacher/Students";
+import Attendance from "./pages/teacher/Attendance";
+import TeacherAssignments from "./pages/teacher/Assignments";
+import TeacherNotices from "./pages/teacher/Notices";
+
+// =====================================================
+// AUTHENTICATION
+// =====================================================
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// Temporary page component
+// =====================================================
+// PLACEHOLDER COMPONENT
+// =====================================================
 function Placeholder({ title }) {
   return (
     <div className="p-6">
@@ -29,19 +55,32 @@ function Placeholder({ title }) {
   );
 }
 
+// =====================================================
+// APP
+// =====================================================
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* ================= LOGIN & REGISTER ================= */}
+        {/* =================================================
+            PUBLIC ROUTES
+        ================================================= */}
 
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/login"
+          element={<Login />}
+        />
 
-        <Route path="/register" element={<Register />} />
+        <Route
+          path="/register"
+          element={<Register />}
+        />
 
 
-        {/* ================= STUDENT ================= */}
+        {/* =================================================
+            STUDENT ROUTES
+        ================================================= */}
 
         <Route
           path="/student"
@@ -52,39 +91,25 @@ export default function App() {
           }
         >
 
-          {/* Dashboard */}
+          {/* /student */}
           <Route
             index
             element={<DashboardHome />}
           />
 
-
-          {/* Profile */}
+          {/* /student/profile */}
           <Route
             path="profile"
             element={<Profile />}
           />
 
-
-          {/* Jobs */}
+          {/* /student/jobs */}
           <Route
             path="jobs"
-            element={
-              <Placeholder title="Jobs & Internships" />
-            }
+            element={<Jobs />}
           />
 
-
-          {/* Job Details */}
-          <Route
-            path="jobs/:id"
-            element={
-              <Placeholder title="Job Details" />
-            }
-          />
-
-
-          {/* Applications */}
+          {/* /student/applications */}
           <Route
             path="applications"
             element={
@@ -92,29 +117,25 @@ export default function App() {
             }
           />
 
-
-          {/* Fee */}
+          {/* /student/notices */}
           <Route
-            path="fee"
-            element={<Fee />}
+            path="notices"
+            element={<StudentNotices />}
           />
 
-
-          {/* Library */}
+          {/* /student/library */}
           <Route
             path="library"
             element={<Library />}
           />
 
-
-          {/* Notices */}
+          {/* /student/fee */}
           <Route
-            path="notices"
-            element={<Notice />}
+            path="fee"
+            element={<Fee />}
           />
 
-
-          {/* Home Location */}
+          {/* /student/location */}
           <Route
             path="location"
             element={
@@ -122,17 +143,19 @@ export default function App() {
             }
           />
 
-
-          {/* Assignments */}
+          {/* /student/assignments */}
           <Route
             path="assignments"
-            element={
-              <Placeholder title="Assignments" />
-            }
+            element={<StudentAssignments />}
           />
 
+          {/* /student/assignments/take */}
+          <Route
+            path="assignments/take"
+            element={<TakeAssignment />}
+          />
 
-          {/* Settings */}
+          {/* /student/settings */}
           <Route
             path="settings"
             element={
@@ -143,22 +166,113 @@ export default function App() {
         </Route>
 
 
-        {/* ================= DEFAULT ================= */}
+        {/* =================================================
+            TEACHER ROUTES
+        ================================================= */}
+
+        <Route
+          path="/teacher"
+          element={
+            <ProtectedRoute allowedRoles={["teacher"]}>
+              <TeacherDashboard />
+            </ProtectedRoute>
+          }
+        >
+
+          {/* /teacher */}
+          <Route
+            index
+            element={<TeacherHome />}
+          />
+
+          {/* /teacher/students */}
+          <Route
+            path="students"
+            element={<Students />}
+          />
+
+          {/* /teacher/attendance */}
+          <Route
+            path="attendance"
+            element={<Attendance />}
+          />
+
+          {/* /teacher/assignments */}
+          <Route
+            path="assignments"
+            element={<TeacherAssignments />}
+          />
+
+          {/* /teacher/notices */}
+          <Route
+            path="notices"
+            element={<TeacherNotices />}
+          />
+
+          {/* /teacher/visits */}
+          <Route
+            path="visits"
+            element={
+              <Placeholder title="Home Visits" />
+            }
+          />
+
+          {/* /teacher/vacancies */}
+          <Route
+            path="vacancies"
+            element={
+              <Placeholder title="Manage Vacancies" />
+            }
+          />
+
+          {/* /teacher/applications */}
+          <Route
+            path="applications"
+            element={
+              <Placeholder title="Student Applications" />
+            }
+          />
+
+          {/* /teacher/profile */}
+          <Route
+            path="profile"
+            element={
+              <Placeholder title="Teacher Profile" />
+            }
+          />
+
+          {/* /teacher/settings */}
+          <Route
+            path="settings"
+            element={
+              <Placeholder title="Settings" />
+            }
+          />
+
+        </Route>
+
+
+        {/* =================================================
+            DEFAULT ROUTES
+        ================================================= */}
 
         <Route
           path="/"
           element={
-            <Navigate to="/login" replace />
+            <Navigate
+              to="/login"
+              replace
+            />
           }
         />
-
-
-        {/* ================= 404 ================= */}
 
         <Route
           path="*"
           element={
-            <Navigate to="/login" replace />
+            <Navigate
+              to="/login"
+              replace
+            />
           }
         />
 

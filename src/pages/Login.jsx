@@ -497,11 +497,11 @@ export default function Login({ onNavigateToRegister }) {
             <p className="text-xs text-slate-500">
               Student:{" "}
               <span className="text-slate-700 font-medium">
-                student1
+                
               </span>{" "}
               /{" "}
               <span className="text-slate-700 font-medium">
-                student123
+                
               </span>
             </p>
           </div>
