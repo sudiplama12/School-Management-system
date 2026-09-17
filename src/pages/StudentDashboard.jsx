@@ -35,6 +35,16 @@ const navigation = [
     icon: User,
   },
   {
+    name: "Assignments",
+    path: "/student/assignments",
+    icon: CreditCard,
+  },
+  {
+    name: "Notices",
+    path: "/student/notices",
+    icon: Bell,
+  },
+  {
     name: "Jobs",
     path: "/student/jobs",
     icon: Briefcase,
@@ -44,22 +54,19 @@ const navigation = [
     path: "/student/applications",
     icon: FileText,
   },
-  
-  {
-    name: "Notices",
-    path: "/student/notices",
-    icon: Bell,
-  },
+
+
   {
     name: "Library",
     path: "/student/library",
     icon: BookOpen,
   },
+
   {
-  name: "Fee",
-  path: "/student/fee",
-  icon: CreditCard,
-},
+    name: "Fee",
+    path: "/student/fee",
+    icon: CreditCard,
+  },
 ];
 
 const assignments = [
@@ -164,9 +171,8 @@ export default function StudentDashboard() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 z-50 flex h-screen w-64 flex-col bg-slate-950 transition-transform lg:translate-x-0 ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed left-0 top-0 z-50 flex h-screen w-64 flex-col bg-slate-950 transition-transform lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         {/* Logo */}
         <div className="flex h-20 items-center justify-between border-b border-slate-800 px-6">
@@ -198,10 +204,9 @@ export default function StudentDashboard() {
                   end={item.end}
                   onClick={() => setMobileOpen(false)}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
-                      isActive
-                        ? "bg-amber-500 text-slate-950"
-                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                    `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${isActive
+                      ? "bg-amber-500 text-slate-950"
+                      : "text-slate-400 hover:bg-slate-800 hover:text-white"
                     }`
                   }
                 >
@@ -218,10 +223,9 @@ export default function StudentDashboard() {
             to="/student/settings"
             onClick={() => setMobileOpen(false)}
             className={({ isActive }) =>
-              `flex items-center gap-3 rounded-xl px-4 py-3 text-sm ${
-                isActive
-                  ? "bg-slate-800 text-white"
-                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
+              `flex items-center gap-3 rounded-xl px-4 py-3 text-sm ${isActive
+                ? "bg-slate-800 text-white"
+                : "text-slate-400 hover:bg-slate-800 hover:text-white"
               }`
             }
           >
