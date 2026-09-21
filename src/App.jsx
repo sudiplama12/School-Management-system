@@ -15,12 +15,12 @@ import StudentDashboard, {
 
 import Profile from "./pages/student/Profile";
 import Jobs from "./pages/student/Jobs";
-import Fee from "./pages/student/Fee";
+
 import Library from "./pages/student/library";
 import StudentAssignments from "./pages/student/Assignments";
 import TakeAssignment from "./pages/student/TakeAssignment";
 import StudentNotices from "./pages/student/Notices";
-
+import Fee from "./pages/student/Fee";
 // =====================================================
 // TEACHER PAGES
 // =====================================================
@@ -128,8 +128,7 @@ export default function App() {
             path="library"
             element={<Library />}
           />
-
-          {/* /student/fee */}
+          {/*Fee  */}
           <Route
             path="fee"
             element={<Fee />}
