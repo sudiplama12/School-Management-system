@@ -20,7 +20,7 @@ import Library from "./pages/student/library";
 import StudentAssignments from "./pages/student/Assignments";
 import TakeAssignment from "./pages/student/TakeAssignment";
 import StudentNotices from "./pages/student/Notices";
-import Fee from "./pages/student/Fee";
+
 // =====================================================
 // TEACHER PAGES
 // =====================================================
@@ -129,10 +129,7 @@ export default function App() {
             element={<Library />}
           />
           {/*Fee  */}
-          <Route
-            path="fee"
-            element={<Fee />}
-          />
+          <Route path="fee" element={<Fee />} />
 
           {/* /student/location */}
           <Route

@@ -93,7 +93,7 @@ export default function TeacherDashboard() {
         <div className="flex h-20 items-center justify-between border-b px-6">
           <div>
             <h1 className="text-xl font-bold text-slate-900">
-              Chautari<span className="text-amber-500">.</span>
+              Smart<span className="text-amber-500">.</span>
             </h1>
 
             <p className="text-xs text-slate-400">
