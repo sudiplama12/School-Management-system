@@ -1,4 +1,9 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
 // =====================================================
 // PUBLIC PAGES
@@ -15,11 +20,11 @@ import StudentDashboard, {
 
 import Profile from "./pages/student/Profile";
 import Jobs from "./pages/student/Jobs";
-
 import Library from "./pages/student/library";
 import StudentAssignments from "./pages/student/Assignments";
 import TakeAssignment from "./pages/student/TakeAssignment";
 import StudentNotices from "./pages/student/Notices";
+import Fee from "./pages/student/Fee";
 
 // =====================================================
 // TEACHER PAGES
@@ -34,12 +39,26 @@ import TeacherAssignments from "./pages/teacher/Assignments";
 import TeacherNotices from "./pages/teacher/Notices";
 
 // =====================================================
+// TEACHER HOME VISIT PAGES
+// =====================================================
+import Location from "./pages/teacher/homevisit/Location";
+import StudentLocation from "./pages/teacher/homevisit/StudentLocation";
+import Upcoming from "./pages/teacher/homevisit/Upcoming";
+import ActiveVisit from "./pages/teacher/homevisit/ActiveVisit";
+import VisitHistory from "./pages/teacher/homevisit/VisitHistory";
+
+// =====================================================
+// PARENT PAGE
+// =====================================================
+import StudentLocationRequest from "./pages/parent/StudentLocation";
+
+// =====================================================
 // AUTHENTICATION
 // =====================================================
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // =====================================================
-// PLACEHOLDER COMPONENT
+// PLACEHOLDER
 // =====================================================
 function Placeholder({ title }) {
   return (
@@ -77,7 +96,6 @@ export default function App() {
           element={<Register />}
         />
 
-
         {/* =================================================
             STUDENT ROUTES
         ================================================= */}
@@ -90,7 +108,6 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-
           {/* /student */}
           <Route
             index
@@ -128,8 +145,12 @@ export default function App() {
             path="library"
             element={<Library />}
           />
-          {/*Fee  */}
-          <Route path="fee" element={<Fee />} />
+
+          {/* /student/fee */}
+          <Route
+            path="fee"
+            element={<Fee />}
+          />
 
           {/* /student/location */}
           <Route
@@ -158,9 +179,7 @@ export default function App() {
               <Placeholder title="Settings" />
             }
           />
-
         </Route>
-
 
         {/* =================================================
             TEACHER ROUTES
@@ -174,7 +193,6 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-
           {/* /teacher */}
           <Route
             index
@@ -205,19 +223,57 @@ export default function App() {
             element={<TeacherNotices />}
           />
 
-          {/* /teacher/visits */}
+          {/* =================================================
+              HOME VISIT ROUTES
+          ================================================= */}
+
+          {/* /teacher/visits/location */}
           <Route
-            path="visits"
-            element={
-              <Placeholder title="Home Visits" />
-            }
+            path="visits/location"
+            element={<StudentLocation />}
           />
+
+          {/* /teacher/visits/upcoming */}
+          <Route
+            path="visits/upcoming"
+            element={<Upcoming />}
+          />
+
+          {/* /teacher/visits/active */}
+          <Route
+            path="visits/active"
+            element={<ActiveVisit />}
+          />
+
+          {/* /teacher/visits/history */}
+          <Route
+            path="visits/history"
+            element={<VisitHistory />}
+          />
+
+          {/* /teacher/visits/map */}
+          <Route
+            path="visits/map"
+            element={<Location />}
+          />
+
+          {/* =================================================
+              OTHER TEACHER ROUTES
+          ================================================= */}
 
           {/* /teacher/vacancies */}
           <Route
             path="vacancies"
             element={
               <Placeholder title="Manage Vacancies" />
+            }
+          />
+
+          {/* /teacher/vacancies/create */}
+          <Route
+            path="vacancies/create"
+            element={
+              <Placeholder title="Post Vacancy" />
             }
           />
 
@@ -244,9 +300,34 @@ export default function App() {
               <Placeholder title="Settings" />
             }
           />
-
         </Route>
 
+        {/* =================================================
+            PARENT ROUTES
+        ================================================= */}
+
+        <Route
+          path="/parent"
+          element={
+            <ProtectedRoute allowedRoles={["parent"]}>
+              <Placeholder title="Parent Dashboard" />
+            </ProtectedRoute>
+          }
+        >
+          {/* /parent */}
+          <Route
+            index
+            element={
+              <Placeholder title="Parent Dashboard" />
+            }
+          />
+
+          {/* /parent/location-request */}
+          <Route
+            path="location-request"
+            element={<StudentLocationRequest />}
+          />
+        </Route>
 
         {/* =================================================
             DEFAULT ROUTES
