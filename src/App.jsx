@@ -37,13 +37,6 @@ import TeacherAttendance from "./pages/teacher/Attendance";
 import TeacherAssignments from "./pages/teacher/Assignments";
 import TeacherNotices from "./pages/teacher/Notices";
 
-// Teacher Home Visit
-import ActiveVisit from "./pages/teacher/homevisit/ActiveVisit";
-import Location from "./pages/teacher/homevisit/Location";
-import StudentLocation from "./pages/teacher/homevisit/StudentLocation";
-import Upcoming from "./pages/teacher/homevisit/Upcoming";
-import VisitHistory from "./pages/teacher/homevisit/VisitHistory";
-
 // =====================================================
 // PARENT
 // =====================================================
@@ -55,8 +48,6 @@ import ParentNotices from "./pages/parent/Notices";
 import ParentVisitHistory from "./pages/parent/VisitHistory";
 import ParentSettings from "./pages/parent/Setting";
 import ParentQueries from "./pages/parent/Queries";
-
-// Location Request
 import ParentLocationRequests from "./pages/parent/LocationRequests";
 
 // =====================================================
@@ -85,7 +76,7 @@ export default function App() {
       <Routes>
 
         {/* =================================================
-            AUTH
+            AUTHENTICATION
         ================================================= */}
 
         <Route path="/login" element={<Login />} />
@@ -105,18 +96,25 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<DashboardHome />} />
+          {/* Dashboard */}
+          <Route
+            index
+            element={<DashboardHome />}
+          />
 
+          {/* Profile */}
           <Route
             path="profile"
             element={<StudentProfile />}
           />
 
+          {/* Jobs */}
           <Route
             path="jobs"
             element={<StudentJobs />}
           />
 
+          {/* Applications */}
           <Route
             path="applications"
             element={
@@ -124,21 +122,25 @@ export default function App() {
             }
           />
 
+          {/* Notices */}
           <Route
             path="notices"
             element={<StudentNotices />}
           />
 
+          {/* Library */}
           <Route
             path="library"
             element={<StudentLibrary />}
           />
 
+          {/* Fee */}
           <Route
             path="fee"
             element={<StudentFee />}
           />
 
+          {/* Location */}
           <Route
             path="location"
             element={
@@ -146,16 +148,19 @@ export default function App() {
             }
           />
 
+          {/* Assignments */}
           <Route
             path="assignments"
             element={<StudentAssignments />}
           />
 
+          {/* Take Assignment */}
           <Route
             path="assignments/take"
             element={<TakeAssignment />}
           />
 
+          {/* Settings */}
           <Route
             path="settings"
             element={
@@ -177,23 +182,31 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<TeacherHome />} />
+          {/* Dashboard */}
+          <Route
+            index
+            element={<TeacherHome />}
+          />
 
+          {/* Students */}
           <Route
             path="students"
             element={<TeacherStudents />}
           />
 
+          {/* Attendance */}
           <Route
             path="attendance"
             element={<TeacherAttendance />}
           />
 
+          {/* Assignments */}
           <Route
             path="assignments"
             element={<TeacherAssignments />}
           />
 
+          {/* Notices */}
           <Route
             path="notices"
             element={<TeacherNotices />}
@@ -212,27 +225,37 @@ export default function App() {
 
           <Route
             path="visits/active"
-            element={<ActiveVisit />}
+            element={
+              <Placeholder title="Active Visit" />
+            }
           />
 
           <Route
             path="visits/location"
-            element={<Location />}
+            element={
+              <Placeholder title="Location" />
+            }
           />
 
           <Route
             path="visits/student-location"
-            element={<StudentLocation />}
+            element={
+              <Placeholder title="Student Location" />
+            }
           />
 
           <Route
             path="visits/upcoming"
-            element={<Upcoming />}
+            element={
+              <Placeholder title="Upcoming Visits" />
+            }
           />
 
           <Route
             path="visits/history"
-            element={<VisitHistory />}
+            element={
+              <Placeholder title="Visit History" />
+            }
           />
 
           <Route
@@ -242,6 +265,7 @@ export default function App() {
             }
           />
 
+          {/* Vacancies */}
           <Route
             path="vacancies"
             element={
@@ -249,6 +273,7 @@ export default function App() {
             }
           />
 
+          {/* Applications */}
           <Route
             path="applications"
             element={
@@ -256,6 +281,7 @@ export default function App() {
             }
           />
 
+          {/* Profile */}
           <Route
             path="profile"
             element={
@@ -263,6 +289,7 @@ export default function App() {
             }
           />
 
+          {/* Settings */}
           <Route
             path="settings"
             element={
@@ -284,7 +311,7 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          {/* Parent Dashboard */}
+          {/* Dashboard */}
           <Route
             index
             element={<ParentHome />}
@@ -361,7 +388,7 @@ export default function App() {
 
 
         {/* =================================================
-            DEFAULT
+            DEFAULT ROUTES
         ================================================= */}
 
         <Route

@@ -1,3 +1,4 @@
+
 import {
   NavLink,
   Outlet,
@@ -15,7 +16,6 @@ import {
   LogOut,
   Menu,
   X,
-  Plus,
   Book,
   FilePen,
   History,
@@ -24,12 +24,11 @@ import {
   ClipboardCheck,
 } from "lucide-react";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import api from "../../api/axios";
 
 // =====================================================
-// NAVIGATION
+// MAIN NAVIGATION
 // =====================================================
 
 const navigation = [
@@ -39,37 +38,31 @@ const navigation = [
     icon: LayoutDashboard,
     end: true,
   },
-
   {
     name: "Students",
     path: "/teacher/students",
     icon: Users,
   },
-
   {
     name: "Assignments",
     path: "/teacher/assignments",
     icon: Book,
   },
-
   {
     name: "Attendance",
     path: "/teacher/attendance",
     icon: FilePen,
   },
-
   {
     name: "Vacancies",
     path: "/teacher/vacancies",
     icon: Briefcase,
   },
-
   {
     name: "Applications",
     path: "/teacher/applications",
     icon: FileText,
   },
-
   {
     name: "Notices",
     path: "/teacher/notices",
@@ -87,19 +80,16 @@ const homeVisitNavigation = [
     path: "/teacher/visits/location",
     icon: Navigation,
   },
-
   {
     name: "Upcoming Visits",
     path: "/teacher/visits/upcoming",
     icon: CalendarClock,
   },
-
   {
     name: "Active Visit",
     path: "/teacher/visits/active",
     icon: ClipboardCheck,
   },
-
   {
     name: "Visit History",
     path: "/teacher/visits/history",
@@ -115,15 +105,12 @@ export default function TeacherDashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [sidebarOpen, setSidebarOpen] =
-    useState(false);
-
-  const [homeVisitOpen, setHomeVisitOpen] =
-    useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [homeVisitOpen, setHomeVisitOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -136,9 +123,7 @@ export default function TeacherDashboard() {
       {sidebarOpen && (
         <button
           type="button"
-          onClick={() =>
-            setSidebarOpen(false)
-          }
+          onClick={() => setSidebarOpen(false)}
           className="fixed inset-0 z-40 bg-black/30 lg:hidden"
           aria-label="Close sidebar"
         />
@@ -149,7 +134,7 @@ export default function TeacherDashboard() {
       ================================================= */}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-slate-200 bg-white transition-transform ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-slate-200 bg-white transition-transform duration-300 ${
           sidebarOpen
             ? "translate-x-0"
             : "-translate-x-full lg:translate-x-0"
@@ -158,10 +143,9 @@ export default function TeacherDashboard() {
 
         {/* LOGO */}
 
-        <div className="flex h-20 items-center justify-between border-b px-6">
+        <div className="flex h-20 items-center justify-between border-b border-slate-200 px-6">
 
           <div>
-
             <h1 className="text-xl font-bold text-slate-900">
               Smart<span className="text-amber-500">.</span>
             </h1>
@@ -169,15 +153,13 @@ export default function TeacherDashboard() {
             <p className="text-xs text-slate-400">
               Teacher Portal
             </p>
-
           </div>
 
           <button
             type="button"
-            onClick={() =>
-              setSidebarOpen(false)
-            }
-            className="rounded-lg p-2 hover:bg-slate-100 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden"
+            aria-label="Close menu"
           >
             <X className="h-5 w-5" />
           </button>
@@ -198,9 +180,7 @@ export default function TeacherDashboard() {
                 key={item.path}
                 to={item.path}
                 end={item.end}
-                onClick={() =>
-                  setSidebarOpen(false)
-                }
+                onClick={() => setSidebarOpen(false)}
                 className={({ isActive }) =>
                   `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
                     isActive
@@ -209,11 +189,8 @@ export default function TeacherDashboard() {
                   }`
                 }
               >
-
-                <Icon className="h-5 w-5" />
-
-                {item.name}
-
+                <Icon className="h-5 w-5 shrink-0" />
+                <span>{item.name}</span>
               </NavLink>
             );
           })}
@@ -227,26 +204,19 @@ export default function TeacherDashboard() {
             <button
               type="button"
               onClick={() =>
-                setHomeVisitOpen(
-                  !homeVisitOpen
-                )
+                setHomeVisitOpen((current) => !current)
               }
               className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-slate-600 hover:bg-slate-100"
             >
 
               <div className="flex items-center gap-3">
-
                 <MapPin className="h-5 w-5" />
-
-                Home Visits
-
+                <span>Home Visits</span>
               </div>
 
               <span
                 className={`text-xs transition-transform ${
-                  homeVisitOpen
-                    ? "rotate-180"
-                    : ""
+                  homeVisitOpen ? "rotate-180" : ""
                 }`}
               >
                 ▼
@@ -257,34 +227,27 @@ export default function TeacherDashboard() {
             {homeVisitOpen && (
               <div className="ml-4 mt-1 space-y-1 border-l border-slate-200 pl-3">
 
-                {homeVisitNavigation.map(
-                  (item) => {
-                    const Icon = item.icon;
+                {homeVisitNavigation.map((item) => {
+                  const Icon = item.icon;
 
-                    return (
-                      <NavLink
-                        key={item.path}
-                        to={item.path}
-                        onClick={() =>
-                          setSidebarOpen(false)
-                        }
-                        className={({ isActive }) =>
-                          `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
-                            isActive
-                              ? "bg-emerald-50 font-semibold text-emerald-700"
-                              : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
-                          }`
-                        }
-                      >
-
-                        <Icon className="h-4 w-4" />
-
-                        {item.name}
-
-                      </NavLink>
-                    );
-                  }
-                )}
+                  return (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setSidebarOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
+                          isActive
+                            ? "bg-emerald-50 font-semibold text-emerald-700"
+                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                        }`
+                      }
+                    >
+                      <Icon className="h-4 w-4 shrink-0" />
+                      <span>{item.name}</span>
+                    </NavLink>
+                  );
+                })}
 
               </div>
             )}
@@ -297,41 +260,31 @@ export default function TeacherDashboard() {
             USER
         ================================================= */}
 
-        <div className="border-t p-4">
+        <div className="border-t border-slate-200 p-4">
 
           <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3">
 
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 font-bold text-amber-700">
-
-              {user?.username
-                ?.charAt(0)
-                .toUpperCase() || "T"}
-
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 font-bold text-amber-700">
+              {user?.username?.charAt(0).toUpperCase() || "T"}
             </div>
 
             <div className="min-w-0 flex-1">
-
-              <p className="truncate text-sm font-semibold">
-
-                {user?.username ||
-                  "Teacher"}
-
+              <p className="truncate text-sm font-semibold text-slate-800">
+                {user?.username || "Teacher"}
               </p>
 
               <p className="text-xs text-slate-400">
                 Teacher
               </p>
-
             </div>
 
             <button
               type="button"
               onClick={handleLogout}
-              className="rounded-lg p-2 text-slate-500 hover:bg-white hover:text-red-500"
+              className="rounded-lg p-2 text-slate-500 transition hover:bg-white hover:text-red-500"
+              aria-label="Logout"
             >
-
               <LogOut className="h-4 w-4" />
-
             </button>
 
           </div>
@@ -341,29 +294,27 @@ export default function TeacherDashboard() {
       </aside>
 
       {/* =================================================
-          MAIN
+          MAIN CONTENT
       ================================================= */}
 
       <div className="lg:pl-72">
 
-        {/* NAVBAR */}
+        {/* HEADER */}
 
-        <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b bg-white/90 px-4 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur sm:px-6">
 
           <div className="flex items-center gap-3">
 
             <button
               type="button"
-              onClick={() =>
-                setSidebarOpen(true)
-              }
-              className="rounded-xl p-2 hover:bg-slate-100 lg:hidden"
+              onClick={() => setSidebarOpen(true)}
+              className="rounded-xl p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
+              aria-label="Open menu"
             >
               <Menu className="h-5 w-5" />
             </button>
 
             <div>
-
               <p className="text-xs text-slate-400">
                 Teacher Portal
               </p>
@@ -371,31 +322,25 @@ export default function TeacherDashboard() {
               <h2 className="font-bold text-slate-900">
                 Academic Management
               </h2>
-
             </div>
 
           </div>
 
           <button
             type="button"
-            onClick={() =>
-              navigate("/teacher/notices")
-            }
-            className="rounded-xl p-2 hover:bg-slate-100"
+            onClick={() => navigate("/teacher/notices")}
+            className="rounded-xl p-2 text-slate-500 transition hover:bg-slate-100"
+            aria-label="Open notices"
           >
-
-            <Bell className="h-5 w-5 text-slate-500" />
-
+            <Bell className="h-5 w-5" />
           </button>
 
         </header>
 
-        {/* CONTENT */}
+        {/* PAGE CONTENT */}
 
         <main className="p-4 sm:p-6 lg:p-8">
-
           <Outlet />
-
         </main>
 
       </div>
@@ -411,74 +356,12 @@ export default function TeacherDashboard() {
 export function TeacherHome() {
   const navigate = useNavigate();
 
-  const [visitStats, setVisitStats] =
-    useState({
-      total: 0,
-      pending: 0,
-      completed: 0,
-    });
-
-  const [loadingVisits, setLoadingVisits] =
-    useState(true);
-
-  const teacherId = "teacher1";
-
-  // =====================================================
-  // LOAD HOME VISIT STATS
-  // =====================================================
-
-  const loadVisitStats = async () => {
-    try {
-      setLoadingVisits(true);
-
-      const response = await api.get(
-        `/home-visits?teacherId=${teacherId}`
-      );
-
-      const visits =
-        Array.isArray(response.data)
-          ? response.data
-          : response.data.visits || [];
-
-      const pending = visits.filter(
-        (visit) =>
-          visit.status === "scheduled" ||
-          visit.status === "started"
-      ).length;
-
-      const completed = visits.filter(
-        (visit) =>
-          visit.status === "completed"
-      ).length;
-
-      setVisitStats({
-        total: visits.length,
-        pending,
-        completed,
-      });
-    } catch (error) {
-      console.error(
-        "Failed to load visit statistics:",
-        error
-      );
-
-      setVisitStats({
-        total: 0,
-        pending: 0,
-        completed: 0,
-      });
-    } finally {
-      setLoadingVisits(false);
-    }
+  // Frontend demo statistics
+  const visitStats = {
+    total: 12,
+    pending: 4,
+    completed: 8,
   };
-
-  useEffect(() => {
-    loadVisitStats();
-  }, []);
-
-  // =====================================================
-  // STATS
-  // =====================================================
 
   const stats = [
     {
@@ -487,25 +370,18 @@ export function TeacherHome() {
       description: "Students assigned",
       icon: Users,
     },
-
     {
       title: "Attendance",
       value: "90.5%",
       description: "Today's attendance",
       icon: CalendarCheck,
     },
-
     {
       title: "Home Visits",
-      value: loadingVisits
-        ? "..."
-        : visitStats.total,
-      description: loadingVisits
-        ? "Loading visits..."
-        : `${visitStats.pending} pending visits`,
+      value: visitStats.total,
+      description: `${visitStats.pending} pending visits`,
       icon: MapPin,
     },
-
     {
       title: "Vacancies",
       value: "6",
@@ -524,7 +400,6 @@ export function TeacherHome() {
       <section className="flex flex-col gap-5 rounded-3xl bg-slate-950 p-6 text-white sm:p-8 lg:flex-row lg:items-center lg:justify-between">
 
         <div>
-
           <p className="text-sm font-medium text-amber-400">
             Teacher Dashboard
           </p>
@@ -534,27 +409,20 @@ export function TeacherHome() {
           </h1>
 
           <p className="mt-3 max-w-xl text-sm leading-6 text-slate-400">
-            Manage students, attendance,
-            home visits and career
-            opportunities from one dashboard.
+            Manage students, attendance, home visits
+            and career opportunities from one dashboard.
           </p>
-
         </div>
 
         <button
           type="button"
           onClick={() =>
-            navigate(
-              "/teacher/vacancies/create"
-            )
+            navigate("/teacher/vacancies/create")
           }
-          className="flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-5 py-3 text-sm font-bold text-slate-950 hover:bg-amber-400"
+          className="flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-amber-400"
         >
-
-          <Plus className="h-4 w-4" />
-
+          <span>＋</span>
           Post Vacancy
-
         </button>
 
       </section>
@@ -566,7 +434,6 @@ export function TeacherHome() {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
         {stats.map((stat) => {
-
           const Icon = stat.icon;
 
           return (
@@ -578,7 +445,6 @@ export function TeacherHome() {
               <div className="flex items-center justify-between">
 
                 <div>
-
                   <p className="text-sm text-slate-500">
                     {stat.title}
                   </p>
@@ -586,13 +452,10 @@ export function TeacherHome() {
                   <p className="mt-2 text-3xl font-bold text-slate-900">
                     {stat.value}
                   </p>
-
                 </div>
 
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50">
-
                   <Icon className="h-5 w-5 text-amber-600" />
-
                 </div>
 
               </div>
@@ -616,16 +479,13 @@ export function TeacherHome() {
         <div className="mb-5 flex items-center justify-between">
 
           <div>
-
             <h2 className="text-lg font-bold text-slate-900">
               Home Visit Management
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
-              Manage student locations and
-              home visits.
+              Manage student locations and home visits.
             </p>
-
           </div>
 
           <MapPin className="h-6 w-6 text-emerald-600" />
@@ -636,11 +496,7 @@ export function TeacherHome() {
 
           <VisitStat
             title="Total Visits"
-            value={
-              loadingVisits
-                ? "..."
-                : visitStats.total
-            }
+            value={visitStats.total}
             onClick={() =>
               navigate("/teacher/visits/history")
             }
@@ -648,11 +504,7 @@ export function TeacherHome() {
 
           <VisitStat
             title="Pending Visits"
-            value={
-              loadingVisits
-                ? "..."
-                : visitStats.pending
-            }
+            value={visitStats.pending}
             onClick={() =>
               navigate("/teacher/visits/upcoming")
             }
@@ -660,11 +512,7 @@ export function TeacherHome() {
 
           <VisitStat
             title="Completed Visits"
-            value={
-              loadingVisits
-                ? "..."
-                : visitStats.completed
-            }
+            value={visitStats.completed}
             onClick={() =>
               navigate("/teacher/visits/history")
             }
@@ -755,7 +603,6 @@ function VisitStat({
       onClick={onClick}
       className="rounded-xl border border-slate-200 bg-slate-50 p-5 text-left transition hover:border-emerald-200 hover:bg-emerald-50"
     >
-
       <p className="text-sm text-slate-500">
         {title}
       </p>
@@ -767,7 +614,6 @@ function VisitStat({
       <p className="mt-2 text-xs font-medium text-emerald-600">
         View →
       </p>
-
     </button>
   );
 }
@@ -790,9 +636,7 @@ function DashboardCard({
     >
 
       <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100">
-
         <Icon className="h-5 w-5 text-slate-700" />
-
       </div>
 
       <h3 className="mt-5 font-bold text-slate-900">
@@ -806,3 +650,4 @@ function DashboardCard({
     </button>
   );
 }
+
