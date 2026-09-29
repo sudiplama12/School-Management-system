@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+
+import { useState } from "react";
 
 import {
   MapPin,
   Navigation,
   CheckCircle,
+  User,
+  CalendarDays,
 } from "lucide-react";
 
 import {
@@ -17,9 +20,10 @@ import L from "leaflet";
 
 import "leaflet/dist/leaflet.css";
 
-import api from "../../api/axios";
+// =====================================================
+// FIX LEAFLET MARKER ICON
+// =====================================================
 
-// Fix Leaflet marker icons
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
@@ -33,83 +37,142 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
+// =====================================================
+// FRONTEND DEMO DATA
+// Later this will come from the backend API.
+// =====================================================
+
+const demoLocation = {
+  studentId: "ST001",
+  studentName: "Aarav Sharma",
+  grade: "Grade 10",
+  section: "A",
+  latitude: 27.7172,
+  longitude: 85.324,
+  status: "Approved",
+  approvedBy: "School Administration",
+  approvedDate: "2026-09-25",
+  address: "Kathmandu, Nepal",
+};
+
 export default function StudentLocation() {
-  const [location, setLocation] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  const studentId = "ST001";
-
-  useEffect(() => {
-    loadLocation();
-  }, []);
-
-  const loadLocation = async () => {
-    try {
-      const response = await api.get(
-        `/location-requests/student/${studentId}`
-      );
-
-      setLocation(response.data);
-
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="p-10 text-center">
-        Loading location...
-      </div>
-    );
-  }
-
-  if (!location) {
-    return (
-      <div className="mx-auto max-w-5xl rounded-2xl bg-white p-10 text-center shadow-sm">
-
-        <MapPin className="mx-auto h-12 w-12 text-slate-300" />
-
-        <h2 className="mt-4 text-lg font-bold text-slate-700">
-          Location Not Available
-        </h2>
-
-        <p className="mt-2 text-sm text-slate-500">
-          Your child's home location has not been approved
-          or shared yet.
-        </p>
-
-      </div>
-    );
-  }
+  const [location] = useState(demoLocation);
 
   const latitude = Number(location.latitude);
   const longitude = Number(location.longitude);
 
+  const openMap = () => {
+    window.open(
+      `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}`,
+      "_blank"
+    );
+  };
+
   return (
     <div className="mx-auto max-w-6xl space-y-6">
 
-      {/* HEADER */}
-      <div>
+      {/* =================================================
+          HEADER
+      ================================================= */}
 
+      <div>
         <h1 className="text-2xl font-bold text-slate-800">
           Student Home Location
         </h1>
 
         <p className="mt-1 text-sm text-slate-500">
-          Approved home location of your child.
+          View your child's approved home location.
         </p>
+      </div>
+
+
+      {/* =================================================
+          STUDENT INFORMATION
+      ================================================= */}
+
+      <div className="grid gap-4 md:grid-cols-3">
+
+        {/* Student */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+
+          <div className="flex items-center gap-3">
+
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50">
+              <User className="h-5 w-5 text-emerald-600" />
+            </div>
+
+            <div>
+              <p className="text-xs text-slate-400">
+                Student
+              </p>
+
+              <p className="font-semibold text-slate-800">
+                {location.studentName}
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* Class */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+
+          <div className="flex items-center gap-3">
+
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50">
+              <CalendarDays className="h-5 w-5 text-blue-600" />
+            </div>
+
+            <div>
+              <p className="text-xs text-slate-400">
+                Class
+              </p>
+
+              <p className="font-semibold text-slate-800">
+                {location.grade} - Section {location.section}
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* Status */}
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+
+          <div className="flex items-center gap-3">
+
+            <CheckCircle className="h-6 w-6 text-emerald-600" />
+
+            <div>
+              <p className="text-xs text-emerald-600">
+                Location Status
+              </p>
+
+              <p className="font-semibold text-emerald-800">
+                {location.status}
+              </p>
+            </div>
+
+          </div>
+
+        </div>
 
       </div>
 
-      {/* STATUS */}
+
+      {/* =================================================
+          APPROVAL MESSAGE
+      ================================================= */}
+
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-start gap-3">
 
-          <CheckCircle className="h-6 w-6 text-emerald-600" />
+          <CheckCircle className="mt-0.5 h-6 w-6 shrink-0 text-emerald-600" />
 
           <div>
 
@@ -117,8 +180,15 @@ export default function StudentLocation() {
               Location Approved
             </p>
 
-            <p className="text-sm text-emerald-700">
-              Location was shared with permission.
+            <p className="mt-1 text-sm text-emerald-700">
+              Your child's home location has been approved
+              and is currently shared with authorized school
+              staff.
+            </p>
+
+            <p className="mt-2 text-xs text-emerald-600">
+              Approved by {location.approvedBy} on{" "}
+              {location.approvedDate}
             </p>
 
           </div>
@@ -127,8 +197,33 @@ export default function StudentLocation() {
 
       </div>
 
-      {/* MAP */}
+
+      {/* =================================================
+          MAP
+      ================================================= */}
+
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+        <div className="border-b border-slate-200 p-5">
+
+          <div className="flex items-center gap-3">
+
+            <MapPin className="h-5 w-5 text-emerald-600" />
+
+            <div>
+              <h2 className="font-semibold text-slate-800">
+                Home Location
+              </h2>
+
+              <p className="text-sm text-slate-500">
+                {location.address}
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
 
         <MapContainer
           center={[latitude, longitude]}
@@ -138,7 +233,7 @@ export default function StudentLocation() {
         >
 
           <TileLayer
-            attribution='&copy; OpenStreetMap contributors'
+            attribution="&copy; OpenStreetMap contributors"
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
@@ -147,8 +242,14 @@ export default function StudentLocation() {
           >
 
             <Popup>
-              <strong>Student Home</strong>
+              <strong>{location.studentName}'s Home</strong>
+
               <br />
+
+              {location.address}
+
+              <br />
+
               {latitude}, {longitude}
             </Popup>
 
@@ -158,14 +259,19 @@ export default function StudentLocation() {
 
       </div>
 
-      {/* DETAILS */}
+
+      {/* =================================================
+          LOCATION DETAILS
+      ================================================= */}
+
       <div className="grid gap-5 md:grid-cols-2">
 
+        {/* Coordinates */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
 
-          <div className="flex gap-3">
+          <div className="flex items-start gap-3">
 
-            <MapPin className="h-5 w-5 text-emerald-600" />
+            <MapPin className="mt-1 h-5 w-5 shrink-0 text-emerald-600" />
 
             <div>
 
@@ -183,14 +289,12 @@ export default function StudentLocation() {
 
         </div>
 
+
+        {/* Open Map */}
         <button
-          onClick={() =>
-            window.open(
-              `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}`,
-              "_blank"
-            )
-          }
-          className="rounded-2xl bg-emerald-600 p-5 text-left text-white shadow-sm hover:bg-emerald-700"
+          type="button"
+          onClick={openMap}
+          className="rounded-2xl bg-emerald-600 p-5 text-left text-white shadow-sm transition hover:bg-emerald-700"
         >
 
           <Navigation className="h-6 w-6" />
@@ -209,4 +313,5 @@ export default function StudentLocation() {
 
     </div>
   );
-}
+
+```

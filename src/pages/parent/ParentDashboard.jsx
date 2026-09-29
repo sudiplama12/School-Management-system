@@ -66,8 +66,8 @@ const navigation = [
     icon: Wallet,
   },
   {
-    name: "Profile",
-    path: "/parent/profile",
+    name: "Queries",
+    path: "/parent/queries",
     icon: User,
   },
   {

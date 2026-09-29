@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // Authentication
@@ -7,7 +8,10 @@ import Register from "./pages/Register";
 // Route protection
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// Student
+// =====================================================
+// STUDENT
+// =====================================================
+
 import StudentDashboard, {
   DashboardHome,
 } from "./pages/StudentDashboard";
@@ -20,7 +24,10 @@ import TakeAssignment from "./pages/student/TakeAssignment";
 import StudentNotices from "./pages/student/Notices";
 import StudentFee from "./pages/student/Fee";
 
-// Teacher
+// =====================================================
+// TEACHER
+// =====================================================
+
 import TeacherDashboard, {
   TeacherHome,
 } from "./pages/teacher/TeacherDashboard";
@@ -37,11 +44,25 @@ import StudentLocation from "./pages/teacher/homevisit/StudentLocation";
 import Upcoming from "./pages/teacher/homevisit/Upcoming";
 import VisitHistory from "./pages/teacher/homevisit/VisitHistory";
 
-// Parent
-import ParentDashboard from "./pages/parent/ParentDashboard";
-import ParentAssignments from "./pages/parent/Assignments";
+// =====================================================
+// PARENT
+// =====================================================
 
-// Temporary placeholder
+import ParentDashboard from "./pages/parent/ParentDashboard";
+import ParentHome from "./pages/parent/ParentHome";
+import ParentAssignments from "./pages/parent/Assignments";
+import ParentNotices from "./pages/parent/Notices";
+import ParentVisitHistory from "./pages/parent/VisitHistory";
+import ParentSettings from "./pages/parent/Setting";
+import ParentQueries from "./pages/parent/Queries";
+
+// Location Request
+import ParentLocationRequests from "./pages/parent/LocationRequests";
+
+// =====================================================
+// TEMPORARY PLACEHOLDER
+// =====================================================
+
 function Placeholder({ title }) {
   return (
     <div className="flex min-h-[400px] items-center justify-center">
@@ -63,14 +84,18 @@ export default function App() {
     <BrowserRouter>
       <Routes>
 
-        {/* ==================== AUTH ==================== */}
+        {/* =================================================
+            AUTH
+        ================================================= */}
 
         <Route path="/login" element={<Login />} />
 
         <Route path="/register" element={<Register />} />
 
 
-        {/* ==================== STUDENT ==================== */}
+        {/* =================================================
+            STUDENT
+        ================================================= */}
 
         <Route
           path="/student"
@@ -80,22 +105,18 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          {/* Student Dashboard */}
           <Route index element={<DashboardHome />} />
 
-          {/* Profile */}
           <Route
             path="profile"
             element={<StudentProfile />}
           />
 
-          {/* Jobs */}
           <Route
             path="jobs"
             element={<StudentJobs />}
           />
 
-          {/* Applications */}
           <Route
             path="applications"
             element={
@@ -103,25 +124,21 @@ export default function App() {
             }
           />
 
-          {/* Notices */}
           <Route
             path="notices"
             element={<StudentNotices />}
           />
 
-          {/* Library */}
           <Route
             path="library"
             element={<StudentLibrary />}
           />
 
-          {/* Fee */}
           <Route
             path="fee"
             element={<StudentFee />}
           />
 
-          {/* Location */}
           <Route
             path="location"
             element={
@@ -129,19 +146,16 @@ export default function App() {
             }
           />
 
-          {/* Assignments */}
           <Route
             path="assignments"
             element={<StudentAssignments />}
           />
 
-          {/* Take Assignment */}
           <Route
             path="assignments/take"
             element={<TakeAssignment />}
           />
 
-          {/* Settings */}
           <Route
             path="settings"
             element={
@@ -151,7 +165,9 @@ export default function App() {
         </Route>
 
 
-        {/* ==================== TEACHER ==================== */}
+        {/* =================================================
+            TEACHER
+        ================================================= */}
 
         <Route
           path="/teacher"
@@ -161,35 +177,31 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          {/* Dashboard */}
           <Route index element={<TeacherHome />} />
 
-          {/* Students */}
           <Route
             path="students"
             element={<TeacherStudents />}
           />
 
-          {/* Attendance */}
           <Route
             path="attendance"
             element={<TeacherAttendance />}
           />
 
-          {/* Assignments */}
           <Route
             path="assignments"
             element={<TeacherAssignments />}
           />
 
-          {/* Notices */}
           <Route
             path="notices"
             element={<TeacherNotices />}
           />
 
-
-          {/* ========== HOME VISIT ========== */}
+          {/* =================================================
+              HOME VISITS
+          ================================================= */}
 
           <Route
             path="visits"
@@ -230,7 +242,6 @@ export default function App() {
             }
           />
 
-          {/* Vacancies */}
           <Route
             path="vacancies"
             element={
@@ -238,7 +249,6 @@ export default function App() {
             }
           />
 
-          {/* Applications */}
           <Route
             path="applications"
             element={
@@ -246,7 +256,6 @@ export default function App() {
             }
           />
 
-          {/* Profile */}
           <Route
             path="profile"
             element={
@@ -254,7 +263,6 @@ export default function App() {
             }
           />
 
-          {/* Settings */}
           <Route
             path="settings"
             element={
@@ -264,7 +272,9 @@ export default function App() {
         </Route>
 
 
-        {/* ==================== PARENT ==================== */}
+        {/* =================================================
+            PARENT
+        ================================================= */}
 
         <Route
           path="/parent"
@@ -277,9 +287,7 @@ export default function App() {
           {/* Parent Dashboard */}
           <Route
             index
-            element={
-              <Placeholder title="Parent Dashboard" />
-            }
+            element={<ParentHome />}
           />
 
           {/* My Child */}
@@ -293,17 +301,13 @@ export default function App() {
           {/* Location Requests */}
           <Route
             path="location-request"
-            element={
-              <Placeholder title="Location Requests" />
-            }
+            element={<ParentLocationRequests />}
           />
 
           {/* Visit History */}
           <Route
             path="visits"
-            element={
-              <Placeholder title="Visit History" />
-            }
+            element={<ParentVisitHistory />}
           />
 
           {/* Attendance */}
@@ -323,9 +327,13 @@ export default function App() {
           {/* Notices */}
           <Route
             path="notices"
-            element={
-              <Placeholder title="Notices" />
-            }
+            element={<ParentNotices />}
+          />
+
+          {/* Queries */}
+          <Route
+            path="queries"
+            element={<ParentQueries />}
           />
 
           {/* Fees */}
@@ -347,14 +355,14 @@ export default function App() {
           {/* Settings */}
           <Route
             path="settings"
-            element={
-              <Placeholder title="Parent Settings" />
-            }
+            element={<ParentSettings />}
           />
         </Route>
 
 
-        {/* ==================== DEFAULT ==================== */}
+        {/* =================================================
+            DEFAULT
+        ================================================= */}
 
         <Route
           path="/"
