@@ -1,21 +1,12 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // Authentication
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-
-// Route protection
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// =====================================================
-// STUDENT
-// =====================================================
-
-import StudentDashboard, {
-  DashboardHome,
-} from "./pages/StudentDashboard";
-
+// Student
+import StudentDashboard, { DashboardHome } from "./pages/StudentDashboard";
 import StudentProfile from "./pages/student/Profile";
 import StudentJobs from "./pages/student/Jobs";
 import StudentLibrary from "./pages/student/library";
@@ -24,23 +15,14 @@ import TakeAssignment from "./pages/student/TakeAssignment";
 import StudentNotices from "./pages/student/Notices";
 import StudentFee from "./pages/student/Fee";
 
-// =====================================================
-// TEACHER
-// =====================================================
-
-import TeacherDashboard, {
-  TeacherHome,
-} from "./pages/teacher/TeacherDashboard";
-
+// Teacher
+import TeacherDashboard, { TeacherHome } from "./pages/teacher/TeacherDashboard";
 import TeacherStudents from "./pages/teacher/Students";
 import TeacherAttendance from "./pages/teacher/Attendance";
 import TeacherAssignments from "./pages/teacher/Assignments";
 import TeacherNotices from "./pages/teacher/Notices";
 
-// =====================================================
-// PARENT
-// =====================================================
-
+// Parent
 import ParentDashboard from "./pages/parent/ParentDashboard";
 import ParentHome from "./pages/parent/ParentHome";
 import ParentAssignments from "./pages/parent/Assignments";
@@ -50,18 +32,21 @@ import ParentSettings from "./pages/parent/Setting";
 import ParentQueries from "./pages/parent/Queries";
 import ParentLocationRequests from "./pages/parent/LocationRequests";
 
-// =====================================================
-// TEMPORARY PLACEHOLDER
-// =====================================================
+// Admin
+import AdminLayout from "./components/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminStudents from "./pages/admin/Students";
+import AdminTeachers from "./pages/admin/Teachers";
+import AdminParents from "./pages/admin/Parents";
+import AdminPermissions from "./pages/admin/Permissions";
+import AdminUsers from "./pages/admin/Users";
 
+// Temporary placeholder for pages not built yet
 function Placeholder({ title }) {
   return (
     <div className="flex min-h-[400px] items-center justify-center">
       <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
-        <h1 className="text-2xl font-bold text-slate-800">
-          {title}
-        </h1>
-
+        <h1 className="text-2xl font-bold text-slate-800">{title}</h1>
         <p className="mt-2 text-sm text-slate-500">
           This page is under development.
         </p>
@@ -74,20 +59,11 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-
-        {/* =================================================
-            AUTHENTICATION
-        ================================================= */}
-
+        {/* Authentication */}
         <Route path="/login" element={<Login />} />
-
         <Route path="/register" element={<Register />} />
 
-
-        {/* =================================================
-            STUDENT
-        ================================================= */}
-
+        {/* Student */}
         <Route
           path="/student"
           element={
@@ -96,84 +72,20 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          {/* Dashboard */}
-          <Route
-            index
-            element={<DashboardHome />}
-          />
-
-          {/* Profile */}
-          <Route
-            path="profile"
-            element={<StudentProfile />}
-          />
-
-          {/* Jobs */}
-          <Route
-            path="jobs"
-            element={<StudentJobs />}
-          />
-
-          {/* Applications */}
-          <Route
-            path="applications"
-            element={
-              <Placeholder title="My Applications" />
-            }
-          />
-
-          {/* Notices */}
-          <Route
-            path="notices"
-            element={<StudentNotices />}
-          />
-
-          {/* Library */}
-          <Route
-            path="library"
-            element={<StudentLibrary />}
-          />
-
-          {/* Fee */}
-          <Route
-            path="fee"
-            element={<StudentFee />}
-          />
-
-          {/* Location */}
-          <Route
-            path="location"
-            element={
-              <Placeholder title="My Location" />
-            }
-          />
-
-          {/* Assignments */}
-          <Route
-            path="assignments"
-            element={<StudentAssignments />}
-          />
-
-          {/* Take Assignment */}
-          <Route
-            path="assignments/take"
-            element={<TakeAssignment />}
-          />
-
-          {/* Settings */}
-          <Route
-            path="settings"
-            element={
-              <Placeholder title="Settings" />
-            }
-          />
+          <Route index element={<DashboardHome />} />
+          <Route path="profile" element={<StudentProfile />} />
+          <Route path="jobs" element={<StudentJobs />} />
+          <Route path="applications" element={<Placeholder title="My Applications" />} />
+          <Route path="notices" element={<StudentNotices />} />
+          <Route path="library" element={<StudentLibrary />} />
+          <Route path="fee" element={<StudentFee />} />
+          <Route path="location" element={<Placeholder title="My Location" />} />
+          <Route path="assignments" element={<StudentAssignments />} />
+          <Route path="assignments/take" element={<TakeAssignment />} />
+          <Route path="settings" element={<Placeholder title="Settings" />} />
         </Route>
 
-
-        {/* =================================================
-            TEACHER
-        ================================================= */}
-
+        {/* Teacher */}
         <Route
           path="/teacher"
           element={
@@ -182,127 +94,28 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          {/* Dashboard */}
-          <Route
-            index
-            element={<TeacherHome />}
-          />
+          <Route index element={<TeacherHome />} />
+          <Route path="students" element={<TeacherStudents />} />
+          <Route path="attendance" element={<TeacherAttendance />} />
+          <Route path="assignments" element={<TeacherAssignments />} />
+          <Route path="notices" element={<TeacherNotices />} />
 
-          {/* Students */}
-          <Route
-            path="students"
-            element={<TeacherStudents />}
-          />
+          {/* Home visits */}
+          <Route path="visits" element={<Placeholder title="Home Visits" />} />
+          <Route path="visits/active" element={<Placeholder title="Active Visit" />} />
+          <Route path="visits/location" element={<Placeholder title="Location" />} />
+          <Route path="visits/student-location" element={<Placeholder title="Student Location" />} />
+          <Route path="visits/upcoming" element={<Placeholder title="Upcoming Visits" />} />
+          <Route path="visits/history" element={<Placeholder title="Visit History" />} />
+          <Route path="visits/map" element={<Placeholder title="Visit Map" />} />
 
-          {/* Attendance */}
-          <Route
-            path="attendance"
-            element={<TeacherAttendance />}
-          />
-
-          {/* Assignments */}
-          <Route
-            path="assignments"
-            element={<TeacherAssignments />}
-          />
-
-          {/* Notices */}
-          <Route
-            path="notices"
-            element={<TeacherNotices />}
-          />
-
-          {/* =================================================
-              HOME VISITS
-          ================================================= */}
-
-          <Route
-            path="visits"
-            element={
-              <Placeholder title="Home Visits" />
-            }
-          />
-
-          <Route
-            path="visits/active"
-            element={
-              <Placeholder title="Active Visit" />
-            }
-          />
-
-          <Route
-            path="visits/location"
-            element={
-              <Placeholder title="Location" />
-            }
-          />
-
-          <Route
-            path="visits/student-location"
-            element={
-              <Placeholder title="Student Location" />
-            }
-          />
-
-          <Route
-            path="visits/upcoming"
-            element={
-              <Placeholder title="Upcoming Visits" />
-            }
-          />
-
-          <Route
-            path="visits/history"
-            element={
-              <Placeholder title="Visit History" />
-            }
-          />
-
-          <Route
-            path="visits/map"
-            element={
-              <Placeholder title="Visit Map" />
-            }
-          />
-
-          {/* Vacancies */}
-          <Route
-            path="vacancies"
-            element={
-              <Placeholder title="Vacancies" />
-            }
-          />
-
-          {/* Applications */}
-          <Route
-            path="applications"
-            element={
-              <Placeholder title="Applications" />
-            }
-          />
-
-          {/* Profile */}
-          <Route
-            path="profile"
-            element={
-              <Placeholder title="Teacher Profile" />
-            }
-          />
-
-          {/* Settings */}
-          <Route
-            path="settings"
-            element={
-              <Placeholder title="Teacher Settings" />
-            }
-          />
+          <Route path="vacancies" element={<Placeholder title="Vacancies" />} />
+          <Route path="applications" element={<Placeholder title="Applications" />} />
+          <Route path="profile" element={<Placeholder title="Teacher Profile" />} />
+          <Route path="settings" element={<Placeholder title="Teacher Settings" />} />
         </Route>
 
-
-        {/* =================================================
-            PARENT
-        ================================================= */}
-
+        {/* Parent */}
         <Route
           path="/parent"
           element={
@@ -311,96 +124,45 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          {/* Dashboard */}
-          <Route
-            index
-            element={<ParentHome />}
-          />
-
-          {/* My Child */}
-          <Route
-            path="student"
-            element={
-              <Placeholder title="My Child" />
-            }
-          />
-
-          {/* Location Requests */}
-          <Route
-            path="location-request"
-            element={<ParentLocationRequests />}
-          />
-
-          {/* Visit History */}
-          <Route
-            path="visits"
-            element={<ParentVisitHistory />}
-          />
-
-          {/* Attendance */}
-          <Route
-            path="attendance"
-            element={
-              <Placeholder title="Attendance" />
-            }
-          />
-
-          {/* Assignments */}
-          <Route
-            path="assignments"
-            element={<ParentAssignments />}
-          />
-
-          {/* Notices */}
-          <Route
-            path="notices"
-            element={<ParentNotices />}
-          />
-
-          {/* Queries */}
-          <Route
-            path="queries"
-            element={<ParentQueries />}
-          />
-
-          {/* Fees */}
-          <Route
-            path="fees"
-            element={
-              <Placeholder title="Fees" />
-            }
-          />
-
-          {/* Profile */}
-          <Route
-            path="profile"
-            element={
-              <Placeholder title="Parent Profile" />
-            }
-          />
-
-          {/* Settings */}
-          <Route
-            path="settings"
-            element={<ParentSettings />}
-          />
+          <Route index element={<ParentHome />} />
+          <Route path="student" element={<Placeholder title="My Child" />} />
+          <Route path="location-request" element={<ParentLocationRequests />} />
+          <Route path="visits" element={<ParentVisitHistory />} />
+          <Route path="attendance" element={<Placeholder title="Attendance" />} />
+          <Route path="assignments" element={<ParentAssignments />} />
+          <Route path="notices" element={<ParentNotices />} />
+          <Route path="queries" element={<ParentQueries />} />
+          <Route path="fees" element={<Placeholder title="Fees" />} />
+          <Route path="profile" element={<Placeholder title="Parent Profile" />} />
+          <Route path="settings" element={<ParentSettings />} />
         </Route>
 
-
-        {/* =================================================
-            DEFAULT ROUTES
-        ================================================= */}
-
+        {/* Admin */}
         <Route
-          path="/"
-          element={<Navigate to="/login" replace />}
-        />
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="students" element={<AdminStudents />} />
+          <Route path="teachers" element={<AdminTeachers />} />
+          <Route path="parents" element={<AdminParents />} />
+          <Route path="classes" element={<Placeholder title="Classes" />} />
+          <Route path="teacher-attendance" element={<Placeholder title="Teacher Attendance" />} />
+          <Route path="attendance" element={<Placeholder title="Student Attendance" />} />
+          <Route path="library/books" element={<Placeholder title="Manage Books" />} />
+          <Route path="library/issue" element={<Placeholder title="Issue Books" />} />
+          <Route path="library/return" element={<Placeholder title="Return Books" />} />
+          <Route path="permissions" element={<AdminPermissions />} />
+          <Route path="users" element={<AdminUsers />} />
+        </Route>
 
-        <Route
-          path="*"
-          element={<Navigate to="/login" replace />}
-        />
-
+        {/* Default routes */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );

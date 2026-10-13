@@ -1,0 +1,70 @@
+﻿src
+    api
+        axios.js
+    assets
+    components
+        AdminLayout.jsx
+        ProtectedRoute.jsx
+    context
+        AuthContext.jsx
+    pages
+        admin
+            AdminDashboard.jsx
+            Parents.jsx
+            Permissions.jsx
+            Students.jsx
+            Teachers.jsx
+            Users.jsx
+        parent
+            Assignments.jsx
+            Attendence.jsx
+            Fees.jsx
+            LocationRequests.jsx
+            Notices.jsx
+            ParentDashboard.jsx
+            ParentHome.jsx
+            Queries.jsx
+            Setting.jsx
+            StudentDetails.jsx
+            StudentLocation.jsx
+            VisitHistory.jsx
+        student
+            application.jsx
+            Assignments.jsx
+            Fee.jsx
+            Jobs.jsx
+            library.jsx
+            Notices.jsx
+            Profile.jsx
+            TakeAssignment.jsx
+        teacher
+            HomeVisit
+                ActiveVisit.jsx
+                Location.jsx
+                StudentLocation.jsx
+                Upcoming.jsx
+                VisitHistory.jsx
+            Assignments.jsx
+            Attendance.jsx
+            LibraryManagement.jsx
+            Notices.jsx
+            Students.jsx
+            TeacherDashboard.jsx
+        Login.jsx
+        Register.jsx
+        StudentDashboard.jsx
+    public
+    services
+    socket
+    App.css
+    App.jsx
+    index.css
+    main.jsx
+.gitignore
+eslint.config.js
+index.html
+package.json
+package-lock.json
+project-structure.txt
+README.md
+vite.config.js
