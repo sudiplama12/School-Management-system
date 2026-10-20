@@ -32,10 +32,10 @@ export default function Users() {
   }, [search]);
 
   const roleStyle = {
-    admin: "bg-red-50 text-red-700",
-    teacher: "bg-blue-50 text-blue-700",
-    student: "bg-emerald-50 text-emerald-700",
-    parent: "bg-violet-50 text-violet-700",
+    admin: "bg-red-50 text-red-700 dark:text-red-300",
+    teacher: "bg-blue-50 text-blue-700 dark:text-blue-300",
+    student: "bg-emerald-50 text-emerald-700 dark:text-emerald-300",
+    parent: "bg-teal-50 text-teal-700 dark:text-teal-300",
   };
 
   return (
@@ -50,12 +50,12 @@ export default function Users() {
       </div>
 
       {error && (
-        <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">
+        <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700 dark:text-red-300">
           {error}
         </p>
       )}
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:flex-row">
+      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-card p-4 sm:flex-row">
         <div className="relative flex-1">
           <Search
             size={18}
@@ -78,7 +78,7 @@ export default function Users() {
         </button>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-card shadow-sm">
         <table className="w-full min-w-[650px]">
           <thead className="bg-slate-50">
             <tr>

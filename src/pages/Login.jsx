@@ -1,512 +1,379 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
+  GraduationCap,
+  Mail,
+  LockKeyhole,
   Eye,
   EyeOff,
-  User,
-  GraduationCap,
-  Users,
-  ShieldCheck,
   ArrowRight,
-  Check,
-  Loader2,
+  ShieldCheck,
+  BookOpen,
+  Users,
+  Building2,
+  LoaderCircle,
+  AlertTriangle,
+  Sparkles,
 } from "lucide-react";
-
+import SchoolBrand from "../components/SchoolBrand";
+import ThemeToggle from "../components/ThemeToggle";
 import { useAuth } from "../context/AuthContext";
 
-const ROLES = {
-  student: {
-    label: "Student",
-    num: "01",
-    icon: GraduationCap,
-    placeholder: "Enter your student username",
-    description: "Access classes, assignments, jobs, and applications.",
-  },
-
-  teacher: {
-    label: "Teacher",
-    num: "02",
-    icon: Users,
-    placeholder: "Enter your teacher username",
-    description: "Manage students, attendance, and academic activities.",
-  },
-
-  parent: {
-    label: "Parent",
-    num: "03",
-    icon: User,
-    placeholder: "Enter your parent username",
-    description: "Monitor student progress and home visits.",
-  },
-
-  admin: {
-    label: "Admin",
-    num: "04",
-    icon: ShieldCheck,
-    placeholder: "Enter administrator username",
-    description: "Manage the complete school management system.",
-  },
-};
-
-const FEATURES = [
-  "Assignments, grades, and attendance in one place",
-  "Direct communication between teachers and parents",
-  "Job and internship opportunities for students",
+const roles = [
+  { value: "student", label: "Student", icon: GraduationCap },
+  { value: "teacher", label: "Teacher", icon: BookOpen },
+  { value: "parent", label: "Parent", icon: Users },
+  { value: "admin", label: "Admin", icon: ShieldCheck },
 ];
 
-function Constellation() {
-  const nodes = [
-    [60, 120],
-    [160, 200],
-    [140, 320],
-    [280, 180],
-    [330, 290],
-    [250, 360],
-    [70, 420],
-    [220, 470],
-    [310, 530],
-  ];
+const dashboards = {
+  student: "/student",
+  teacher: "/teacher",
+  parent: "/parent",
+  admin: "/admin",
+};
 
-  const edges = [
-    [0, 1],
-    [1, 2],
-    [2, 5],
-    [1, 3],
-    [3, 4],
-    [5, 4],
-    [2, 6],
-    [5, 7],
-    [6, 7],
-    [7, 8],
-  ];
+const portals = [
+  ["Student Portal", "Lessons, attendance and fees"],
+  ["Teacher Portal", "Classes, visits and marks"],
+  ["Parent Portal", "Your child, every day"],
+  ["Admin Portal", "Records, library and fees"],
+];
 
-  const highlighted = new Set([1, 5]);
-
-  return (
-    <svg
-      viewBox="0 0 400 640"
-      preserveAspectRatio="xMidYMid slice"
-      className="absolute inset-0 h-full w-full opacity-50"
-    >
-      <g stroke="#475569" strokeWidth="1">
-        {edges.map(([a, b], index) => (
-          <line
-            key={index}
-            x1={nodes[a][0]}
-            y1={nodes[a][1]}
-            x2={nodes[b][0]}
-            y2={nodes[b][1]}
-          />
-        ))}
-      </g>
-
-      <g>
-        {nodes.map(([x, y], index) => (
-          <circle
-            key={index}
-            cx={x}
-            cy={y}
-            r={highlighted.has(index) ? 4 : 3}
-            fill={
-              highlighted.has(index)
-                ? "#d97706"
-                : "#64748b"
-            }
-          />
-        ))}
-      </g>
-    </svg>
-  );
-}
-
-export default function Login({ onNavigateToRegister }) {
+export default function Login() {
   const navigate = useNavigate();
-  const { login, loading } = useAuth();
+  const { login, requestReveal } = useAuth();
 
-  const [role, setRole] = useState("student");
+  const [schoolCode, setSchoolCode] = useState("");
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("student");
   const [showPassword, setShowPassword] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [status, setStatus] = useState("idle");
 
-  const currentRole = ROLES[role];
-  const RoleIcon = currentRole.icon;
+  // No school name, tagline or code is fetched here: the school identifies
+  // itself only after a successful sign-in, on <SchoolReveal />.
+  useEffect(() => {
+    document.title = "Smart LMS · Sign in";
+  }, []);
 
-  const handleRoleChange = (newRole) => {
-    setRole(newRole);
+  const roleIndex = useMemo(
+    () => Math.max(0, roles.findIndex((r) => r.value === role)),
+    [role]
+  );
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError("");
-    setStatus("idle");
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (loading) return;
-
-    setError("");
-    setStatus("idle");
-
-    const cleanIdentifier = identifier.trim();
-
-    if (!cleanIdentifier) {
-      setError("Please enter your username.");
+    if (!schoolCode.trim()) {
+      setError("Enter your school code first.");
       return;
     }
 
-    if (!password) {
-      setError("Please enter your password.");
+    if (!identifier.trim() || !password) {
+      setError("Please enter your username and password.");
       return;
     }
+
+    setLoading(true);
 
     try {
-      setStatus("working");
-
-      const data = await login(
-        cleanIdentifier,
+      const result = await login(
+        identifier.trim(),
         password,
-        role
+        role,
+        schoolCode.trim().toUpperCase()
       );
 
-      const loggedRole =
-        data?.user?.role ||
-        data?.role ||
-        role;
+      const storedUser = localStorage.getItem("lms_user");
+      const user =
+        result?.user ||
+        (typeof result === "object" ? result : null) ||
+        (storedUser ? JSON.parse(storedUser) : null);
 
-      setStatus("done");
+      const actualRole = String(user?.role || role).toLowerCase();
 
-      switch (loggedRole) {
-        case "student":
-          navigate("/student");
-          break;
-
-        case "teacher":
-          navigate("/teacher");
-          break;
-
-        case "parent":
-          navigate("/parent");
-          break;
-
-        case "admin":
-          navigate("/admin");
-          break;
-
-        default:
-          navigate("/");
+      if (!dashboards[actualRole]) {
+        throw new Error("Your account has an invalid role.");
       }
+
+      requestReveal();
+      navigate(dashboards[actualRole], { replace: true });
     } catch (err) {
-      console.error("Login error:", err);
-
-      setStatus("idle");
-
       setError(
-        err?.message ||
-          "Login failed. Please check your username and password."
+        err?.response?.data?.message ||
+          err?.message ||
+          "Login failed. Please check your credentials."
       );
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleRegister = () => {
-    if (onNavigateToRegister) {
-      onNavigateToRegister();
-    } else {
-      navigate("/register");
-    }
-  };
+  const inputClass =
+    "w-full rounded-xl border border-slate-200 bg-card py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10";
+
+  const labelClass = "mb-1.5 block text-[13px] font-semibold text-slate-700";
 
   return (
-    <div className="min-h-screen w-full bg-slate-100 flex items-stretch justify-center font-sans">
-      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-[0.85fr_1.15fr] bg-white shadow-sm my-0 md:my-10 md:rounded-sm overflow-hidden">
+    /* The auth screens are one fixed viewport tall: only the form column
+       scrolls, and only when the window is shorter than the card. */
+    <main className="relative h-dvh overflow-hidden bg-slate-50 lg:grid lg:grid-cols-[1.05fr_1fr]">
+      {/* Brand panel */}
+      <section className="qd-ink relative hidden overflow-hidden bg-emerald-950 p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-12">
+        <div className="qd-drift absolute -right-28 -top-28 h-[26rem] w-[26rem] rounded-full bg-emerald-500/25 blur-3xl" />
+        <div className="qd-drift-slow absolute -bottom-36 -left-24 h-[24rem] w-[24rem] rounded-full bg-teal-400/20 blur-3xl" />
+        <div className="qd-float absolute right-14 top-1/3 h-20 w-20 rounded-3xl border border-amber-300/25 bg-amber-300/10" />
+        <div
+          className="qd-float absolute bottom-1/4 left-20 h-12 w-12 rounded-2xl border border-emerald-300/20 bg-emerald-300/5"
+          style={{ animationDelay: "1.6s" }}
+        />
 
-        {/* =====================================================
-            LEFT BRAND PANEL
-        ====================================================== */}
-        <aside className="hidden md:flex relative flex-col justify-between bg-slate-900 text-slate-200 p-12 overflow-hidden">
+        <SchoolBrand
+          school={null}
+          portal="School Portal"
+          tone="dark"
+          size="lg"
+          className="relative qd-slide-right"
+        />
 
-          <Constellation />
+        <div className="relative max-w-xl py-4">
+          <span className="qd-fade-up inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-200">
+            <Sparkles size={13} />
+            A smarter way to learn
+          </span>
 
-          {/* Logo */}
-          <div className="relative z-10 flex items-center gap-2 font-serif text-xl font-semibold text-slate-50">
-            <span className="h-2 w-2 rounded-full bg-amber-500 inline-block" />
-            Smart LMS
+          <h1 className="qd-fade-up qd-d-1 mt-5 font-serif text-4xl font-bold leading-[1.1] xl:text-5xl">
+            One code.
+            <br />
+            <span className="text-amber-300">Four portals.</span>
+          </h1>
+
+          <p className="qd-fade-up qd-d-2 mt-4 max-w-md text-[15px] leading-7 text-emerald-100/75">
+            Sign in with your school code and the account your school gave you.
+            Your school&rsquo;s name appears the moment you are in.
+          </p>
+
+          <div className="qd-stagger mt-6 grid grid-cols-2 gap-3">
+            {portals.map(([title, subtitle]) => (
+              <div
+                key={title}
+                className="rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-300/40 hover:bg-white/10"
+              >
+                <p className="text-sm font-semibold">{title}</p>
+                <p className="mt-0.5 text-xs text-emerald-100/60">{subtitle}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <p className="relative text-xs text-emerald-100/50">
+          © {new Date().getFullYear()} Smart LMS
+        </p>
+      </section>
+
+      {/* Form panel */}
+      <section className="relative flex h-full items-center justify-center overflow-hidden px-4 py-4 sm:px-8">
+        <div className="qd-drift absolute -right-24 -top-24 h-72 w-72 rounded-full bg-emerald-200/50 blur-3xl" />
+        <div className="qd-drift-slow absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-amber-200/50 blur-3xl" />
+
+        <div className="qd-fade-up absolute right-4 top-4 sm:right-7 sm:top-6">
+          <ThemeToggle />
+        </div>
+
+        <div className="qd-scrollbar relative max-h-full w-full max-w-md overflow-y-auto overscroll-contain py-1">
+          <div className="qd-fade-up mb-5 lg:hidden">
+            <SchoolBrand school={null} portal="School Portal" tone="light" />
           </div>
 
-          {/* Main message */}
-          <div className="relative z-10 max-w-sm">
-            <h1 className="font-serif text-4xl font-medium leading-tight text-slate-50 mb-4">
-              One login, every classroom.
-            </h1>
+          <div className="qd-fade-up qd-d-1 mb-4">
+            <div className="qd-float mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-800 dark:text-emerald-300 shadow-inner">
+              <GraduationCap size={22} />
+            </div>
 
-            <p className="text-sm leading-relaxed text-slate-400 mb-7 max-w-xs">
-              Students, teachers, parents, and administrators
-              each get a workspace designed around what they
-              need to do.
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">
+              Welcome back
             </p>
 
-            <ul className="flex flex-col gap-3">
-              {FEATURES.map((feature) => (
-                <li
-                  key={feature}
-                  className="flex items-start gap-3 text-sm text-slate-300"
-                >
-                  <Check className="h-4 w-4 mt-0.5 text-amber-500 shrink-0" />
-
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Footer */}
-          <div className="relative z-10 flex justify-between border-t border-slate-700 pt-4 text-xs text-slate-500">
-            <span>© 2026 Smart LMS</span>
-            <span>Smart School Management</span>
-          </div>
-        </aside>
-
-        {/* =====================================================
-            RIGHT LOGIN PANEL
-        ====================================================== */}
-        <main className="p-8 sm:p-12 flex flex-col justify-center">
-
-          {/* Mobile Logo */}
-          <div className="md:hidden mb-8">
-            <div className="flex items-center gap-2 font-serif text-xl font-semibold text-slate-900">
-              <span className="h-2 w-2 rounded-full bg-amber-600 inline-block" />
-              Smart LMS
-            </div>
-          </div>
-
-          {/* Role tabs */}
-          <nav className="flex gap-7 border-b border-slate-200 mb-9 overflow-x-auto">
-            {Object.entries(ROLES).map(([key, item]) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => handleRoleChange(key)}
-                className={`relative pb-3.5 text-sm font-medium whitespace-nowrap flex items-center gap-1.5 ${
-                  role === key
-                    ? "text-slate-900"
-                    : "text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                <span
-                  className={`font-serif italic text-xs ${
-                    role === key
-                      ? "text-amber-700"
-                      : "text-slate-400"
-                  }`}
-                >
-                  {item.num}
-                </span>
-
-                {item.label}
-
-                {role === key && (
-                  <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-amber-600" />
-                )}
-              </button>
-            ))}
-          </nav>
-
-          {/* Heading */}
-          <div className="mb-7">
-            <h2 className="font-serif text-3xl font-medium text-slate-900 mb-2">
-              Welcome back
+            <h2 className="mt-1 font-serif text-[23px] font-extrabold leading-tight tracking-tight text-slate-900">
+              Sign in to your school portal
             </h2>
 
-            <p className="text-sm text-slate-500 leading-relaxed max-w-sm">
-              Sign in to your {currentRole.label.toLowerCase()}{" "}
-              workspace and continue where you left off.
+            <p className="mt-1 text-xs leading-4 text-slate-500">
+              The same school code works for every portal.
             </p>
           </div>
 
-          {/* Selected role information */}
-          <div className="flex gap-3 p-4 rounded-sm bg-slate-50 border border-slate-100 mb-6 max-w-sm">
-            <div className="w-10 h-10 rounded-sm bg-amber-50 flex items-center justify-center shrink-0">
-              <RoleIcon
-                size={20}
-                className="text-amber-700"
-              />
-            </div>
-
-            <div>
-              <p className="font-semibold text-slate-800">
-                {currentRole.label} Login
-              </p>
-
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                {currentRole.description}
-              </p>
-            </div>
-          </div>
-
-          {/* Error */}
-          {error && (
-            <div className="mb-5 p-3 rounded-sm bg-red-50 border border-red-200 text-sm text-red-700 max-w-sm">
-              {error}
-            </div>
-          )}
-
-          {/* Success */}
-          {status === "done" && (
-            <div className="mb-5 p-3 rounded-sm bg-amber-50 border border-amber-200 text-sm text-amber-800 max-w-sm">
-              Login successful. Redirecting...
-            </div>
-          )}
-
-          {/* Login form */}
           <form
             onSubmit={handleSubmit}
-            className="flex flex-col gap-4 max-w-sm w-full"
+            className="qd-fade-up qd-d-2 space-y-3 rounded-2xl border border-slate-200/80 bg-card/90 p-4 shadow-xl shadow-slate-300/40 backdrop-blur transition duration-300 hover:shadow-2xl hover:shadow-emerald-200/40 sm:p-5"
           >
-            {/* Username */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-slate-700">
-                Username
+            <div>
+              <label htmlFor="schoolCode" className={labelClass}>
+                School code
               </label>
 
               <div className="relative">
-                <User
+                <Building2
                   size={17}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-700 dark:text-emerald-300"
                 />
 
                 <input
+                  id="schoolCode"
+                  name="schoolCode"
                   type="text"
-                  value={identifier}
-                  onChange={(e) =>
-                    setIdentifier(e.target.value)
-                  }
-                  placeholder={currentRole.placeholder}
-                  autoComplete="username"
-                  disabled={loading}
-                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-sm border border-slate-200 bg-slate-50 focus:bg-white focus:border-amber-500 outline-none focus:ring-1 focus:ring-amber-500 disabled:bg-slate-100"
+                  autoComplete="organization"
+                  value={schoolCode}
+                  onChange={(e) => setSchoolCode(e.target.value.toUpperCase())}
+                  placeholder="Your school code"
+                  className="w-full rounded-xl border border-slate-200 bg-card py-2.5 pl-10 pr-3 text-sm font-semibold uppercase tracking-wider text-slate-900 outline-none transition placeholder:font-normal placeholder:normal-case placeholder:tracking-normal placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
                 />
               </div>
             </div>
 
-            {/* Password */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-slate-700">
+            <div>
+              <span className={labelClass}>Sign in as</span>
+
+              <div className="relative grid grid-cols-4 rounded-xl border border-slate-200 bg-slate-100/80 p-1">
+                <span
+                  aria-hidden="true"
+                  className="absolute bottom-1 left-1 top-1 rounded-lg bg-card shadow-md ring-1 ring-emerald-700/15 transition-transform duration-300 ease-out"
+                  style={{
+                    width: "calc((100% - 0.5rem) / 4)",
+                    transform: `translateX(${roleIndex * 100}%)`,
+                  }}
+                />
+
+                {roles.map(({ value, label, icon: Icon }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setRole(value)}
+                    aria-pressed={role === value}
+                    className={`relative z-10 flex items-center justify-center gap-1.5 rounded-lg px-1 py-1.5 text-[11px] font-semibold transition-colors duration-200 ${
+                      role === value
+                        ? "text-emerald-800 dark:text-emerald-300"
+                        : "text-slate-500 hover:text-emerald-700 dark:hover:text-emerald-300"
+                    }`}
+                  >
+                    <Icon
+                      size={16}
+                      className={
+                        role === value
+                          ? "scale-110 text-emerald-700 dark:text-emerald-300 transition-transform duration-200"
+                          : "transition-transform duration-200"
+                      }
+                    />
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="identifier" className={labelClass}>
+                Username or email
+              </label>
+
+              <div className="relative">
+                <Mail
+                  size={17}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+
+                <input
+                  id="identifier"
+                  name="identifier"
+                  type="text"
+                  autoComplete="username"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  placeholder="Enter your username"
+                  className={inputClass}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="password" className={labelClass}>
                 Password
               </label>
 
               <div className="relative">
+                <LockKeyhole
+                  size={17}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                />
+
                 <input
-                  type={
-                    showPassword
-                      ? "text"
-                      : "password"
-                  }
-                  value={password}
-                  onChange={(e) =>
-                    setPassword(e.target.value)
-                  }
-                  placeholder="Enter your password"
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
-                  disabled={loading}
-                  className="w-full text-sm px-3.5 pr-11 py-2.5 rounded-sm border border-slate-200 bg-slate-50 focus:bg-white focus:border-amber-500 outline-none focus:ring-1 focus:ring-amber-500 disabled:bg-slate-100"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="w-full rounded-xl border border-slate-200 bg-card py-2.5 pl-10 pr-10 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10"
                 />
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowPassword(
-                      (previous) => !previous
-                    )
-                  }
-                  disabled={loading}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
                 >
-                  {showPassword ? (
-                    <EyeOff size={17} />
-                  ) : (
-                    <Eye size={17} />
-                  )}
+                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                 </button>
               </div>
             </div>
 
-            {/* Remember + Forgot */}
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
-                <input
-                  type="checkbox"
-                  disabled={loading}
-                  className="h-3.5 w-3.5 accent-amber-600"
-                />
-
-                Remember me
-              </label>
-
-              <button
-                type="button"
-                className="text-xs text-amber-700 hover:underline"
+            {error && (
+              <div
+                role="alert"
+                className="qd-shake flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-[13px] text-red-700 dark:text-red-300"
               >
-                Forgot password?
-              </button>
-            </div>
+                <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
 
-            {/* Login button */}
             <button
               type="submit"
               disabled={loading}
-              className="mt-1 flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-500 text-white text-sm font-medium py-3 rounded-sm transition-colors"
+              className="qd-gradient qd-shine group flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-800/20 transition hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-emerald-600/25 disabled:cursor-not-allowed disabled:opacity-70"
             >
               {loading ? (
                 <>
-                  <Loader2
-                    size={17}
-                    className="animate-spin"
-                  />
-
+                  <LoaderCircle size={18} className="animate-spin" />
                   Signing in…
                 </>
               ) : (
                 <>
                   Sign in
-
-                  <ArrowRight size={17} />
+                  <ArrowRight
+                    size={18}
+                    className="transition-transform duration-200 group-hover:translate-x-1"
+                  />
                 </>
               )}
             </button>
           </form>
 
-          {/* Register */}
-          <div className="mt-6 text-sm text-slate-500">
-            Don't have an account?{" "}
-
-            <button
-              type="button"
-              onClick={handleRegister}
-              className="font-medium text-amber-700 hover:underline"
+          <p className="qd-fade-up qd-d-4 mt-3.5 flex items-center justify-center gap-1.5 text-[13px] text-slate-600">
+            <ShieldCheck size={14} className="text-emerald-600 dark:text-emerald-400" />
+            New here?{" "}
+            <Link
+              to="/register"
+              className="font-bold text-emerald-700 dark:text-emerald-300 transition hover:text-emerald-900 dark:hover:text-emerald-300"
             >
-              Create an account
-            </button>
-          </div>
-
-          {/* Demo credentials */}
-          <div className="mt-8 max-w-sm border-t border-slate-200 pt-5">
-            <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-2">
-              Demo account
-            </p>
-
-            <p className="text-xs text-slate-500">
-              Student:{" "}
-              <span className="text-slate-700 font-medium">
-                
-              </span>{" "}
-              /{" "}
-              <span className="text-slate-700 font-medium">
-                
-              </span>
-            </p>
-          </div>
-        </main>
-      </div>
-    </div>
+              Create account
+            </Link>
+          </p>
+        </div>
+      </section>
+    </main>
   );
 }

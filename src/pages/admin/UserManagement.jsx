@@ -3,6 +3,9 @@ import { useCallback, useEffect, useState } from "react";
 import { Search, Plus, Pencil, Trash2, X } from "lucide-react";
 import api from "../../api/axios";
 
+// The fields listed here are the ones the account owner cannot change itself —
+// the student profile screen only exposes phone and address, so the office has
+// to be able to maintain the rest of the enrollment record.
 const settings = {
   student: {
     title: "Student Management",
@@ -10,6 +13,11 @@ const settings = {
     fields: [
       ["studentId", "Student ID"],
       ["className", "Class"],
+      ["rollNumber", "Roll Number"],
+      ["program", "Program"],
+      ["semester", "Semester"],
+      ["phone", "Phone"],
+      ["address", "Address"],
     ],
   },
   teacher: {
@@ -17,13 +25,22 @@ const settings = {
     singular: "Teacher",
     fields: [
       ["teacherId", "Teacher ID"],
+      ["subject", "Subject"],
+      ["qualification", "Qualification"],
       ["assignedClasses", "Assigned Classes (comma-separated)"],
+      ["phone", "Phone"],
+      ["address", "Address"],
     ],
   },
   parent: {
     title: "Parent Management",
     singular: "Parent",
-    fields: [["parentId", "Parent ID"]],
+    fields: [
+      ["parentId", "Parent ID"],
+      ["childId", "Child Student ID"],
+      ["phone", "Phone"],
+      ["address", "Address"],
+    ],
   },
 };
 
@@ -33,9 +50,17 @@ const emptyForm = {
   password: "",
   studentId: "",
   className: "",
+  rollNumber: "",
+  program: "",
+  semester: "",
+  phone: "",
+  address: "",
   teacherId: "",
+  subject: "",
+  qualification: "",
   assignedClasses: "",
   parentId: "",
+  childId: "",
 };
 
 export default function UserManagement({ role }) {
@@ -88,11 +113,10 @@ export default function UserManagement({ role }) {
       ...emptyForm,
       name: user.name || "",
       email: user.email || "",
-      studentId: user.studentId || "",
-      className: user.className || "",
-      teacherId: user.teacherId || "",
+      ...Object.fromEntries(
+        config.fields.map(([field]) => [field, user[field] ?? ""])
+      ),
       assignedClasses: (user.assignedClasses || []).join(", "),
-      parentId: user.parentId || "",
     });
 
     setError("");
@@ -203,18 +227,18 @@ export default function UserManagement({ role }) {
       </div>
 
       {error && (
-        <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">
+        <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700 dark:text-red-300">
           {error}
         </p>
       )}
 
       {message && (
-        <p role="status" className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-700">
+        <p role="status" className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-700 dark:text-emerald-300">
           {message}
         </p>
       )}
 
-      <div className="relative rounded-2xl border border-slate-200 bg-white p-4">
+      <div className="relative rounded-2xl border border-slate-200 bg-card p-4">
         <Search
           size={18}
           className="absolute left-7 top-1/2 -translate-y-1/2 text-slate-400"
@@ -227,7 +251,7 @@ export default function UserManagement({ role }) {
         />
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-card">
         <table className="w-full min-w-[650px]">
           <thead className="bg-slate-50">
             <tr>
@@ -265,7 +289,7 @@ export default function UserManagement({ role }) {
                     {user.email}
                   </td>
                   <td className="px-5 py-4">
-                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                       {user.status || "active"}
                     </span>
                   </td>
@@ -274,14 +298,14 @@ export default function UserManagement({ role }) {
                       <button
                         onClick={() => openEdit(user)}
                         title="Edit"
-                        className="rounded-lg bg-blue-50 p-2 text-blue-700"
+                        className="rounded-lg bg-blue-50 p-2 text-blue-700 dark:text-blue-300"
                       >
                         <Pencil size={16} />
                       </button>
                       <button
                         onClick={() => removeUser(user)}
                         title="Delete"
-                        className="rounded-lg bg-red-50 p-2 text-red-700"
+                        className="rounded-lg bg-red-50 p-2 text-red-700 dark:text-red-300"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -296,7 +320,7 @@ export default function UserManagement({ role }) {
 
       {modal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4">
-          <div className="my-6 w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+          <div className="my-6 w-full max-w-lg rounded-2xl bg-card p-6 shadow-xl">
             <div className="mb-5 flex items-center justify-between">
               <h2 className="text-xl font-bold text-slate-800">
                 {editing ? "Edit" : "Add"} {config.singular}
@@ -308,7 +332,7 @@ export default function UserManagement({ role }) {
 
             <form onSubmit={saveUser} className="space-y-4">
               {error && (
-                <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:text-red-300">
                   {error}
                 </p>
               )}

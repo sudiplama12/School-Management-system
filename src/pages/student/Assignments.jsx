@@ -8,33 +8,39 @@ import {
   CalendarDays,
   ClipboardList,
 } from "lucide-react";
-
-const STORAGE_KEY = "school_assignments";
+import api from "../../api/axios";
 
 export default function Assignments() {
   const navigate = useNavigate();
   const [assignments, setAssignments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    loadAssignments();
+    let active = true;
+
+    api
+      .get("/assignments")
+      .then(({ data }) => {
+        if (active) setAssignments(data);
+      })
+      .catch((err) => {
+        if (active)
+          setError(err?.response?.data?.message || "Unable to load assignments.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
-
-  const loadAssignments = () => {
-    try {
-      const saved = JSON.parse(
-        localStorage.getItem(STORAGE_KEY)
-      );
-
-      setAssignments(Array.isArray(saved) ? saved : []);
-    } catch {
-      setAssignments([]);
-    }
-  };
 
   const startAssignment = (assignment) => {
     navigate("/student/assignments/take", {
       state: {
-        assignment,
+        assignmentId: assignment.id,
       },
     });
   };
@@ -45,6 +51,9 @@ export default function Assignments() {
     return new Date(date).toLocaleString();
   };
 
+  const pendingCount = assignments.filter((a) => !a.submitted).length;
+  const completedCount = assignments.filter((a) => a.submitted).length;
+
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-6 lg:p-8">
 
@@ -53,7 +62,7 @@ export default function Assignments() {
         <div className="flex items-center gap-4">
 
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100">
-            <ClipboardList className="h-6 w-6 text-emerald-600" />
+            <ClipboardList className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
           </div>
 
           <div>
@@ -69,10 +78,16 @@ export default function Assignments() {
         </div>
       </div>
 
+      {error && (
+        <p className="mb-6 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+          {error}
+        </p>
+      )}
+
       {/* SUMMARY */}
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm">
           <p className="text-sm text-slate-500">
             Available
           </p>
@@ -82,31 +97,35 @@ export default function Assignments() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm">
           <p className="text-sm text-slate-500">
             Pending
           </p>
 
-          <p className="mt-2 text-2xl font-bold text-amber-600">
-            {assignments.length}
+          <p className="mt-2 text-2xl font-bold text-amber-600 dark:text-amber-400">
+            {pendingCount}
           </p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm">
           <p className="text-sm text-slate-500">
             Completed
           </p>
 
-          <p className="mt-2 text-2xl font-bold text-emerald-600">
-            0
+          <p className="mt-2 text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+            {completedCount}
           </p>
         </div>
 
       </div>
 
       {/* EMPTY STATE */}
-      {assignments.length === 0 ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-sm">
+      {loading ? (
+        <div className="rounded-2xl border border-slate-200 bg-card p-12 text-center shadow-sm">
+          <p className="text-sm text-slate-500">Loading assignments…</p>
+        </div>
+      ) : assignments.length === 0 ? (
+        <div className="rounded-2xl border border-slate-200 bg-card p-12 text-center shadow-sm">
 
           <FileText className="mx-auto h-14 w-14 text-slate-300" />
 
@@ -128,7 +147,7 @@ export default function Assignments() {
 
             <div
               key={assignment.id}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md md:p-6"
+              className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm transition hover:shadow-md md:p-6"
             >
 
               {/* TITLE SECTION */}
@@ -137,7 +156,7 @@ export default function Assignments() {
                 <div className="flex gap-4">
 
                   <div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 sm:flex">
-                    <FileText className="h-6 w-6 text-emerald-600" />
+                    <FileText className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
 
                   <div>
@@ -148,7 +167,7 @@ export default function Assignments() {
                         {assignment.title}
                       </h2>
 
-                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                         {assignment.type}
                       </span>
 
@@ -164,9 +183,28 @@ export default function Assignments() {
 
                 </div>
 
-                <span className="w-fit rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
-                  Pending
-                </span>
+                <div className="flex flex-col items-start gap-2 sm:items-end">
+                  {assignment.submitted ? (
+                    <span className="w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                      {assignment.submissionStatus === "graded"
+                        ? "Graded"
+                        : "Submitted"}
+                    </span>
+                  ) : (
+                    <span className="w-fit rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
+                      Pending
+                    </span>
+                  )}
+
+                  {assignment.submitted && assignment.score != null && (
+                    <span className="text-xs font-semibold text-slate-500">
+                      Score: {assignment.score}
+                      {assignment.totalMarks != null
+                        ? ` / ${assignment.totalMarks}`
+                        : ""}
+                    </span>
+                  )}
+                </div>
 
               </div>
 
@@ -274,7 +312,7 @@ export default function Assignments() {
                   }
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
                 >
-                  Start Assignment
+                  {assignment.submitted ? "Review Assignment" : "Start Assignment"}
                   <ArrowRight className="h-4 w-4" />
                 </button>
 

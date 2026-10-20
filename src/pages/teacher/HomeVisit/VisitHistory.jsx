@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import api from "../../../api/axios";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function VisitHistory() {
   const [search, setSearch] = useState("");
@@ -20,8 +21,7 @@ export default function VisitHistory() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Demo teacher ID
-  const teacherId = "teacher1";
+  const { teacherId } = useAuth();
 
   // =====================================================
   // LOAD COMPLETED VISITS FROM BACKEND
@@ -33,7 +33,7 @@ export default function VisitHistory() {
       setError("");
 
       const response = await api.get(
-        `/home-visits?teacherId=${teacherId}&status=completed`
+        `/home-visits?teacherId=${teacherId}&status=completed,declined,cancelled`
       );
 
       const data = Array.isArray(response.data)
@@ -173,7 +173,7 @@ export default function VisitHistory() {
           <div className="flex items-center gap-3">
 
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100">
-              <FileText className="h-6 w-6 text-emerald-600" />
+              <FileText className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
             </div>
 
             <div>
@@ -190,7 +190,7 @@ export default function VisitHistory() {
 
           <button
             onClick={loadVisits}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm hover:bg-slate-50"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-card px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm hover:bg-slate-50"
           >
             <RefreshCw className="h-4 w-4" />
             Refresh
@@ -202,7 +202,7 @@ export default function VisitHistory() {
         ================================================= */}
 
         {error && (
-          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:text-red-400">
             {error}
           </div>
         )}
@@ -215,11 +215,11 @@ export default function VisitHistory() {
 
           {/* COMPLETED VISITS */}
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm">
             <div className="flex items-center gap-3">
 
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100">
-                <CheckCircle className="h-5 w-5 text-emerald-600" />
+                <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               </div>
 
               <div>
@@ -237,11 +237,11 @@ export default function VisitHistory() {
 
           {/* STUDENTS */}
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm">
             <div className="flex items-center gap-3">
 
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100">
-                <User className="h-5 w-5 text-blue-600" />
+                <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
 
               <div>
@@ -265,11 +265,11 @@ export default function VisitHistory() {
 
           {/* TEACHER */}
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm">
             <div className="flex items-center gap-3">
 
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-purple-100">
-                <User className="h-5 w-5 text-purple-600" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100">
+                <User className="h-5 w-5 text-amber-600 dark:text-amber-400" />
               </div>
 
               <div>
@@ -291,7 +291,7 @@ export default function VisitHistory() {
             SEARCH
         ================================================= */}
 
-        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="mb-6 rounded-2xl border border-slate-200 bg-card p-4 shadow-sm">
 
           <div className="relative">
 
@@ -316,7 +316,7 @@ export default function VisitHistory() {
         ================================================= */}
 
         {filteredVisits.length > 0 ? (
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-sm">
 
             <div className="overflow-x-auto">
 
@@ -366,7 +366,7 @@ export default function VisitHistory() {
                         <div className="flex items-center gap-3">
 
                           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
-                            <User className="h-5 w-5 text-emerald-600" />
+                            <User className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                           </div>
 
                           <div>
@@ -436,7 +436,7 @@ export default function VisitHistory() {
 
                       <td className="px-5 py-4">
 
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
 
                           <CheckCircle className="h-3.5 w-3.5" />
 
@@ -459,7 +459,7 @@ export default function VisitHistory() {
                           onClick={() =>
                             setSelectedVisit(visit)
                           }
-                          className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                          className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100"
                         >
 
                           <Eye className="h-4 w-4" />
@@ -482,7 +482,7 @@ export default function VisitHistory() {
 
           </div>
         ) : (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-card p-10 text-center">
 
             <FileText className="mx-auto h-10 w-10 text-slate-300" />
 
@@ -507,7 +507,7 @@ export default function VisitHistory() {
 
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
 
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-xl">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-card shadow-xl">
 
             {/* HEADER */}
 
@@ -590,7 +590,7 @@ export default function VisitHistory() {
 
                   <div className="flex items-start gap-3">
 
-                    <MapPin className="mt-0.5 h-5 w-5 text-emerald-600" />
+                    <MapPin className="mt-0.5 h-5 w-5 text-emerald-600 dark:text-emerald-400" />
 
                     <div>
 

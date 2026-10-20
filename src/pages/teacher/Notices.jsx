@@ -1,29 +1,43 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Plus,
   Trash2,
   Bell,
   X,
 } from "lucide-react";
+import api from "../../api/axios";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Notices() {
-  const [notices, setNotices] = useState([
-    {
-      id: 1,
-      title: "Parent-Teacher Meeting",
-      message:
-        "The parent-teacher meeting will be held on Sunday at 11:00 AM.",
-      className: "Grade 10 - A",
-      createdAt: "Sep 17, 2026 • 3:45 PM",
-    },
-  ]);
+  const { user } = useAuth();
+  const [notices, setNotices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
-  const [className, setClassName] = useState("Grade 10 - A");
 
-  const publishNotice = (e) => {
+  const classOptions = (user?.assignedClasses?.length
+    ? user.assignedClasses
+    : ["Grade 10 - A"]
+  ).concat(""); // trailing empty string = whole school
+  const [className, setClassName] = useState(classOptions[0]);
+
+  const load = () => {
+    setLoading(true);
+    api
+      .get("/notices")
+      .then(({ data }) => setNotices(data))
+      .catch((err) =>
+        setError(err?.response?.data?.message || "Unable to load notices.")
+      )
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(load, []);
+
+  const publishNotice = async (e) => {
     e.preventDefault();
 
     if (!title.trim() || !message.trim()) {
@@ -31,27 +45,33 @@ export default function Notices() {
       return;
     }
 
-    const newNotice = {
-      id: Date.now(),
-      title,
-      message,
-      className,
-      createdAt: new Date().toLocaleString(),
-    };
+    try {
+      await api.post("/notices", {
+        title,
+        message,
+        className,
+        category: "General",
+        priority: "normal",
+      });
 
-    setNotices((current) => [newNotice, ...current]);
-
-    setTitle("");
-    setMessage("");
-    setShowForm(false);
+      setTitle("");
+      setMessage("");
+      setShowForm(false);
+      load();
+    } catch (err) {
+      alert(err?.response?.data?.message || "Could not publish notice.");
+    }
   };
 
-  const deleteNotice = (id) => {
+  const deleteNotice = async (id) => {
     if (!window.confirm("Delete this notice?")) return;
 
-    setNotices((current) =>
-      current.filter((notice) => notice.id !== id)
-    );
+    try {
+      await api.delete(`/notices/${id}`);
+      setNotices((current) => current.filter((notice) => notice.id !== id));
+    } catch (err) {
+      alert(err?.response?.data?.message || "Could not delete notice.");
+    }
   };
 
   return (
@@ -79,7 +99,7 @@ export default function Notices() {
       {showForm && (
         <form
           onSubmit={publishNotice}
-          className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+          className="rounded-2xl border border-slate-200 bg-card p-6 shadow-sm"
         >
           <div className="mb-5 flex items-center justify-between">
             <h2 className="text-xl font-bold">
@@ -108,8 +128,11 @@ export default function Notices() {
               onChange={(e) => setClassName(e.target.value)}
               className="w-full rounded-xl border border-slate-300 px-4 py-3"
             >
-              <option>Grade 10 - A</option>
-              <option>Grade 9 - A</option>
+              {classOptions.map((cls) => (
+                <option key={cls} value={cls}>
+                  {cls || "Whole School"}
+                </option>
+              ))}
             </select>
 
             <textarea
@@ -134,11 +157,11 @@ export default function Notices() {
         {notices.map((notice) => (
           <div
             key={notice.id}
-            className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+            className="rounded-2xl border border-slate-200 bg-card p-6 shadow-sm"
           >
             <div className="flex gap-4">
               <div className="rounded-xl bg-emerald-100 p-3">
-                <Bell className="text-emerald-600" />
+                <Bell className="text-emerald-600 dark:text-emerald-400" />
               </div>
 
               <div className="flex-1">
@@ -148,14 +171,14 @@ export default function Notices() {
                       {notice.title}
                     </h2>
 
-                    <p className="text-sm text-emerald-600">
+                    <p className="text-sm text-emerald-600 dark:text-emerald-400">
                       {notice.className}
                     </p>
                   </div>
 
                   <button
                     onClick={() => deleteNotice(notice.id)}
-                    className="self-start rounded-lg p-2 text-red-600 hover:bg-red-50"
+                    className="self-start rounded-lg p-2 text-red-600 dark:text-red-400 hover:bg-red-50"
                   >
                     <Trash2 size={18} />
                   </button>
@@ -166,12 +189,16 @@ export default function Notices() {
                 </p>
 
                 <p className="mt-4 text-sm text-slate-400">
-                  {notice.createdAt}
+                  {notice.date} • {notice.time}
                 </p>
               </div>
             </div>
           </div>
         ))}
+
+        {!loading && notices.length === 0 && (
+          <p className="text-sm text-slate-500">You have not posted any notices yet.</p>
+        )}
       </div>
     </div>
   );

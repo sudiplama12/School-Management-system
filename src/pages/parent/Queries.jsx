@@ -1,5 +1,5 @@
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   MessageCircleQuestion,
   Send,
@@ -11,65 +11,12 @@ import {
   X,
 } from "lucide-react";
 
-// =====================================================
-// FRONTEND DEMO DATA
-// Later this will come from the backend API.
-// Admin will control which teachers a parent can query.
-// =====================================================
-
-const authorizedTeachers = [
-  {
-    id: 1,
-    name: "Mrs. Sita Sharma",
-    subject: "Class Teacher",
-    className: "Grade 10 - Section A",
-  },
-  {
-    id: 2,
-    name: "Mr. Ram Thapa",
-    subject: "Mathematics",
-    className: "Grade 10 - Section A",
-  },
-  {
-    id: 3,
-    name: "Mrs. Mina KC",
-    subject: "Science",
-    className: "Grade 10 - Section A",
-  },
-];
-
-const initialQueries = [
-  {
-    id: 1,
-    teacher: "Mrs. Sita Sharma",
-    subject: "Class Teacher",
-    question:
-      "I would like to know about my child's recent attendance and class participation.",
-    date: "2026-09-27",
-    time: "10:30 AM",
-    status: "Replied",
-    reply:
-      "Your child has been attending classes regularly. Class participation has also been satisfactory.",
-    replyDate: "2026-09-28",
-  },
-  {
-    id: 2,
-    teacher: "Mr. Ram Thapa",
-    subject: "Mathematics",
-    question:
-      "Could you please provide some information about my child's performance in Mathematics?",
-    date: "2026-09-25",
-    time: "02:15 PM",
-    status: "Pending",
-    reply: "",
-    replyDate: "",
-  },
-];
+import api from "../../api/axios";
 
 function StatusBadge({ status }) {
   if (status === "Replied") {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
         <CheckCircle className="h-3.5 w-3.5" />
         Replied
       </span>
@@ -77,7 +24,7 @@ function StatusBadge({ status }) {
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-700">
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300">
       <Clock className="h-3.5 w-3.5" />
       Pending
     </span>
@@ -87,9 +34,41 @@ function StatusBadge({ status }) {
 export default function Queries() {
   const [teacherId, setTeacherId] = useState("");
   const [question, setQuestion] = useState("");
-  const [queries, setQueries] = useState(initialQueries);
+  const [queries, setQueries] = useState([]);
+  const [teachers, setTeachers] = useState([]);
   const [selectedQuery, setSelectedQuery] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const loadQueries = () => {
+    let active = true;
+
+    return Promise.all([
+      api.get("/queries"),
+      api.get("/queries/teachers"),
+    ])
+      .then(([queriesRes, teachersRes]) => {
+        if (!active) return;
+        setQueries(queriesRes.data || []);
+        setTeachers(teachersRes.data || []);
+        setError("");
+      })
+      .catch((err) => {
+        if (active)
+          setError(
+            err?.response?.data?.message || "Unable to load your queries."
+          );
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    loadQueries();
+  }, []);
 
   const pendingCount = useMemo(
     () => queries.filter((query) => query.status === "Pending").length,
@@ -101,39 +80,33 @@ export default function Queries() {
     [queries]
   );
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!teacherId || !question.trim()) {
       return;
     }
 
-    const teacher = authorizedTeachers.find(
-      (item) => item.id === Number(teacherId)
-    );
+    setSubmitting(true);
 
-    if (!teacher) return;
+    try {
+      await api.post("/queries", {
+        teacherId,
+        question: question.trim(),
+      });
 
-    const newQuery = {
-      id: Date.now(),
-      teacher: teacher.name,
-      subject: teacher.subject,
-      question: question.trim(),
-      date: new Date().toISOString().split("T")[0],
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      status: "Pending",
-      reply: "",
-      replyDate: "",
-    };
+      setTeacherId("");
+      setQuestion("");
+      setShowForm(false);
 
-    setQueries((prev) => [newQuery, ...prev]);
-
-    setTeacherId("");
-    setQuestion("");
-    setShowForm(false);
+      await loadQueries();
+    } catch (err) {
+      setError(
+        err?.response?.data?.message || "Unable to send your query."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -145,7 +118,7 @@ export default function Queries() {
         <div>
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100">
-              <MessageCircleQuestion className="h-6 w-6 text-emerald-600" />
+              <MessageCircleQuestion className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
             </div>
 
             <div>
@@ -174,7 +147,7 @@ export default function Queries() {
           SUMMARY CARDS
       ================================================= */}
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm">
           <p className="text-sm text-slate-500">
             Total Queries
           </p>
@@ -185,21 +158,21 @@ export default function Queries() {
         </div>
 
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-          <p className="text-sm text-amber-700">
+          <p className="text-sm text-amber-700 dark:text-amber-300">
             Pending
           </p>
 
-          <p className="mt-2 text-2xl font-bold text-amber-800">
+          <p className="mt-2 text-2xl font-bold text-amber-800 dark:text-amber-300">
             {pendingCount}
           </p>
         </div>
 
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-          <p className="text-sm text-emerald-700">
+          <p className="text-sm text-emerald-700 dark:text-emerald-300">
             Replied
           </p>
 
-          <p className="mt-2 text-2xl font-bold text-emerald-800">
+          <p className="mt-2 text-2xl font-bold text-emerald-800 dark:text-emerald-300">
             {repliedCount}
           </p>
         </div>
@@ -212,12 +185,12 @@ export default function Queries() {
         {queries.map((query) => (
           <div
             key={query.id}
-            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md"
+            className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm transition hover:shadow-md"
           >
             {/* Header */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-semibold text-emerald-700">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-semibold text-emerald-700 dark:text-emerald-300">
                   {query.teacher.charAt(0)}
                 </div>
 
@@ -254,9 +227,9 @@ export default function Queries() {
             {query.status === "Replied" && query.reply && (
               <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 p-4">
                 <div className="mb-2 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-emerald-600" />
+                  <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
 
-                  <span className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
                     Teacher's Reply
                   </span>
                 </div>
@@ -285,7 +258,7 @@ export default function Queries() {
                 <button
                   type="button"
                   onClick={() => setSelectedQuery(query)}
-                  className="text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+                  className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300"
                 >
                   View Conversation →
                 </button>
@@ -296,28 +269,46 @@ export default function Queries() {
       </div>
 
       {/* =================================================
-          EMPTY STATE
+          LOADING / ERROR / EMPTY STATE
       ================================================= */}
-      {queries.length === 0 && (
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-sm">
+      {loading ? (
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-card p-12 text-center shadow-sm">
           <MessageCircleQuestion className="mx-auto h-12 w-12 text-slate-300" />
 
-          <h2 className="mt-4 text-lg font-semibold text-slate-700">
-            No Queries Yet
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-500">
-            You have not sent any queries to teachers.
+          <p className="mt-4 text-sm text-slate-500">
+            Loading your queries…
           </p>
         </div>
+      ) : error ? (
+        <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-12 text-center">
+          <MessageCircleQuestion className="mx-auto h-12 w-12 text-red-300" />
+
+          <p className="mt-4 text-sm text-red-600 dark:text-red-400">
+            {error}
+          </p>
+        </div>
+      ) : (
+        queries.length === 0 && (
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-card p-12 text-center shadow-sm">
+            <MessageCircleQuestion className="mx-auto h-12 w-12 text-slate-300" />
+
+            <h2 className="mt-4 text-lg font-semibold text-slate-700">
+              No Queries Yet
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-500">
+              You have not sent any queries to teachers.
+            </p>
+          </div>
+        )
       )}
 
       {/* =================================================
           NEW QUERY MODAL
       ================================================= */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 dark:bg-slate-950/70 p-4">
+          <div className="w-full max-w-2xl rounded-2xl bg-card shadow-2xl">
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-slate-200 p-6">
               <div>
@@ -360,10 +351,10 @@ export default function Queries() {
                       Select an authorized teacher
                     </option>
 
-                    {authorizedTeachers.map((teacher) => (
+                    {teachers.map((teacher) => (
                       <option
-                        key={teacher.id}
-                        value={teacher.id}
+                        key={teacher.id || teacher.teacherId}
+                        value={teacher.teacherId}
                       >
                         {teacher.name} — {teacher.subject}
                       </option>
@@ -412,10 +403,11 @@ export default function Queries() {
 
                 <button
                   type="submit"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                  disabled={submitting}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <Send className="h-4 w-4" />
-                  Send Query
+                  {submitting ? "Sending…" : "Send Query"}
                 </button>
               </div>
             </form>
@@ -427,8 +419,8 @@ export default function Queries() {
           CONVERSATION MODAL
       ================================================= */}
       {selectedQuery && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 dark:bg-slate-950/70 p-4">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-card shadow-2xl">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-200 p-6">
               <div>

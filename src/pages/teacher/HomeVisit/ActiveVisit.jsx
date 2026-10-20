@@ -14,9 +14,11 @@ import {
   Loader2,
 } from "lucide-react";
 import api from "../../../api/axios";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function ActiveVisit() {
   const [visit, setVisit] = useState(null);
+  const [awaitingParent, setAwaitingParent] = useState(0);
 
   const [visitStarted, setVisitStarted] = useState(false);
   const [completed, setCompleted] = useState(false);
@@ -33,8 +35,7 @@ export default function ActiveVisit() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  // Demo teacher
-  const teacherId = "teacher1";
+  const { teacherId } = useAuth();
 
   // =====================================================
   // LOAD ACTIVE / SCHEDULED VISIT
@@ -66,10 +67,14 @@ export default function ActiveVisit() {
       }
 
       if (!currentVisit) {
+        setAwaitingParent(
+          visits.filter((item) => item.status === "awaiting_parent").length
+        );
         setVisit(null);
         return;
       }
 
+      setAwaitingParent(0);
       setVisit(currentVisit);
 
       setVisitStarted(
@@ -349,7 +354,7 @@ export default function ActiveVisit() {
 
           <div className="text-center">
 
-            <Loader2 className="mx-auto h-10 w-10 animate-spin text-emerald-600" />
+            <Loader2 className="mx-auto h-10 w-10 animate-spin text-emerald-600 dark:text-emerald-400" />
 
             <p className="mt-3 text-sm text-slate-500">
               Loading active visit...
@@ -372,7 +377,7 @@ export default function ActiveVisit() {
 
         <div className="mx-auto max-w-6xl">
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-card p-10 text-center shadow-sm">
 
             <MapPin className="mx-auto h-12 w-12 text-slate-300" />
 
@@ -383,6 +388,14 @@ export default function ActiveVisit() {
             <p className="mt-2 text-sm text-slate-500">
               There is no scheduled or active home visit for you.
             </p>
+
+            {awaitingParent > 0 && (
+              <p className="mt-2 text-sm font-medium text-amber-600 dark:text-amber-400">
+                {awaitingParent} request{awaitingParent === 1 ? "" : "s"} on the
+                Upcoming page {awaitingParent === 1 ? "is" : "are"} still waiting
+                for a parent to accept.
+              </p>
+            )}
 
             <button
               onClick={loadVisit}
@@ -418,7 +431,7 @@ export default function ActiveVisit() {
 
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100">
 
-              <MapPin className="h-6 w-6 text-emerald-600" />
+              <MapPin className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
 
             </div>
 
@@ -443,7 +456,7 @@ export default function ActiveVisit() {
         ================================================= */}
 
         {message && (
-          <div className="mb-6 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm font-medium text-emerald-700">
+          <div className="mb-6 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm font-medium text-emerald-700 dark:text-emerald-300">
 
             <CheckCircle className="h-5 w-5" />
 
@@ -457,7 +470,7 @@ export default function ActiveVisit() {
         ================================================= */}
 
         {error && (
-          <div className="mb-6 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-4 text-sm font-medium text-red-700">
+          <div className="mb-6 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-4 text-sm font-medium text-red-700 dark:text-red-300">
 
             <AlertCircle className="h-5 w-5 shrink-0" />
 
@@ -470,7 +483,7 @@ export default function ActiveVisit() {
             STATUS
         ================================================= */}
 
-        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="mb-6 rounded-2xl border border-slate-200 bg-card p-5 shadow-sm">
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
@@ -545,7 +558,7 @@ export default function ActiveVisit() {
 
             ) : (
 
-              <div className="inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-5 py-3 text-sm font-semibold text-emerald-700">
+              <div className="inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-5 py-3 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
 
                 <CheckCircle className="h-5 w-5" />
 
@@ -567,7 +580,7 @@ export default function ActiveVisit() {
 
           {/* STUDENT */}
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
+          <div className="rounded-2xl border border-slate-200 bg-card p-6 shadow-sm lg:col-span-2">
 
             <h2 className="mb-5 text-lg font-bold text-slate-800">
               Student Information
@@ -636,7 +649,7 @@ export default function ActiveVisit() {
 
           {/* SCHEDULE */}
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-card p-6 shadow-sm">
 
             <h2 className="mb-5 text-lg font-bold text-slate-800">
               Visit Schedule
@@ -679,7 +692,7 @@ export default function ActiveVisit() {
             LOCATION
         ================================================= */}
 
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-card p-6 shadow-sm">
 
           <div className="mb-4 flex items-center justify-between">
 
@@ -695,13 +708,13 @@ export default function ActiveVisit() {
 
             </div>
 
-            <MapPin className="h-6 w-6 text-emerald-600" />
+            <MapPin className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
 
           </div>
 
           <div className="rounded-2xl bg-slate-100 p-8 text-center">
 
-            <MapPin className="mx-auto h-12 w-12 text-emerald-600" />
+            <MapPin className="mx-auto h-12 w-12 text-emerald-600 dark:text-emerald-400" />
 
             <p className="mt-3 font-semibold text-slate-700">
               {visit.locationName ||
@@ -748,7 +761,7 @@ export default function ActiveVisit() {
             VISIT NOTES
         ================================================= */}
 
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-card p-6 shadow-sm">
 
           <div className="mb-5">
 
@@ -903,7 +916,7 @@ function Info({ icon, label, value }) {
   return (
     <div className="flex gap-3">
 
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:text-emerald-400">
 
         <div className="h-5 w-5">
           {icon}

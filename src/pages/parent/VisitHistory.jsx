@@ -10,46 +10,50 @@ import {
 } from "lucide-react";
 
 import api from "../../api/axios";
+import { useAuth } from "../../context/AuthContext";
 
 export default function VisitHistory() {
+  const { childStudentId } = useAuth();
+
   const [visits, setVisits] = useState([]);
   const [selectedVisit, setSelectedVisit] =
     useState(null);
-
-  const studentId = "ST001";
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    loadVisits();
-  }, []);
+    let active = true;
 
-  const loadVisits = async () => {
-    try {
-      const response = await api.get(
-        `/visits/student/${studentId}`
-      );
-
-      setVisits(response.data || []);
-
-    } catch (error) {
-      console.error(error);
-
-      // Demo fallback
-      setVisits([
-        {
-          _id: "VIS001",
-          teacherName: "Teacher One",
-          visitDate: "2026-09-10",
-          status: "completed",
-          observation:
-            "Student has a suitable study environment.",
-          remarks:
-            "Student is participating well in academic activities.",
-          recommendations:
-            "Continue regular study routine.",
-        },
-      ]);
+    if (!childStudentId) {
+      setError("No child is linked to this parent account.");
+      setLoading(false);
+      return;
     }
-  };
+
+    const loadVisits = async () => {
+      try {
+        const response = await api.get(
+          `/visits/student/${childStudentId}`
+        );
+
+        if (active) setVisits(response.data || []);
+      } catch (err) {
+        if (active)
+          setError(
+            err?.response?.data?.message ||
+              "Unable to load home visit history."
+          );
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    loadVisits();
+
+    return () => {
+      active = false;
+    };
+  }, [childStudentId]);
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -64,8 +68,22 @@ export default function VisitHistory() {
         </p>
       </div>
 
-      {visits.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
+      {loading ? (
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-card p-10 text-center">
+          <FileText className="mx-auto h-10 w-10 text-slate-300" />
+          <p className="mt-3 text-sm text-slate-500">
+            Loading home visit history…
+          </p>
+        </div>
+      ) : error ? (
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-card p-10 text-center">
+          <FileText className="mx-auto h-10 w-10 text-slate-300" />
+          <p className="mt-3 text-sm text-red-500">
+            {error}
+          </p>
+        </div>
+      ) : visits.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-card p-10 text-center">
 
           <FileText className="mx-auto h-10 w-10 text-slate-300" />
 
@@ -75,7 +93,7 @@ export default function VisitHistory() {
 
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-sm">
 
           <div className="overflow-x-auto">
 
@@ -116,7 +134,7 @@ export default function VisitHistory() {
                       <div className="flex items-center gap-3">
 
                         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100">
-                          <User className="h-4 w-4 text-emerald-600" />
+                          <User className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                         </div>
 
                         <span className="text-sm font-medium text-slate-700">
@@ -149,7 +167,7 @@ export default function VisitHistory() {
 
                     <td className="px-5 py-4">
 
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
 
                         <CheckCircle className="h-3.5 w-3.5" />
 
@@ -165,7 +183,7 @@ export default function VisitHistory() {
                         onClick={() =>
                           setSelectedVisit(visit)
                         }
-                        className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                        className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100"
                       >
 
                         <Eye className="h-4 w-4" />
@@ -193,7 +211,7 @@ export default function VisitHistory() {
       {selectedVisit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
 
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-card">
 
             <div className="flex items-center justify-between border-b p-5">
 

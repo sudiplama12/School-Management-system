@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
   BookOpen,
   Plus,
@@ -7,6 +8,7 @@ import {
   RefreshCw,
   ArrowLeftRight,
   RotateCcw,
+  Pencil,
   X,
   AlertCircle,
 } from "lucide-react";
@@ -17,7 +19,20 @@ const emptyBook = {
   author: "",
   isbn: "",
   category: "",
+  type: "Book",
+  description: "",
   quantity: 1,
+};
+
+// A copy is still owed to the library in each of these states.
+const OPEN_STATUSES = ["issued", "overdue", "lost"];
+
+// Native date inputs are filled from the local calendar, never from
+// toISOString(), which is a day early this side of GMT.
+const toDateInput = (date = new Date()) => {
+  const pad = (n) => String(n).padStart(2, "0");
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 };
 
 export default function Library() {
@@ -27,10 +42,25 @@ export default function Library() {
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("books");
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+
+  const { pathname } = useLocation();
+
+  // The sidebar points Manage Books, Issue Books and Return Books at this page.
+  useEffect(() => {
+    setActiveTab(
+      pathname.endsWith("/issue")
+        ? "issue"
+        : pathname.endsWith("/return")
+          ? "issues"
+          : "books"
+    );
+  }, [pathname]);
   const [showBookForm, setShowBookForm] = useState(false);
   const [bookForm, setBookForm] = useState(emptyBook);
+  const [editing, setEditing] = useState(null);
   const [issueForm, setIssueForm] = useState({
     bookId: "",
     studentId: "",
@@ -69,23 +99,57 @@ export default function Library() {
     loadLibrary();
   }, []);
 
-  const addBook = async (e) => {
+  const openBookForm = (book = null) => {
+    setEditing(book);
+    setBookForm(
+      book
+        ? {
+            title: book.title || "",
+            author: book.author || "",
+            isbn: book.isbn || "",
+            category: book.category || "",
+            type: book.type || "Book",
+            description: book.description || "",
+            quantity: book.quantity ?? 1,
+          }
+        : emptyBook
+    );
+    setError("");
+    setMessage("");
+    setShowBookForm(true);
+  };
+
+  const saveBook = async (e) => {
     e.preventDefault();
     setError("");
     setMessage("");
+    setSaving(true);
+
+    const payload = {
+      ...bookForm,
+      quantity: Number(bookForm.quantity),
+    };
 
     try {
-      await api.post("/library/books", {
-        ...bookForm,
-        quantity: Number(bookForm.quantity),
-      });
+      if (editing) {
+        await api.patch(
+          `/library/books/${editing.id || editing._id}`,
+          payload
+        );
+        setMessage(`"${payload.title}" updated successfully.`);
+      } else {
+        await api.post("/library/books", payload);
+        setMessage("Book added successfully.");
+      }
 
       setBookForm(emptyBook);
+      setEditing(null);
       setShowBookForm(false);
-      setMessage("Book added successfully.");
       await loadLibrary();
     } catch (err) {
-      setError(err.response?.data?.message || "Unable to add book.");
+      setError(err.response?.data?.message || "Unable to save the book.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -159,16 +223,13 @@ export default function Library() {
     0
   );
 
-  const issuedCount = issues.filter(
-    (issue) => issue.status === "issued"
+  const issuedCount = issues.filter((issue) =>
+    OPEN_STATUSES.includes(issue.status)
   ).length;
 
-  const overdueCount = issues.filter(
-    (issue) =>
-      issue.status === "issued" &&
-      issue.dueDate &&
-      new Date(issue.dueDate) < new Date()
-  ).length;
+  const overdueCount = issues.filter((issue) => issue.overdue).length;
+
+  const lostCount = issues.filter((issue) => issue.status === "lost").length;
 
   const formatDate = (date) => {
     if (!date) return "—";
@@ -180,7 +241,7 @@ export default function Library() {
       <div className="mx-auto max-w-7xl space-y-6">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <p className="text-sm font-semibold text-indigo-600">
+            <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
               SMART SCHOOL MANAGEMENT SYSTEM
             </p>
             <h1 className="mt-1 text-3xl font-bold text-slate-900">
@@ -194,15 +255,15 @@ export default function Library() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={loadLibrary}
-              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 font-medium text-slate-700 hover:bg-slate-50"
+              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-card px-4 py-3 font-medium text-slate-700 hover:bg-slate-50"
             >
               <RefreshCw size={17} />
               Refresh
             </button>
 
             <button
-              onClick={() => setShowBookForm(true)}
-              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white hover:bg-indigo-700"
+              onClick={() => openBookForm()}
+              className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-700"
             >
               <Plus size={18} />
               Add Book
@@ -211,14 +272,14 @@ export default function Library() {
         </div>
 
         {error && (
-          <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
+          <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 dark:text-red-300">
             <AlertCircle className="mt-0.5 shrink-0" size={18} />
             <p>{error}</p>
           </div>
         )}
 
         {message && (
-          <div className="rounded-xl border border-green-200 bg-green-50 p-4 text-green-700">
+          <div className="rounded-xl border border-green-200 bg-green-50 p-4 text-green-700 dark:text-green-300">
             {message}
           </div>
         )}
@@ -229,25 +290,25 @@ export default function Library() {
               label: "Book Titles",
               value: books.length,
               icon: BookOpen,
-              color: "bg-blue-100 text-blue-700",
+              color: "bg-blue-100 text-blue-700 dark:text-blue-300",
             },
             {
               label: "Total Copies",
               value: totalCopies,
               icon: BookOpen,
-              color: "bg-violet-100 text-violet-700",
+              color: "bg-teal-100 text-teal-700 dark:text-teal-300",
             },
             {
               label: "Available Copies",
               value: availableCopies,
               icon: RotateCcw,
-              color: "bg-emerald-100 text-emerald-700",
+              color: "bg-emerald-100 text-emerald-700 dark:text-emerald-300",
             },
             {
               label: "Currently Issued",
               value: issuedCount,
               icon: ArrowLeftRight,
-              color: "bg-amber-100 text-amber-700",
+              color: "bg-amber-100 text-amber-700 dark:text-amber-300",
             },
           ].map((stat) => {
             const Icon = stat.icon;
@@ -255,7 +316,7 @@ export default function Library() {
             return (
               <div
                 key={stat.label}
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium text-slate-500">
@@ -269,8 +330,8 @@ export default function Library() {
                   {loading ? "…" : stat.value}
                 </p>
                 {stat.label === "Currently Issued" && (
-                  <p className="mt-1 text-xs text-red-600">
-                    {overdueCount} overdue
+                  <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                    {overdueCount} overdue · {lostCount} lost
                   </p>
                 )}
               </div>
@@ -278,13 +339,13 @@ export default function Library() {
           })}
         </div>
 
-        <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setActiveTab("books")}
               className={`rounded-lg px-4 py-2.5 text-sm font-semibold ${
                 activeTab === "books"
-                  ? "bg-indigo-600 text-white"
+                  ? "bg-emerald-600 text-white"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -295,7 +356,7 @@ export default function Library() {
               onClick={() => setActiveTab("issues")}
               className={`rounded-lg px-4 py-2.5 text-sm font-semibold ${
                 activeTab === "issues"
-                  ? "bg-indigo-600 text-white"
+                  ? "bg-emerald-600 text-white"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -306,7 +367,7 @@ export default function Library() {
               onClick={() => setActiveTab("issue")}
               className={`rounded-lg px-4 py-2.5 text-sm font-semibold ${
                 activeTab === "issue"
-                  ? "bg-indigo-600 text-white"
+                  ? "bg-emerald-600 text-white"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -323,17 +384,17 @@ export default function Library() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search books or students..."
-              className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-4 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-4 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
             />
           </div>
         </div>
 
         {loading ? (
-          <div className="rounded-2xl bg-white p-12 text-center text-slate-500">
+          <div className="rounded-2xl bg-card p-12 text-center text-slate-500">
             Loading library data...
           </div>
         ) : activeTab === "books" ? (
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-card">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[750px] text-left text-sm">
                 <thead className="bg-slate-50 text-xs uppercase text-slate-500">
@@ -355,6 +416,7 @@ export default function Library() {
                         </p>
                         <p className="mt-1 text-xs text-slate-500">
                           {book.author}
+                          {book.code ? ` · ${book.code}` : ""}
                         </p>
                       </td>
                       <td className="px-5 py-4 text-slate-600">
@@ -362,20 +424,43 @@ export default function Library() {
                       </td>
                       <td className="px-5 py-4 text-slate-600">
                         {book.category || "General"}
+                        {book.type === "PDF" && (
+                          <span className="ml-2 rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-semibold text-teal-700 dark:text-teal-300">
+                            PDF
+                          </span>
+                        )}
                       </td>
                       <td className="px-5 py-4">{book.quantity ?? 0}</td>
                       <td className="px-5 py-4">
-                        <span className="rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">
+                        <span
+                          className={`rounded-full px-3 py-1 font-semibold ${
+                            Number(book.availableCopies ?? book.quantity ?? 0) > 0
+                              ? "bg-emerald-50 text-emerald-700 dark:text-emerald-300"
+                              : "bg-red-50 text-red-700 dark:text-red-300"
+                          }`}
+                        >
                           {book.availableCopies ?? book.quantity ?? 0}
                         </span>
                       </td>
                       <td className="px-5 py-4">
-                        <button
-                          onClick={() => deleteBook(book._id)}
-                          className="rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50"
-                        >
-                          Delete
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => openBookForm(book)}
+                            aria-label={`Edit ${book.title}`}
+                            className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                          >
+                            <Pencil size={14} />
+                            Edit
+                          </button>
+
+                          <button
+                            onClick={() => deleteBook(book._id)}
+                            aria-label={`Delete ${book.title}`}
+                            className="rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -394,7 +479,7 @@ export default function Library() {
             </div>
           </div>
         ) : activeTab === "issues" ? (
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-card">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[800px] text-left text-sm">
                 <thead className="bg-slate-50 text-xs uppercase text-slate-500">
@@ -409,10 +494,15 @@ export default function Library() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {filteredIssues.map((issue) => {
-                    const overdue =
-                      issue.status === "issued" &&
-                      issue.dueDate &&
-                      new Date(issue.dueDate) < new Date();
+                    const open = OPEN_STATUSES.includes(issue.status);
+                    const label =
+                      issue.status === "returned"
+                        ? "Returned"
+                        : issue.status === "lost"
+                          ? "Lost"
+                          : issue.overdue
+                            ? "Overdue"
+                            : "Issued";
 
                     return (
                       <tr key={issue._id} className="hover:bg-slate-50">
@@ -423,6 +513,11 @@ export default function Library() {
                           {issue.student?.name ||
                             issue.studentName ||
                             "Student"}
+                          {issue.student?.studentId && (
+                            <p className="mt-1 text-xs font-normal text-slate-500">
+                              {issue.student.studentId}
+                            </p>
+                          )}
                         </td>
                         <td className="px-5 py-4">
                           {formatDate(issue.issueDate || issue.createdAt)}
@@ -434,23 +529,24 @@ export default function Library() {
                           <span
                             className={`rounded-full px-3 py-1 text-xs font-semibold ${
                               issue.status === "returned"
-                                ? "bg-emerald-50 text-emerald-700"
-                                : overdue
-                                  ? "bg-red-50 text-red-700"
-                                  : "bg-amber-50 text-amber-700"
+                                ? "bg-emerald-50 text-emerald-700 dark:text-emerald-300"
+                                : issue.status === "lost"
+                                  ? "bg-slate-200 text-slate-700"
+                                  : issue.overdue
+                                    ? "bg-red-50 text-red-700 dark:text-red-300"
+                                    : "bg-amber-50 text-amber-700 dark:text-amber-300"
                             }`}
                           >
-                            {issue.status === "returned"
-                              ? "Returned"
-                              : overdue
-                                ? "Overdue"
-                                : "Issued"}
+                            {label}
                           </span>
                         </td>
                         <td className="px-5 py-4">
-                          {issue.status === "issued" && (
+                          {open && (
                             <button
                               onClick={() => returnBook(issue._id)}
+                              aria-label={`Return ${issue.book?.title || "book"} for ${
+                                issue.student?.name || "student"
+                              }`}
                               className="flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
                             >
                               <RotateCcw size={14} />
@@ -478,7 +574,7 @@ export default function Library() {
         ) : (
           <form
             onSubmit={issueBook}
-            className="mx-auto max-w-2xl space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+            className="mx-auto max-w-2xl space-y-5 rounded-2xl border border-slate-200 bg-card p-6 shadow-sm"
           >
             <div>
               <h2 className="text-xl font-bold text-slate-900">
@@ -499,7 +595,7 @@ export default function Library() {
                 onChange={(e) =>
                   setIssueForm({ ...issueForm, bookId: e.target.value })
                 }
-                className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-emerald-500"
               >
                 <option value="">Choose a book</option>
                 {books
@@ -523,7 +619,7 @@ export default function Library() {
                 onChange={(e) =>
                   setIssueForm({ ...issueForm, studentId: e.target.value })
                 }
-                className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-emerald-500"
               >
                 <option value="">Choose a student</option>
                 {students.map((student) => (
@@ -541,18 +637,18 @@ export default function Library() {
               <input
                 type="date"
                 required
-                min={new Date().toISOString().slice(0, 10)}
+                min={toDateInput()}
                 value={issueForm.dueDate}
                 onChange={(e) =>
                   setIssueForm({ ...issueForm, dueDate: e.target.value })
                 }
-                className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-emerald-500"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white hover:bg-indigo-700"
+              className="w-full rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white hover:bg-emerald-700"
             >
               Issue Book
             </button>
@@ -562,13 +658,22 @@ export default function Library() {
         {showBookForm && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-slate-950/60 p-4">
             <form
-              onSubmit={addBook}
-              className="my-auto w-full max-w-lg space-y-4 rounded-2xl bg-white p-6 shadow-xl"
+              onSubmit={saveBook}
+              className="my-auto w-full max-w-lg space-y-4 rounded-2xl bg-card p-6 shadow-xl"
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-slate-900">
-                  Add New Book
-                </h2>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">
+                    {editing ? "Edit Book" : "Add New Book"}
+                  </h2>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {editing
+                      ? `Accession ${editing.code || "—"} · ${
+                          editing.availableCopies ?? editing.quantity ?? 0
+                        } of ${editing.quantity ?? 0} copies on the shelf`
+                      : "New copies go straight onto the shelf."}
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={() => setShowBookForm(false)}
@@ -596,10 +701,41 @@ export default function Library() {
                       setBookForm({ ...bookForm, [name]: e.target.value })
                     }
                     placeholder={placeholder}
-                    className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-indigo-500"
+                    className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-emerald-500"
                   />
                 </div>
               ))}
+
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  Format
+                </label>
+                <select
+                  value={bookForm.type}
+                  onChange={(e) =>
+                    setBookForm({ ...bookForm, type: e.target.value })
+                  }
+                  className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-emerald-500"
+                >
+                  <option value="Book">Book (issued to a student)</option>
+                  <option value="PDF">PDF (downloadable reference)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  Description
+                </label>
+                <textarea
+                  rows={3}
+                  value={bookForm.description}
+                  onChange={(e) =>
+                    setBookForm({ ...bookForm, description: e.target.value })
+                  }
+                  placeholder="Shown to students in the catalogue (optional)"
+                  className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-emerald-500"
+                />
+              </div>
 
               <div>
                 <label className="mb-1.5 block text-sm font-semibold text-slate-700">
@@ -607,21 +743,31 @@ export default function Library() {
                 </label>
                 <input
                   type="number"
-                  min="1"
+                  min="0"
                   required
                   value={bookForm.quantity}
                   onChange={(e) =>
                     setBookForm({ ...bookForm, quantity: e.target.value })
                   }
-                  className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-indigo-500"
+                  className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-emerald-500"
                 />
+                <p className="mt-1.5 text-xs text-slate-500">
+                  {editing
+                    ? "Raising the count adds the difference to the shelf. Stock cannot fall below the copies still on loan."
+                    : "Use 0 to catalogue a title before its copies arrive."}
+                </p>
               </div>
 
               <button
                 type="submit"
-                className="w-full rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white hover:bg-indigo-700"
+                disabled={saving}
+                className="w-full rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Save Book
+                {saving
+                  ? "Saving..."
+                  : editing
+                    ? "Save Changes"
+                    : "Save Book"}
               </button>
             </form>
           </div>

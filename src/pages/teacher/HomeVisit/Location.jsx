@@ -17,6 +17,7 @@ import {
 
 import L from "leaflet";
 import api from "../../../api/axios";
+import { useAuth } from "../../../context/AuthContext";
 import "leaflet/dist/leaflet.css";
 
 // =====================================================
@@ -49,8 +50,7 @@ export default function Location() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Demo teacher account
-  const teacherId = "teacher1";
+  const { teacherId } = useAuth();
 
   // ===================================================
   // LOAD APPROVED LOCATIONS
@@ -162,7 +162,7 @@ export default function Location() {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 p-6">
-        <div className="flex min-h-[400px] items-center justify-center rounded-2xl bg-white shadow-sm">
+        <div className="flex min-h-[400px] items-center justify-center rounded-2xl bg-card shadow-sm">
           <div className="text-center">
             <div className="mx-auto h-9 w-9 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-600" />
 
@@ -191,7 +191,7 @@ export default function Location() {
           <div className="flex items-center gap-3">
 
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100">
-              <MapPin className="h-6 w-6 text-emerald-600" />
+              <MapPin className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
             </div>
 
             <div>
@@ -212,7 +212,7 @@ export default function Location() {
         ================================================= */}
 
         {error && (
-          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:text-red-300">
             {error}
           </div>
         )}
@@ -221,7 +221,7 @@ export default function Location() {
             SEARCH
         ================================================= */}
 
-        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="mb-6 rounded-2xl border border-slate-200 bg-card p-4 shadow-sm">
 
           <div className="relative">
 
@@ -251,7 +251,7 @@ export default function Location() {
               STUDENT LIST
           ================================================= */}
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-card p-4 shadow-sm">
 
             <div className="mb-4 flex items-center justify-between">
 
@@ -259,7 +259,7 @@ export default function Location() {
                 Approved Locations
               </h2>
 
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                 {filteredLocations.length}
               </span>
 
@@ -286,7 +286,7 @@ export default function Location() {
                     <div className="flex items-center gap-3">
 
                       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-100">
-                        <User className="h-5 w-5 text-emerald-600" />
+                        <User className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                       </div>
 
                       <div className="min-w-0">
@@ -303,7 +303,7 @@ export default function Location() {
 
                     </div>
 
-                    <div className="mt-3 flex items-center gap-1.5 text-xs font-medium text-emerald-600">
+                    <div className="mt-3 flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
                       <CheckCircle className="h-3.5 w-3.5" />
                       Location Approved
                     </div>
@@ -337,7 +337,7 @@ export default function Location() {
               MAP
           ================================================= */}
 
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-sm">
 
             <MapContainer
               center={
@@ -431,7 +431,7 @@ export default function Location() {
 
                     <div className="flex items-center gap-2">
 
-                      <CheckCircle className="h-5 w-5 text-emerald-600" />
+                      <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
 
                       <p className="font-semibold text-slate-800">
                         {selected.studentName}

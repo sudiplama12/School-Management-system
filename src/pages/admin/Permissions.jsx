@@ -100,7 +100,7 @@ export default function Permissions() {
     <div className="space-y-6">
       <div>
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600">
+          <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600 dark:text-emerald-400">
             <ShieldCheck size={25} />
           </div>
           <div>
@@ -115,18 +115,18 @@ export default function Permissions() {
       </div>
 
       {error && (
-        <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">
+        <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700 dark:text-red-300">
           {error}
         </p>
       )}
 
       {message && (
-        <p role="status" className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-700">
+        <p role="status" className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-700 dark:text-emerald-300">
           {message}
         </p>
       )}
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm">
         <label className="mb-2 block text-sm font-semibold text-slate-700">
           Select user
         </label>
@@ -146,7 +146,7 @@ export default function Permissions() {
         </select>
       </section>
 
-      <section className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section className="overflow-x-auto rounded-2xl border border-slate-200 bg-card shadow-sm">
         <table className="w-full min-w-[600px]">
           <thead className="bg-slate-50">
             <tr>

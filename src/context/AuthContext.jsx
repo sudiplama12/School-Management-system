@@ -1,28 +1,15 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import api from "../api/axios";
 
 const AuthContext = createContext(null);
 
-const DEMO_USERS = {
-  admin: {
-    username: "admin",
-    password: "admin123",
-    role: "admin",
-  },
-  teacher1: {
-    username: "teacher1",
-    password: "teacher123",
-    role: "teacher",
-  },
-  student1: {
-    username: "student1",
-    password: "student123",
-    role: "student",
-  },
-  parent1: {
-    username: "parent1",
-    password: "parent123",
-    role: "parent",
-  },
+const readSchool = () => {
+  try {
+    const saved = localStorage.getItem("lms_school");
+    return saved ? JSON.parse(saved) : null;
+  } catch {
+    return null;
+  }
 };
 
 export function AuthProvider({ children }) {
@@ -35,49 +22,55 @@ export function AuthProvider({ children }) {
     }
   });
 
+  // Cached so the school name is still on screen while /auth/me is in flight.
+  const [school, setSchool] = useState(readSchool);
+
   const [loading, setLoading] = useState(false);
 
-  const login = async (identifier, password, role) => {
+  // Timestamp key of the pending school reveal, or 0. The school's name is kept
+  // off the sign-in screen and played once here after a successful login.
+  const [reveal, setReveal] = useState(0);
+
+  const requestReveal = () => setReveal(Date.now());
+  const clearReveal = () => setReveal(0);
+
+  const storeSchool = (next) => {
+    if (!next) return;
+
+    localStorage.setItem("lms_school", JSON.stringify(next));
+    setSchool(next);
+  };
+
+  const login = async (identifier, password, role, schoolCode) => {
     setLoading(true);
 
     try {
-      const username = identifier.trim().toLowerCase();
+      const { data } = await api.post("/auth/login", {
+        identifier: identifier.trim(),
+        password,
+        role,
+        schoolCode: (schoolCode || "").trim(),
+      });
 
-      const demoUser = DEMO_USERS[username];
+      localStorage.setItem("lms_token", data.token);
+      localStorage.setItem("lms_user", JSON.stringify(data.user));
 
-      if (!demoUser) {
-        throw new Error("Invalid username.");
+      setUser(data.user);
+      storeSchool(data.school);
+
+      return data;
+    } catch (err) {
+      // No response at all means the request never reached Express — the usual
+      // cause is a stopped backend, which is not a bad password.
+      if (!err?.response) {
+        throw new Error(
+          "Cannot reach the school server. Check that the backend is running, then try again."
+        );
       }
 
-      if (demoUser.password !== password) {
-        throw new Error("Invalid password.");
-      }
-
-      if (demoUser.role !== role) {
-        throw new Error("Selected role does not match this account.");
-      }
-
-      const loggedUser = {
-        username: demoUser.username,
-        role: demoUser.role,
-      };
-
-      localStorage.setItem(
-        "lms_token",
-        `demo-token-${demoUser.username}`
+      throw new Error(
+        err?.response?.data?.message || "Unable to sign in."
       );
-
-      localStorage.setItem(
-        "lms_user",
-        JSON.stringify(loggedUser)
-      );
-
-      setUser(loggedUser);
-
-      return {
-        token: `demo-token-${demoUser.username}`,
-        user: loggedUser,
-      };
     } finally {
       setLoading(false);
     }
@@ -86,16 +79,65 @@ export function AuthProvider({ children }) {
   const logout = () => {
     localStorage.removeItem("lms_token");
     localStorage.removeItem("lms_user");
+    localStorage.removeItem("lms_school");
     setUser(null);
+    setSchool(null);
+    setReveal(0);
+  };
+
+  // Pages read identity from this context, but `user` is only ever written at
+  // login — so any change made through /profile or by an administrator stayed
+  // invisible until the next sign-in. This pulls the live account document.
+  const refreshUser = async () => {
+    if (!localStorage.getItem("lms_token")) return null;
+
+    try {
+      const { data } = await api.get("/auth/me");
+
+      if (data?.user) {
+        localStorage.setItem("lms_user", JSON.stringify(data.user));
+        setUser(data.user);
+      }
+
+      storeSchool(data?.school);
+
+      return data?.user || null;
+    } catch {
+      return null;
+    }
+  };
+
+  // Reconcile the cached account with the database on load, so an edit made
+  // from another device or by an administrator shows up without signing out.
+  useEffect(() => {
+    refreshUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Derived identity so pages never hardcode a student/teacher id. The backend
+  // login and /auth/me responses already carry these fields on the user doc,
+  // and add `child` for parents.
+  const derived = {
+    studentId: user?.studentId || null,
+    teacherId: user?.teacherId || null,
+    parentId: user?.parentId || null,
+    child: user?.child || null,
+    childStudentId: user?.child?.studentId || user?.childId || null,
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        school,
         login,
         logout,
         loading,
+        refreshUser,
+        reveal,
+        requestReveal,
+        clearReveal,
+        ...derived,
       }}
     >
       {children}

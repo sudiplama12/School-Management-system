@@ -1,53 +1,74 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Plus,
   Trash2,
-  Edit3,
   Clock,
   Shuffle,
   CheckCircle2,
   X,
 } from "lucide-react";
-
-const initialAssignments = [
-  {
-    id: 1,
-    title: "Mathematics Unit Test",
-    className: "Grade 10 - A",
-    type: "Mixed",
-    duration: 30,
-    randomize: true,
-    questions: [
-      {
-        id: 1,
-        type: "mcq",
-        question: "What is 2 + 2?",
-        options: ["3", "4", "5", "6"],
-        answer: "4",
-        marks: 1,
-      },
-      {
-        id: 2,
-        type: "long",
-        question: "Explain linear equations.",
-        options: [],
-        answer: "",
-        marks: 5,
-      },
-    ],
-    createdAt: new Date().toLocaleString(),
-  },
-];
+import api from "../../api/axios";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Assignments() {
-  const [assignments, setAssignments] = useState(initialAssignments);
+  const { user } = useAuth();
+
+  const [assignments, setAssignments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const [showForm, setShowForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const [title, setTitle] = useState("");
-  const [className, setClassName] = useState("Grade 10 - A");
+  const [subject, setSubject] = useState("");
+  const [className, setClassName] = useState(
+    (user?.assignedClasses || [])[0] || "Grade 10 - A"
+  );
+  const [dueDate, setDueDate] = useState("");
+  const [instructions, setInstructions] = useState("");
   const [duration, setDuration] = useState(30);
   const [randomize, setRandomize] = useState(false);
   const [questions, setQuestions] = useState([]);
+
+  const classOptions = user?.assignedClasses?.length
+    ? user.assignedClasses
+    : ["Grade 10 - A"];
+
+  const load = () => {
+    setLoading(true);
+    api
+      .get("/assignments")
+      .then(({ data }) => setAssignments(data))
+      .catch((err) =>
+        setError(err?.response?.data?.message || "Unable to load assignments.")
+      )
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    let active = true;
+
+    setLoading(true);
+    api
+      .get("/assignments")
+      .then(({ data }) => {
+        if (active) setAssignments(data);
+      })
+      .catch((err) => {
+        if (active)
+          setError(
+            err?.response?.data?.message || "Unable to load assignments."
+          );
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const addMCQ = () => {
     setQuestions((current) => [
@@ -79,9 +100,7 @@ export default function Assignments() {
 
   const updateQuestion = (id, field, value) => {
     setQuestions((current) =>
-      current.map((q) =>
-        q.id === id ? { ...q, [field]: value } : q
-      )
+      current.map((q) => (q.id === id ? { ...q, [field]: value } : q))
     );
   };
 
@@ -93,21 +112,16 @@ export default function Assignments() {
         const options = [...q.options];
         options[optionIndex] = value;
 
-        return {
-          ...q,
-          options,
-        };
+        return { ...q, options };
       })
     );
   };
 
   const removeQuestion = (id) => {
-    setQuestions((current) =>
-      current.filter((q) => q.id !== id)
-    );
+    setQuestions((current) => current.filter((q) => q.id !== id));
   };
 
-  const createAssignment = (e) => {
+  const createAssignment = async (e) => {
     e.preventDefault();
 
     if (!title.trim()) {
@@ -120,43 +134,61 @@ export default function Assignments() {
       return;
     }
 
-    const assignment = {
-      id: Date.now(),
-      title,
-      className,
-      type:
-        questions.some((q) => q.type === "mcq") &&
-        questions.some((q) => q.type === "long")
-          ? "Mixed"
-          : questions[0].type === "mcq"
-          ? "MCQ"
-          : "Long Answer",
-      duration: Number(duration),
-      randomize,
-      questions,
-      createdAt: new Date().toLocaleString(),
-    };
+    setSubmitting(true);
 
-    setAssignments((current) => [assignment, ...current]);
+    try {
+      await api.post("/assignments", {
+        title,
+        subject,
+        className,
+        instructions,
+        dueDate: dueDate || undefined,
+        duration: Number(duration),
+        randomize,
+        questions: questions.map((q) => ({
+          type: q.type,
+          question: q.question,
+          options: q.options,
+          answer: q.answer,
+          marks: Number(q.marks || 0),
+        })),
+      });
 
-    setTitle("");
-    setDuration(30);
-    setRandomize(false);
-    setQuestions([]);
-    setShowForm(false);
+      setTitle("");
+      setSubject("");
+      setInstructions("");
+      setDueDate("");
+      setDuration(30);
+      setRandomize(false);
+      setQuestions([]);
+      setShowForm(false);
+      load();
+    } catch (err) {
+      alert(err?.response?.data?.message || "Could not create assignment.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const deleteAssignment = (id) => {
+  const deleteAssignment = async (id) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this assignment?"
     );
 
     if (!confirmed) return;
 
-    setAssignments((current) =>
-      current.filter((assignment) => assignment.id !== id)
-    );
+    try {
+      await api.delete(`/assignments/${id}`);
+      setAssignments((current) =>
+        current.filter((assignment) => assignment.id !== id)
+      );
+    } catch (err) {
+      alert(err?.response?.data?.message || "Could not delete assignment.");
+    }
   };
+
+  const formatDate = (date) =>
+    date ? new Date(date).toLocaleString() : "—";
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -179,10 +211,16 @@ export default function Assignments() {
         </button>
       </div>
 
+      {error && (
+        <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+          {error}
+        </p>
+      )}
+
       {showForm && (
         <form
           onSubmit={createAssignment}
-          className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+          className="rounded-2xl border border-slate-200 bg-card p-6 shadow-sm"
         >
           <div className="mb-6 flex items-center justify-between">
             <div>
@@ -227,9 +265,38 @@ export default function Assignments() {
                 onChange={(e) => setClassName(e.target.value)}
                 className="w-full rounded-xl border border-slate-300 px-4 py-3"
               >
-                <option>Grade 10 - A</option>
-                <option>Grade 9 - A</option>
+                {classOptions.map((cls) => (
+                  <option key={cls} value={cls}>
+                    {cls}
+                  </option>
+                ))}
               </select>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Subject
+              </label>
+
+              <input
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="e.g. Mathematics"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Due Date
+              </label>
+
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              />
             </div>
 
             <div>
@@ -246,7 +313,21 @@ export default function Assignments() {
               />
             </div>
 
-            <label className="flex cursor-pointer items-center gap-3 md:col-span-2">
+            <div className="md:col-span-2">
+              <label className="mb-2 block text-sm font-medium">
+                Instructions
+              </label>
+
+              <textarea
+                value={instructions}
+                onChange={(e) => setInstructions(e.target.value)}
+                rows="2"
+                placeholder="Optional instructions for students…"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              />
+            </div>
+
+            <label className="flex cursor-pointer items-center gap-3">
               <input
                 type="checkbox"
                 checked={randomize}
@@ -265,7 +346,7 @@ export default function Assignments() {
             <button
               type="button"
               onClick={addMCQ}
-              className="rounded-xl border border-emerald-300 px-4 py-2 font-medium text-emerald-700 hover:bg-emerald-50"
+              className="rounded-xl border border-emerald-300 px-4 py-2 font-medium text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50"
             >
               + Add MCQ
             </button>
@@ -273,7 +354,7 @@ export default function Assignments() {
             <button
               type="button"
               onClick={addLongQuestion}
-              className="rounded-xl border border-blue-300 px-4 py-2 font-medium text-blue-700 hover:bg-blue-50"
+              className="rounded-xl border border-blue-300 px-4 py-2 font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-50"
             >
               + Add Long Question
             </button>
@@ -289,16 +370,14 @@ export default function Assignments() {
                   <h3 className="font-bold">
                     Question {index + 1}{" "}
                     <span className="ml-2 text-sm font-normal text-slate-500">
-                      {q.type === "mcq"
-                        ? "MCQ"
-                        : "Long Answer"}
+                      {q.type === "mcq" ? "MCQ" : "Long Answer"}
                     </span>
                   </h3>
 
                   <button
                     type="button"
                     onClick={() => removeQuestion(q.id)}
-                    className="rounded-lg p-2 text-red-600 hover:bg-red-50"
+                    className="rounded-lg p-2 text-red-600 dark:text-red-400 hover:bg-red-50"
                   >
                     <Trash2 size={18} />
                   </button>
@@ -306,15 +385,9 @@ export default function Assignments() {
 
                 <input
                   value={q.question}
-                  onChange={(e) =>
-                    updateQuestion(
-                      q.id,
-                      "question",
-                      e.target.value
-                    )
-                  }
+                  onChange={(e) => updateQuestion(q.id, "question", e.target.value)}
                   placeholder="Enter question..."
-                  className="mb-4 w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
+                  className="mb-4 w-full rounded-xl border border-slate-300 bg-card px-4 py-3"
                 />
 
                 {q.type === "mcq" && (
@@ -324,31 +397,19 @@ export default function Assignments() {
                         key={optionIndex}
                         value={option}
                         onChange={(e) =>
-                          updateOption(
-                            q.id,
-                            optionIndex,
-                            e.target.value
-                          )
+                          updateOption(q.id, optionIndex, e.target.value)
                         }
                         placeholder={`Option ${optionIndex + 1}`}
-                        className="rounded-xl border border-slate-300 bg-white px-4 py-3"
+                        className="rounded-xl border border-slate-300 bg-card px-4 py-3"
                       />
                     ))}
 
                     <select
                       value={q.answer}
-                      onChange={(e) =>
-                        updateQuestion(
-                          q.id,
-                          "answer",
-                          e.target.value
-                        )
-                      }
-                      className="rounded-xl border border-slate-300 bg-white px-4 py-3"
+                      onChange={(e) => updateQuestion(q.id, "answer", e.target.value)}
+                      className="rounded-xl border border-slate-300 bg-card px-4 py-3"
                     >
-                      <option value="">
-                        Select correct answer
-                      </option>
+                      <option value="">Select correct answer</option>
 
                       {q.options.map((option, index) => (
                         <option key={index} value={option}>
@@ -360,22 +421,16 @@ export default function Assignments() {
                 )}
 
                 <div className="mt-4">
-                  <label className="mb-2 block text-sm font-medium">
-                    Marks
-                  </label>
+                  <label className="mb-2 block text-sm font-medium">Marks</label>
 
                   <input
                     type="number"
                     min="1"
                     value={q.marks}
                     onChange={(e) =>
-                      updateQuestion(
-                        q.id,
-                        "marks",
-                        Number(e.target.value)
-                      )
+                      updateQuestion(q.id, "marks", Number(e.target.value))
                     }
-                    className="w-32 rounded-xl border border-slate-300 bg-white px-4 py-2"
+                    className="w-32 rounded-xl border border-slate-300 bg-card px-4 py-2"
                   />
                 </div>
               </div>
@@ -384,67 +439,82 @@ export default function Assignments() {
 
           <button
             type="submit"
-            className="mt-6 w-full rounded-xl bg-emerald-600 px-5 py-3 font-bold text-white hover:bg-emerald-700"
+            disabled={submitting}
+            className="mt-6 w-full rounded-xl bg-emerald-600 px-5 py-3 font-bold text-white hover:bg-emerald-700 disabled:opacity-60"
           >
-            Save Assignment
+            {submitting ? "Saving…" : "Save Assignment"}
           </button>
         </form>
       )}
 
-      <div className="grid gap-5 md:grid-cols-2">
-        {assignments.map((assignment) => (
-          <div
-            key={assignment.id}
-            className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-slate-900">
-                  {assignment.title}
-                </h2>
+      {loading ? (
+        <p className="text-sm text-slate-500">Loading assignments…</p>
+      ) : assignments.length === 0 ? (
+        <p className="text-sm text-slate-500">
+          You have not created any assignments yet.
+        </p>
+      ) : (
+        <div className="grid gap-5 md:grid-cols-2">
+          {assignments.map((assignment) => (
+            <div
+              key={assignment.id}
+              className="rounded-2xl border border-slate-200 bg-card p-6 shadow-sm"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">
+                    {assignment.title}
+                  </h2>
 
-                <p className="mt-1 text-sm text-slate-500">
-                  {assignment.className}
-                </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {assignment.className}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => deleteAssignment(assignment.id)}
+                  className="rounded-lg p-2 text-red-600 dark:text-red-400 hover:bg-red-50"
+                >
+                  <Trash2 size={19} />
+                </button>
               </div>
 
-              <button
-                onClick={() => deleteAssignment(assignment.id)}
-                className="rounded-lg p-2 text-red-600 hover:bg-red-50"
-              >
-                <Trash2 size={19} />
-              </button>
-            </div>
-
-            <div className="mt-5 flex flex-wrap gap-2">
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm text-emerald-700">
-                {assignment.type}
-              </span>
-
-              <span className="flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700">
-                <Clock size={15} />
-                {assignment.duration} min
-              </span>
-
-              {assignment.randomize && (
-                <span className="flex items-center gap-1 rounded-full bg-purple-100 px-3 py-1 text-sm text-purple-700">
-                  <Shuffle size={15} />
-                  Random
+              <div className="mt-5 flex flex-wrap gap-2">
+                <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm text-emerald-700 dark:text-emerald-300">
+                  {assignment.type}
                 </span>
-              )}
-            </div>
 
-            <p className="mt-4 text-sm text-slate-400">
-              Created: {assignment.createdAt}
-            </p>
+                <span className="flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700 dark:text-blue-300">
+                  <Clock size={15} />
+                  {assignment.duration} min
+                </span>
 
-            <div className="mt-5 flex items-center gap-2 text-sm text-slate-600">
-              <CheckCircle2 size={18} className="text-emerald-600" />
-              {assignment.questions.length} question(s)
+                {assignment.randomize && (
+                  <span className="flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-sm text-amber-700 dark:text-amber-300">
+                    <Shuffle size={15} />
+                    Random
+                  </span>
+                )}
+              </div>
+
+              <p className="mt-4 text-sm text-slate-400">
+                Created: {formatDate(assignment.createdAt)}
+              </p>
+
+              <div className="mt-5 flex items-center justify-between text-sm text-slate-600">
+                <span className="flex items-center gap-2">
+                  <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400" />
+                  {assignment.questions?.length || 0} question(s)
+                </span>
+
+                <span className="text-slate-500">
+                  {assignment.totalMarks} marks • {assignment.submissionCount} submitted
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -11,10 +11,19 @@ import {
   RefreshCw,
 } from "lucide-react";
 import api from "../../api/axios";
+import { useAuth } from "../../context/AuthContext";
+
+// Today's date in the backend's YYYY-MM-DD format, using the local timezone.
+const todayString = () => {
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+};
 
 export default function Attendance() {
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
-  const [selectedDate, setSelectedDate] = useState("2026-09-21");
+  const [selectedDate, setSelectedDate] = useState(todayString);
   const [attendance, setAttendance] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -28,6 +37,7 @@ export default function Attendance() {
       const response = await api.get("/attendance", {
         params: {
           date: selectedDate,
+          className: (user?.assignedClasses || [])[0],
         },
       });
 
@@ -142,7 +152,7 @@ export default function Attendance() {
 
     if (value === "present") {
       return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
           <CheckCircle size={14} />
           Present
         </span>
@@ -151,7 +161,7 @@ export default function Attendance() {
 
     if (value === "absent") {
       return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
+        <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 dark:text-red-300">
           <XCircle size={14} />
           Absent
         </span>
@@ -160,7 +170,7 @@ export default function Attendance() {
 
     if (value === "late") {
       return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
+        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
           <Clock size={14} />
           Late
         </span>
@@ -182,7 +192,7 @@ export default function Attendance() {
         {/* Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-emerald-100 p-3 text-emerald-600">
+            <div className="rounded-xl bg-emerald-100 p-3 text-emerald-600 dark:text-emerald-400">
               <CalendarCheck size={26} />
             </div>
 
@@ -217,33 +227,33 @@ export default function Attendance() {
             title="Total Students"
             value={statistics.total}
             icon={<User size={22} />}
-            iconClass="bg-blue-100 text-blue-600"
+            iconClass="bg-blue-100 text-blue-600 dark:text-blue-400"
           />
 
           <StatCard
             title="Present"
             value={statistics.present}
             icon={<CheckCircle size={22} />}
-            iconClass="bg-emerald-100 text-emerald-600"
+            iconClass="bg-emerald-100 text-emerald-600 dark:text-emerald-400"
           />
 
           <StatCard
             title="Absent"
             value={statistics.absent}
             icon={<XCircle size={22} />}
-            iconClass="bg-red-100 text-red-600"
+            iconClass="bg-red-100 text-red-600 dark:text-red-400"
           />
 
           <StatCard
             title="Late"
             value={statistics.late}
             icon={<Clock size={22} />}
-            iconClass="bg-amber-100 text-amber-600"
+            iconClass="bg-amber-100 text-amber-600 dark:text-amber-400"
           />
         </div>
 
         {/* Filters */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-card p-4 shadow-sm">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 
             {/* Date */}
@@ -305,13 +315,13 @@ export default function Attendance() {
 
         {/* Error */}
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:text-red-300">
             {error}
           </div>
         )}
 
         {/* Table */}
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-sm">
           <div className="border-b border-slate-200 px-5 py-4">
             <h2 className="font-bold text-slate-800">
               Attendance Records
@@ -418,7 +428,7 @@ export default function Attendance() {
 
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:text-emerald-400">
                               <User size={17} />
                             </div>
 
@@ -466,7 +476,7 @@ function StatCard({
   iconClass,
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-slate-500">

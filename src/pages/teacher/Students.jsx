@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Search,
   Users,
@@ -9,150 +9,41 @@ import {
   GraduationCap,
   Eye,
   Pencil,
-  Trash2,
   X,
   Filter,
   ChevronDown,
 } from "lucide-react";
+import api from "../../api/axios";
+import { useAuth } from "../../context/AuthContext";
 
-const initialStudents = [
-  {
-    id: 1,
-    studentId: "STU-001",
-    name: "Aarav Sharma",
-    gender: "Male",
-    className: "Grade 10",
-    section: "A",
-    email: "aarav@example.com",
-    phone: "9800000001",
-    location: "Birtamode",
-    address: "Birtamode, Jhapa",
-    parent: "Raj Sharma",
-    attendance: "94%",
-    status: "Active",
-  },
-  {
-    id: 2,
-    studentId: "STU-002",
-    name: "Anisha Rai",
-    gender: "Female",
-    className: "Grade 10",
-    section: "A",
-    email: "anisha@example.com",
-    phone: "9800000002",
-    location: "Damak",
-    address: "Damak, Jhapa",
-    parent: "Milan Rai",
-    attendance: "91%",
-    status: "Active",
-  },
-  {
-    id: 3,
-    studentId: "STU-003",
-    name: "Bibek Tamang",
-    gender: "Male",
-    className: "Grade 9",
-    section: "B",
-    email: "bibek@example.com",
-    phone: "9800000003",
-    location: "Mechinagar",
-    address: "Mechinagar, Jhapa",
-    parent: "Dawa Tamang",
-    attendance: "88%",
-    status: "Active",
-  },
-  {
-    id: 4,
-    studentId: "STU-004",
-    name: "Diya Gurung",
-    gender: "Female",
-    className: "Grade 8",
-    section: "A",
-    email: "diya@example.com",
-    phone: "9800000004",
-    location: "Bhadrapur",
-    address: "Bhadrapur, Jhapa",
-    parent: "Ramesh Gurung",
-    attendance: "96%",
-    status: "Active",
-  },
-  {
-    id: 5,
-    studentId: "STU-005",
-    name: "Kiran Limbu",
-    gender: "Male",
-    className: "Grade 9",
-    section: "A",
-    email: "kiran@example.com",
-    phone: "9800000005",
-    location: "Kakarvitta",
-    address: "Kakarvitta, Jhapa",
-    parent: "Prem Limbu",
-    attendance: "89%",
-    status: "Active",
-  },
-  {
-    id: 6,
-    studentId: "STU-006",
-    name: "Manisha Karki",
-    gender: "Female",
-    className: "Grade 10",
-    section: "B",
-    email: "manisha@example.com",
-    phone: "9800000006",
-    location: "Dhulabari",
-    address: "Dhulabari, Jhapa",
-    parent: "Suresh Karki",
-    attendance: "93%",
-    status: "Active",
-  },
-  {
-    id: 7,
-    studentId: "STU-007",
-    name: "Nischal Thapa",
-    gender: "Male",
-    className: "Grade 8",
-    section: "B",
-    email: "nischal@example.com",
-    phone: "9800000007",
-    location: "Chandragadhi",
-    address: "Chandragadhi, Jhapa",
-    parent: "Hari Thapa",
-    attendance: "86%",
-    status: "Active",
-  },
-  {
-    id: 8,
-    studentId: "STU-008",
-    name: "Pragya Adhikari",
-    gender: "Female",
-    className: "Grade 9",
-    section: "A",
-    email: "pragya@example.com",
-    phone: "9800000008",
-    location: "Birtamode",
-    address: "Birtamode, Jhapa",
-    parent: "Rabin Adhikari",
-    attendance: "95%",
-    status: "Active",
-  },
-];
+const titleCase = (value) =>
+  value ? String(value).charAt(0).toUpperCase() + String(value).slice(1) : "";
 
-const classOptions = [
-  "All Classes",
-  "Grade 8",
-  "Grade 9",
-  "Grade 10",
-];
-
-const genderOptions = [
-  "All Genders",
-  "Male",
-  "Female",
-];
+// Adapt the live GET /teacher/students row (lowercased gender, numeric
+// attendancePercent, guardianName parent) into the shape this page renders.
+const normalizeStudent = (student) => ({
+  ...student,
+  id: student.id || student._id || student.studentId,
+  studentId: student.studentId || student.id || "",
+  name: student.name || "",
+  gender: titleCase(student.gender),
+  className: student.className || "",
+  section: student.section || "",
+  email: student.email || "",
+  phone: student.phone || "",
+  location: student.location || student.address || "",
+  address: student.address || "",
+  parent: student.parent || student.guardianName || "",
+  attendance: `${student.attendancePercent ?? 0}%`,
+  status: titleCase(student.status),
+});
 
 export default function Students() {
-  const [students, setStudents] = useState(initialStudents);
+  const { user } = useAuth();
+
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [search, setSearch] = useState("");
   const [classFilter, setClassFilter] = useState("All Classes");
@@ -162,6 +53,29 @@ export default function Students() {
 
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [editingStudent, setEditingStudent] = useState(null);
+
+  const classOptions = ["All Classes", ...(user?.assignedClasses || [])];
+
+  const genderOptions = ["All Genders", "Male", "Female"];
+
+  const load = () => {
+    setLoading(true);
+    setError("");
+
+    api
+      .get("/teacher/students")
+      .then(({ data }) =>
+        setStudents((Array.isArray(data) ? data : []).map(normalizeStudent))
+      )
+      .catch((err) =>
+        setError(
+          err?.response?.data?.message || "Unable to load students."
+        )
+      )
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(load, []);
 
   const locations = [
     "All Locations",
@@ -224,36 +138,32 @@ export default function Students() {
     sortOrder,
   ]);
 
-  const handleDelete = (id) => {
-    const student = students.find((item) => item.id === id);
+  const handleUpdate = async (updatedStudent) => {
+    try {
+      // The PATCH accepts either the readable studentId or the Mongo _id and
+      // ignores any field outside the teacher-editable contact/class set.
+      await api.patch(
+        `/teacher/students/${updatedStudent.studentId || updatedStudent._id || updatedStudent.id}`,
+        {
+          name: updatedStudent.name,
+          email: updatedStudent.email,
+          phone: updatedStudent.phone,
+          address: updatedStudent.address,
+          location: updatedStudent.location,
+          gender: String(updatedStudent.gender || "").toLowerCase(),
+          className: updatedStudent.className,
+          section: updatedStudent.section,
+          guardianName: updatedStudent.parent,
+        }
+      );
 
-    if (!student) return;
-
-    const confirmed = window.confirm(
-      `Remove ${student.name} from the student list?`
-    );
-
-    if (!confirmed) return;
-
-    setStudents((current) =>
-      current.filter((item) => item.id !== id)
-    );
-
-    if (selectedStudent?.id === id) {
-      setSelectedStudent(null);
+      setEditingStudent(null);
+      load();
+    } catch (err) {
+      alert(
+        err?.response?.data?.message || "Could not update the student."
+      );
     }
-  };
-
-  const handleUpdate = (updatedStudent) => {
-    setStudents((current) =>
-      current.map((student) =>
-        student.id === updatedStudent.id
-          ? updatedStudent
-          : student
-      )
-    );
-
-    setEditingStudent(null);
   };
 
   const clearFilters = () => {
@@ -280,7 +190,7 @@ export default function Students() {
       <div>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-medium text-amber-600">
+            <p className="text-sm font-medium text-amber-600 dark:text-amber-400">
               Teacher Portal
             </p>
 
@@ -324,7 +234,7 @@ export default function Students() {
       </section>
 
       {/* Search */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-card p-4 shadow-sm">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
 
@@ -339,7 +249,7 @@ export default function Students() {
       </section>
 
       {/* Filters */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-card p-4 shadow-sm">
         <div className="mb-4 flex items-center gap-2">
           <Filter className="h-5 w-5 text-slate-600" />
 
@@ -388,14 +298,21 @@ export default function Students() {
         <button
           type="button"
           onClick={clearFilters}
-          className="mt-4 text-sm font-medium text-amber-600 hover:text-amber-700"
+          className="mt-4 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300"
         >
           Clear all filters
         </button>
       </section>
 
+      {/* Error */}
+      {error && (
+        <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+          {error}
+        </p>
+      )}
+
       {/* Results */}
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-sm">
         <div className="flex items-center justify-between border-b p-5">
           <div>
             <h2 className="font-bold text-slate-900">
@@ -408,7 +325,13 @@ export default function Students() {
           </div>
         </div>
 
-        {filteredStudents.length === 0 ? (
+        {loading ? (
+          <div className="p-12 text-center">
+            <Users className="mx-auto h-12 w-12 text-slate-300" />
+
+            <p className="mt-4 text-sm text-slate-500">Loading students…</p>
+          </div>
+        ) : filteredStudents.length === 0 ? (
           <div className="p-12 text-center">
             <Users className="mx-auto h-12 w-12 text-slate-300" />
 
@@ -460,7 +383,7 @@ export default function Students() {
                     {/* Student */}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-amber-100 font-bold text-amber-700">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-amber-100 font-bold text-amber-700 dark:text-amber-300">
                           {student.name.charAt(0)}
                         </div>
 
@@ -523,16 +446,6 @@ export default function Students() {
                         >
                           <Pencil className="h-4 w-4" />
                         </ActionButton>
-
-                        <ActionButton
-                          title="Delete Student"
-                          danger
-                          onClick={() =>
-                            handleDelete(student.id)
-                          }
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </ActionButton>
                       </div>
                     </td>
                   </tr>
@@ -571,7 +484,7 @@ export default function Students() {
 
 function StatCard({ title, value, icon: Icon }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-slate-500">
@@ -584,7 +497,7 @@ function StatCard({ title, value, icon: Icon }) {
         </div>
 
         <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50">
-          <Icon className="h-5 w-5 text-amber-600" />
+          <Icon className="h-5 w-5 text-amber-600 dark:text-amber-400" />
         </div>
       </div>
     </div>
@@ -609,7 +522,7 @@ function FilterSelect({
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+          className="w-full appearance-none rounded-xl border border-slate-200 bg-card px-4 py-3 pr-10 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
         >
           {options.map((option) => {
             const item =
@@ -652,7 +565,7 @@ function ActionButton({
       onClick={onClick}
       className={`rounded-lg p-2 transition ${
         danger
-          ? "text-slate-400 hover:bg-red-50 hover:text-red-600"
+          ? "text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:text-red-400"
           : "text-slate-400 hover:bg-slate-100 hover:text-slate-900"
       }`}
     >
@@ -672,7 +585,7 @@ function StudentDetails({
     <Modal onClose={onClose}>
       <div className="flex items-start justify-between border-b p-6">
         <div>
-          <p className="text-sm font-medium text-amber-600">
+          <p className="text-sm font-medium text-amber-600 dark:text-amber-400">
             Student Details
           </p>
 
@@ -697,7 +610,7 @@ function StudentDetails({
       <div className="space-y-6 p-6">
         {/* Profile */}
         <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-xl font-bold text-amber-700">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-xl font-bold text-amber-700 dark:text-amber-300">
             {student.name.charAt(0)}
           </div>
 
@@ -711,7 +624,7 @@ function StudentDetails({
               {student.section}
             </p>
 
-            <span className="mt-2 inline-block rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700">
+            <span className="mt-2 inline-block rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700 dark:text-green-300">
               {student.status}
             </span>
           </div>
@@ -759,7 +672,7 @@ function StudentDetails({
         {/* Address */}
         <div className="rounded-xl bg-slate-50 p-4">
           <div className="flex gap-3">
-            <MapPin className="mt-0.5 h-5 w-5 text-amber-600" />
+            <MapPin className="mt-0.5 h-5 w-5 text-amber-600 dark:text-amber-400" />
 
             <div>
               <p className="text-xs font-semibold uppercase text-slate-400">
@@ -807,7 +720,7 @@ function InfoItem({
   return (
     <div className="rounded-xl border border-slate-200 p-4">
       <div className="flex items-start gap-3">
-        <Icon className="mt-0.5 h-5 w-5 text-amber-600" />
+        <Icon className="mt-0.5 h-5 w-5 text-amber-600 dark:text-amber-400" />
 
         <div className="min-w-0">
           <p className="text-xs font-medium text-slate-400">
@@ -831,6 +744,7 @@ function EditStudentModal({
   onSave,
 }) {
   const [form, setForm] = useState(student);
+  const [saving, setSaving] = useState(false);
 
   const handleChange = (field, value) => {
     setForm((current) => ({
@@ -839,16 +753,21 @@ function EditStudentModal({
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(form);
+    setSaving(true);
+    try {
+      await onSave(form);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <Modal onClose={onClose}>
       <div className="flex items-center justify-between border-b p-6">
         <div>
-          <p className="text-sm font-medium text-amber-600">
+          <p className="text-sm font-medium text-amber-600 dark:text-amber-400">
             Student Management
           </p>
 
@@ -963,9 +882,10 @@ function EditStudentModal({
 
           <button
             type="submit"
-            className="rounded-xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
+            disabled={saving}
+            className="rounded-xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Save Changes
+            {saving ? "Saving…" : "Save Changes"}
           </button>
         </div>
       </form>
@@ -1008,7 +928,7 @@ function Modal({ children, onClose }) {
         className="absolute inset-0 cursor-default"
       />
 
-      <div className="relative z-10 max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
+      <div className="relative z-10 max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-card shadow-2xl">
         {children}
       </div>
     </div>

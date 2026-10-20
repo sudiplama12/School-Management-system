@@ -40,10 +40,10 @@ function Setting({
   description,
 }) {
   return (
-    <div className="flex items-center gap-4 rounded-2xl border bg-white p-5 shadow-sm">
+    <div className="flex items-center gap-4 rounded-2xl border bg-card p-5 shadow-sm">
 
       <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50">
-        <Icon className="h-5 w-5 text-emerald-600" />
+        <Icon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
       </div>
 
       <div>

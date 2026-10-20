@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="School crest">
+  <rect width="64" height="64" rx="16" fill="#022c22"/>
+  <path d="M8 46 L26 16 L36 32 L42 22 L56 46 Z" fill="#34d399"/>
+  <path d="M22 22 L26 16 L30 22 Z" fill="#ecfdf5"/>
+  <rect x="8" y="48" width="48" height="5" rx="2.5" fill="#fbbf24"/>
+</svg>

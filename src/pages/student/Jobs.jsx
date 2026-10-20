@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   Search,
@@ -14,109 +14,89 @@ import {
   Building2,
   UserCircle,
 } from "lucide-react";
+import api from "../../api/axios";
 
 /* =========================
-   MOCK VACANCIES
+   DATE HELPERS
 ========================= */
 
-const initialJobs = [
-  {
-    id: 1,
-    title: "Frontend Developer Intern",
-    company: "Tech Solutions Nepal",
-    location: "Kathmandu",
-    type: "Internship",
-    salary: "NPR 15,000/month",
-    posted: "2 days ago",
-    deadline: "September 25, 2026",
-    openings: 2,
-    postedBy: "Admin",
-    postedByName: "School Admin",
-    description:
-      "We are looking for a motivated student interested in frontend development. The selected student will work on real-world web projects with the development team.",
-    requirements: [
-      "Basic knowledge of HTML, CSS and JavaScript",
-      "Understanding of React.js",
-      "Good communication skills",
-    ],
-    skills: ["React", "JavaScript", "HTML", "CSS"],
-    applied: false,
-  },
+const formatDate = (value) => {
+  if (!value) return "";
 
-  {
-    id: 2,
-    title: "UI/UX Design Intern",
-    company: "Creative Labs",
-    location: "Remote",
-    type: "Part-time",
-    salary: "NPR 18,000/month",
-    posted: "3 days ago",
-    deadline: "September 28, 2026",
-    openings: 1,
-    postedBy: "Teacher",
-    postedByName: "Mr. Sharma",
-    description:
-      "Creative Labs is looking for a UI/UX design intern to help create modern and user-friendly interfaces for web and mobile applications.",
-    requirements: [
-      "Basic knowledge of UI/UX principles",
-      "Figma knowledge preferred",
-      "Creative thinking",
-    ],
-    skills: ["Figma", "UI/UX", "Prototyping"],
-    applied: false,
-  },
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
 
-  {
-    id: 3,
-    title: "Junior React Developer",
-    company: "Digital Works",
-    location: "Lalitpur",
-    type: "Full-time",
-    salary: "NPR 35,000/month",
-    posted: "5 days ago",
-    deadline: "October 5, 2026",
-    openings: 3,
-    postedBy: "Admin",
-    postedByName: "School Admin",
-    description:
-      "Digital Works is hiring junior React developers to join its frontend development team and work on modern web applications.",
-    requirements: [
-      "Knowledge of React.js",
-      "JavaScript ES6+",
-      "Understanding of REST APIs",
-    ],
-    skills: ["React", "JavaScript", "REST API"],
-    applied: false,
-  },
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
 
-  {
-    id: 4,
-    title: "Backend Developer Intern",
-    company: "Cloud Nepal",
-    location: "Kathmandu",
-    type: "Internship",
-    salary: "NPR 20,000/month",
-    posted: "1 week ago",
-    deadline: "September 30, 2026",
-    openings: 2,
-    postedBy: "Teacher",
-    postedByName: "Mr. Rai",
-    description:
-      "Cloud Nepal is offering an internship opportunity for students interested in backend development using Node.js and MongoDB.",
-    requirements: [
-      "Basic Node.js knowledge",
-      "Basic MongoDB knowledge",
-      "Understanding of APIs",
-    ],
-    skills: ["Node.js", "Express", "MongoDB", "API"],
-    applied: false,
-  },
-];
+const formatPosted = (value) => {
+  if (!value) return "";
+
+  const then = new Date(value).getTime();
+  if (Number.isNaN(then)) return "";
+
+  const days = Math.floor((Date.now() - then) / 86400000);
+
+  if (days <= 0) return "today";
+  if (days === 1) return "1 day ago";
+  if (days < 7) return `${days} days ago`;
+
+  const weeks = Math.floor(days / 7);
+  if (weeks === 1) return "1 week ago";
+  if (weeks < 5) return `${weeks} weeks ago`;
+
+  const months = Math.floor(days / 30);
+  return months <= 1 ? "1 month ago" : `${months} months ago`;
+};
 
 export default function Jobs() {
-  const [jobs, setJobs] = useState(initialJobs);
+  const [jobs, setJobs] = useState([]);
   const [search, setSearch] = useState("");
   const [type, setType] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [applyingId, setApplyingId] = useState(null);
+
+  /* =========================
+     LOAD VACANCIES
+  ========================= */
+
+  useEffect(() => {
+    let active = true;
+
+    setLoading(true);
+
+    api
+      .get("/jobs")
+      .then(({ data }) => {
+        if (!active) return;
+
+        setJobs(
+          (data || []).map((job) => ({
+            ...job,
+            deadline: formatDate(job.deadline),
+            posted: formatPosted(job.createdAt),
+          }))
+        );
+      })
+      .catch((err) => {
+        if (active)
+          setError(
+            err?.response?.data?.message || "Unable to load vacancies."
+          );
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   /* =========================
      FILTER JOBS
@@ -130,7 +110,7 @@ export default function Jobs() {
       job.title.toLowerCase().includes(query) ||
       job.company.toLowerCase().includes(query) ||
       job.location.toLowerCase().includes(query) ||
-      job.skills.some((skill) =>
+      (job.skills || []).some((skill) =>
         skill.toLowerCase().includes(query)
       );
 
@@ -144,17 +124,36 @@ export default function Jobs() {
      APPLY FOR VACANCY
   ========================= */
 
-  const handleApply = (jobId) => {
+  const markApplied = (jobId) =>
     setJobs((currentJobs) =>
       currentJobs.map((job) =>
-        job.id === jobId
-          ? {
-              ...job,
-              applied: true,
-            }
-          : job
+        job.id === jobId ? { ...job, applied: true } : job
       )
     );
+
+  const handleApply = async (jobId) => {
+    setApplyingId(jobId);
+    setError("");
+
+    try {
+      await api.post(`/jobs/${jobId}/apply`);
+      markApplied(jobId);
+    } catch (err) {
+      const status = err?.response?.status;
+
+      // Already applied is the desired end state, so reflect it as applied.
+      if (status === 409) {
+        markApplied(jobId);
+      } else if (status === 400) {
+        setError(err?.response?.data?.message || "This vacancy is closed.");
+      } else {
+        setError(
+          err?.response?.data?.message || "Unable to apply right now."
+        );
+      }
+    } finally {
+      setApplyingId(null);
+    }
   };
 
   return (
@@ -163,7 +162,7 @@ export default function Jobs() {
       {/* ================= HEADER ================= */}
 
       <div>
-        <p className="text-xs font-semibold uppercase tracking-widest text-amber-600">
+        <p className="text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">
           Career Center
         </p>
 
@@ -179,7 +178,7 @@ export default function Jobs() {
 
       {/* ================= SEARCH ================= */}
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-4">
+      <div className="rounded-2xl border border-slate-200 bg-card p-4">
 
         <div className="flex flex-col gap-3 md:flex-row">
 
@@ -193,7 +192,7 @@ export default function Jobs() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search vacancies, companies or skills..."
-              className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm outline-none transition focus:border-amber-500 focus:bg-white"
+              className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm outline-none transition focus:border-amber-500 focus:bg-card"
             />
 
           </div>
@@ -221,6 +220,14 @@ export default function Jobs() {
 
       </div>
 
+      {/* ================= ERROR ================= */}
+
+      {error && (
+        <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+          {error}
+        </p>
+      )}
+
       {/* ================= RESULT COUNT ================= */}
 
       <div className="flex items-center justify-between">
@@ -240,7 +247,11 @@ export default function Jobs() {
 
       {/* ================= VACANCY CARDS ================= */}
 
-      {filtered.length > 0 ? (
+      {loading ? (
+
+        <p className="text-sm text-slate-500">Loading vacancies…</p>
+
+      ) : filtered.length > 0 ? (
 
         <div className="grid gap-5 lg:grid-cols-2">
 
@@ -250,6 +261,7 @@ export default function Jobs() {
               key={job.id}
               job={job}
               onApply={handleApply}
+              applying={applyingId === job.id}
             />
 
           ))}
@@ -258,7 +270,7 @@ export default function Jobs() {
 
       ) : (
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center">
+        <div className="rounded-2xl border border-slate-200 bg-card p-12 text-center">
 
           <Briefcase className="mx-auto h-10 w-10 text-slate-300" />
 
@@ -282,9 +294,9 @@ export default function Jobs() {
    VACANCY CARD
 ========================= */
 
-function VacancyCard({ job, onApply }) {
+function VacancyCard({ job, onApply, applying }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:border-amber-300 hover:shadow-lg">
+    <div className="rounded-2xl border border-slate-200 bg-card p-6 transition hover:-translate-y-1 hover:border-amber-300 hover:shadow-lg">
 
       {/* Top */}
 
@@ -294,7 +306,7 @@ function VacancyCard({ job, onApply }) {
           <Briefcase className="h-5 w-5 text-amber-400" />
         </div>
 
-        <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+        <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
           {job.type}
         </span>
 
@@ -357,13 +369,13 @@ function VacancyCard({ job, onApply }) {
         <InfoItem
           icon={Clock}
           label="Salary"
-          value={job.salary}
+          value={job.salary || "Not specified"}
         />
 
         <InfoItem
           icon={CalendarDays}
           label="Deadline"
-          value={job.deadline}
+          value={job.deadline || "Not specified"}
         />
 
       </div>
@@ -388,7 +400,7 @@ function VacancyCard({ job, onApply }) {
 
         <div className="flex items-center gap-2">
 
-          <GraduationCap className="h-4 w-4 text-amber-600" />
+          <GraduationCap className="h-4 w-4 text-amber-600 dark:text-amber-400" />
 
           <p className="text-xs font-semibold text-slate-700">
             Requirements
@@ -398,7 +410,7 @@ function VacancyCard({ job, onApply }) {
 
         <ul className="mt-2 space-y-1">
 
-          {job.requirements.map((requirement, index) => (
+          {(job.requirements || []).map((requirement, index) => (
 
             <li
               key={index}
@@ -420,7 +432,7 @@ function VacancyCard({ job, onApply }) {
 
       <div className="mt-4 flex flex-wrap gap-2">
 
-        {job.skills.map((skill) => (
+        {(job.skills || []).map((skill) => (
 
           <span
             key={skill}
@@ -446,7 +458,7 @@ function VacancyCard({ job, onApply }) {
           <button
             type="button"
             disabled
-            className="flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-2.5 text-xs font-semibold text-emerald-600"
+            className="flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-2.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400"
           >
 
             <CheckCircle2 className="h-4 w-4" />
@@ -459,13 +471,14 @@ function VacancyCard({ job, onApply }) {
 
           <button
             type="button"
+            disabled={applying}
             onClick={() => onApply(job.id)}
-            className="flex items-center gap-2 rounded-xl bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800"
+            className="flex items-center gap-2 rounded-xl bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60"
           >
 
             <Send className="h-4 w-4" />
 
-            Apply Now
+            {applying ? "Applying…" : "Apply Now"}
 
           </button>
 
@@ -483,7 +496,7 @@ function VacancyCard({ job, onApply }) {
 
 function InfoItem({ icon: Icon, label, value }) {
   return (
-    <div className="rounded-xl border border-slate-100 bg-white p-3">
+    <div className="rounded-xl border border-slate-100 bg-card p-3">
 
       <div className="flex items-center gap-1.5 text-slate-400">
 

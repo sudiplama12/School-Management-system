@@ -1,3 +1,625 @@
 @import "tailwindcss";
-@import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
+
+/* ---------------------------------------------------------------------------
+   Theme system: light and dark
+
+   Tailwind v4 builds every colour utility on top of a CSS variable, so
+   `bg-slate-50` compiles to `background-color: var(--color-slate-50)`. That
+   lets the whole app change theme from one place: `.dark` re-declares the
+   variables and the ~2,900 existing utility classes follow.
+
+   Two rules keep that safe:
+
+   1. Only the *light* end of each ramp is remapped — the neutral surfaces,
+      borders and muted text, plus the 50/100/200 accent tints used by chips
+      and alerts. The dark end of slate and emerald (800/900/950) is left
+      alone because it is genuinely used as a dark surface.
+
+   2. Chrome that is dark in *both* themes — the sidebar, the reveal curtain,
+      the sign-in brand panel and the dashboard hero cards — is wrapped in
+      `.qd-ink`, which restores the original palette for its subtree. Without
+      it, `text-emerald-100` on the sidebar would flip to a dark tint.
+
+   `bg-card` is the one new token: card and header surfaces used `bg-white`,
+   which cannot be remapped because `text-white` must stay white.
+--------------------------------------------------------------------------- */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-card: #ffffff;
+}
+
+:root {
+  color-scheme: light;
+
+  --chart-track: #eef2f7;
+  --chart-ink: #0f172a;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --color-card: #101a24;
+
+  --chart-track: #1b2735;
+  --chart-ink: #f1f6fb;
+
+  /* Neutral ramp: light steps become surfaces, dark steps become text. */
+  --color-slate-50: #070c13;
+  --color-slate-100: #0e1720;
+  --color-slate-200: #1d2937;
+  --color-slate-300: #2c3c4f;
+  --color-slate-400: #7c91a6;
+  --color-slate-500: #9cb0c4;
+  --color-slate-600: #bccddd;
+  --color-slate-700: #dae5ef;
+  --color-slate-800: #eaf1f8;
+  --color-slate-900: #f6fafc;
+
+  /* Accent tints: solid pastel chips read as glare on a dark surface, so
+     they become the hue at low alpha and blend with whatever is behind. */
+  --color-emerald-50: rgb(16 185 129 / 0.1);
+  --color-emerald-100: rgb(16 185 129 / 0.17);
+  --color-emerald-200: rgb(16 185 129 / 0.3);
+  --color-red-50: rgb(248 113 113 / 0.11);
+  --color-red-100: rgb(248 113 113 / 0.18);
+  --color-red-200: rgb(248 113 113 / 0.32);
+  --color-amber-50: rgb(251 191 36 / 0.11);
+  --color-amber-100: rgb(251 191 36 / 0.18);
+  --color-amber-200: rgb(251 191 36 / 0.32);
+  --color-blue-50: rgb(96 165 250 / 0.11);
+  --color-blue-100: rgb(96 165 250 / 0.18);
+  --color-blue-200: rgb(96 165 250 / 0.32);
+  --color-teal-50: rgb(45 212 191 / 0.11);
+  --color-teal-100: rgb(45 212 191 / 0.18);
+  --color-green-50: rgb(74 222 128 / 0.11);
+  --color-green-200: rgb(74 222 128 / 0.32);
+  --color-sky-50: rgb(56 189 248 / 0.11);
+  --color-sky-100: rgb(56 189 248 / 0.18);
+  --color-rose-50: rgb(251 113 133 / 0.11);
+  --color-rose-200: rgb(251 113 133 / 0.32);
+}
+
+/* slate-800 is remapped above because it is mostly body text, but a few dark
+   buttons and icon tiles use it as a surface. Pin those back to the light-mode
+   value so they do not turn white. */
+.dark .bg-slate-800,
+.dark .hover\:bg-slate-800:hover {
+  background-color: #1e293b;
+}
+
+/* Restore the untouched palette inside always-dark chrome. */
+.dark .qd-ink {
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
+  --color-card: #ffffff;
+
+  --color-emerald-50: #ecfdf5;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-200: #a7f3d0;
+  --color-red-50: #fef2f2;
+  --color-red-100: #fee2e2;
+  --color-red-200: #fecaca;
+  --color-amber-50: #fffbeb;
+  --color-amber-100: #fef3c7;
+  --color-amber-200: #fde68a;
+  --color-blue-50: #eff6ff;
+  --color-blue-100: #dbeafe;
+  --color-blue-200: #bfdbfe;
+  --color-teal-50: #f0fdfa;
+  --color-teal-100: #ccfbf1;
+  --color-green-50: #f0fdf4;
+  --color-green-200: #bbf7d0;
+  --color-sky-50: #f0f9ff;
+  --color-sky-100: #e0f2fe;
+  --color-rose-50: #fff1f2;
+  --color-rose-200: #fecdd3;
+}
+
+/* ---------------------------------------------------------------------------
+   Shared motion layer for the sign-in page and every role dashboard.
+
+   The colour system is emerald (school crest) with amber highlights on slate,
+   and these classes are the one place the animation timings live so all four
+   portals move the same way. Apply with `qd-fade-up qd-d-2` on a card, or put
+   `qd-stagger` on a grid/list to cascade its children.
+--------------------------------------------------------------------------- */
+
+@keyframes qd-fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes qd-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes qd-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes qd-slide-right {
+  from {
+    opacity: 0;
+    transform: translate3d(-18px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes qd-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Slow bob for the crest mark and the floating login shapes. */
+@keyframes qd-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}
+
+@keyframes qd-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-38px, 26px, 0) scale(1.12);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* Sweeps across skeletons and the primary button while a request is running. */
+@keyframes qd-shimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+@keyframes qd-gradient-pan {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes qd-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-7px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes qd-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgb(245 158 11 / 0.55);
+  }
+  100% {
+    box-shadow: 0 0 0 12px rgb(245 158 11 / 0);
+  }
+}
+
+.qd-fade-up {
+  animation: qd-fade-up 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.qd-fade-in {
+  animation: qd-fade-in 0.5s ease-out both;
+}
+
+.qd-scale-in {
+  animation: qd-scale-in 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.qd-slide-right {
+  animation: qd-slide-right 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.qd-pop {
+  animation: qd-pop 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.qd-float {
+  animation: qd-float 6s ease-in-out infinite;
+}
+
+.qd-drift {
+  animation: qd-drift 22s ease-in-out infinite;
+}
+
+.qd-drift-slow {
+  animation: qd-drift 30s ease-in-out infinite reverse;
+}
+
+.qd-shake {
+  animation: qd-shake 0.45s ease-in-out both;
+}
+
+.qd-ring {
+  animation: qd-ring 1.8s ease-out infinite;
+}
+
+.qd-d-1 {
+  animation-delay: 70ms;
+}
+.qd-d-2 {
+  animation-delay: 140ms;
+}
+.qd-d-3 {
+  animation-delay: 210ms;
+}
+.qd-d-4 {
+  animation-delay: 280ms;
+}
+.qd-d-5 {
+  animation-delay: 350ms;
+}
+.qd-d-6 {
+  animation-delay: 420ms;
+}
+.qd-d-7 {
+  animation-delay: 490ms;
+}
+.qd-d-8 {
+  animation-delay: 560ms;
+}
+
+/* Cascade the children of a grid, list or nav without counting them out. */
+.qd-stagger > * {
+  animation: qd-fade-up 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.qd-stagger > *:nth-child(1) {
+  animation-delay: 40ms;
+}
+.qd-stagger > *:nth-child(2) {
+  animation-delay: 100ms;
+}
+.qd-stagger > *:nth-child(3) {
+  animation-delay: 160ms;
+}
+.qd-stagger > *:nth-child(4) {
+  animation-delay: 220ms;
+}
+.qd-stagger > *:nth-child(5) {
+  animation-delay: 280ms;
+}
+.qd-stagger > *:nth-child(6) {
+  animation-delay: 340ms;
+}
+.qd-stagger > *:nth-child(7) {
+  animation-delay: 400ms;
+}
+.qd-stagger > *:nth-child(8) {
+  animation-delay: 460ms;
+}
+.qd-stagger > *:nth-child(n + 9) {
+  animation-delay: 520ms;
+}
+
+/* Animated sheen for loading placeholders: pair with overflow-hidden. */
+.qd-skeleton {
+  position: relative;
+  overflow: hidden;
+}
+
+.qd-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 0.65),
+    transparent
+  );
+  animation: qd-shimmer 1.6s ease-in-out infinite;
+}
+
+/* Moving emerald gradient used by the primary sign-in button. */
+.qd-gradient {
+  background-image: linear-gradient(
+    110deg,
+    #047857,
+    #059669,
+    #0d9488,
+    #059669,
+    #047857
+  );
+  background-size: 200% 100%;
+  animation: qd-gradient-pan 7s linear infinite;
+}
+
+/* ---------------------------------------------------------------------------
+   Post-login reveal
+
+   The school's name is withheld until a sign-in succeeds, then it is played
+   once on <SchoolReveal /> before the portal appears. Timings here are paired
+   with the constants in SchoolReveal.jsx — change both together.
+--------------------------------------------------------------------------- */
+
+@keyframes qd-word-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.85em, 0) rotate(-6deg);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+@keyframes qd-curtain-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.14);
+    filter: blur(10px);
+  }
+}
+
+/* Expanding halo rings behind the crest. */
+@keyframes qd-halo {
+  from {
+    opacity: 0.5;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+}
+
+@keyframes qd-spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Diagonal light sweep across a card or badge. */
+@keyframes qd-shine {
+  0% {
+    transform: translateX(-130%) skewX(-18deg);
+  }
+  60%,
+  100% {
+    transform: translateX(240%) skewX(-18deg);
+  }
+}
+
+@keyframes qd-track {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes qd-line-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.qd-word {
+  display: inline-block;
+  animation: qd-word-rise 0.75s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.qd-curtain-out {
+  animation: qd-curtain-out 0.55s cubic-bezier(0.55, 0, 0.85, 0.35) both;
+}
+
+.qd-halo {
+  animation: qd-halo 2.8s ease-out infinite;
+}
+
+.qd-spin-slow {
+  animation: qd-spin-slow 22s linear infinite;
+}
+
+.qd-line {
+  transform-origin: center;
+  animation: qd-line-grow 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+/* Progress track inside the reveal badge. */
+.qd-track {
+  transform-origin: left center;
+  animation: qd-track 2.2s linear both;
+}
+
+/* Pair with overflow-hidden; the sheen needs a rounded parent. */
+.qd-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.qd-shine::after {
+  content: "";
+  position: absolute;
+  inset: -20% auto -20% 0;
+  width: 35%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 0.28),
+    transparent
+  );
+  animation: qd-shine 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Sidebar nav cascade: children slide in from the crest side. */
+.qd-stagger-side > * {
+  animation: qd-slide-right 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.qd-stagger-side > *:nth-child(1) {
+  animation-delay: 60ms;
+}
+.qd-stagger-side > *:nth-child(2) {
+  animation-delay: 110ms;
+}
+.qd-stagger-side > *:nth-child(3) {
+  animation-delay: 160ms;
+}
+.qd-stagger-side > *:nth-child(4) {
+  animation-delay: 210ms;
+}
+.qd-stagger-side > *:nth-child(5) {
+  animation-delay: 260ms;
+}
+.qd-stagger-side > *:nth-child(6) {
+  animation-delay: 310ms;
+}
+.qd-stagger-side > *:nth-child(7) {
+  animation-delay: 360ms;
+}
+.qd-stagger-side > *:nth-child(8) {
+  animation-delay: 410ms;
+}
+.qd-stagger-side > *:nth-child(n + 9) {
+  animation-delay: 460ms;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Slim emerald scrollbar inside the dark sidebars. */
+.qd-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(6 78 59) transparent;
+}
+
+.qd-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.qd-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(6 78 59);
+  border-radius: 9999px;
+}
+
+/* The white sheen would flash over a dark skeleton. */
+.dark .qd-skeleton::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 0.08),
+    transparent
+  );
+}
+
+/* Leaflet has no theme switch, so dim and shift the light raster tiles. */
+.dark .leaflet-tile {
+  filter: brightness(0.72) invert(1) contrast(0.9) hue-rotate(190deg)
+    saturate(0.5);
+}
+
+.dark .leaflet-container {
+  background: #0e1720;
+}
+
+.dark .leaflet-bar a,
+.dark .leaflet-control-attribution {
+  background: #101a24;
+  color: #9cb0c4;
+  border-color: #1d2937;
+}
+
+.dark .leaflet-control-attribution a {
+  color: #34d399;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+}

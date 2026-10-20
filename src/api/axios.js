@@ -7,7 +7,6 @@ const api = axios.create({
   },
 });
 
-// Add JWT token to every request
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("lms_token");
@@ -18,7 +17,20 @@ api.interceptors.request.use(
 
     return config;
   },
+  (error) => Promise.reject(error)
+);
+
+api.interceptors.response.use(
+  (response) => response,
   (error) => {
+    const onLogin = window.location.pathname === "/login";
+
+    if (error.response?.status === 401 && !onLogin) {
+      localStorage.removeItem("lms_token");
+      localStorage.removeItem("lms_user");
+      window.location.href = "/login";
+    }
+
     return Promise.reject(error);
   }
 );

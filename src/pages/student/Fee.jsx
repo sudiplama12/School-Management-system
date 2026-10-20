@@ -12,51 +12,15 @@ import {
 } from "lucide-react";
 import { jsPDF } from "jspdf";
 import api from "../../api/axios";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Fee() {
+  const { school } = useAuth();
+
   const [fees, setFees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
-
-  // =====================================================
-  // DEMO FEE DATA
-  // =====================================================
-
-  const DEMO_FEES = [
-    {
-      id: 1,
-      title: "Semester Fee",
-      description: "6th Semester Tuition Fee",
-      amount: 45000,
-      paidAmount: 45000,
-      dueDate: "2026-09-30",
-      status: "Paid",
-      paymentDate: "2026-09-05",
-      invoice: "INV-2026-001",
-    },
-    {
-      id: 2,
-      title: "Library Fee",
-      description: "Library and learning resources",
-      amount: 2000,
-      paidAmount: 2000,
-      dueDate: "2026-09-30",
-      status: "Paid",
-      paymentDate: "2026-09-05",
-      invoice: "INV-2026-002",
-    },
-    {
-      id: 3,
-      title: "Examination Fee",
-      description: "Semester examination fee",
-      amount: 1500,
-      paidAmount: 0,
-      dueDate: "2026-10-15",
-      status: "Pending",
-      paymentDate: null,
-      invoice: "INV-2026-003",
-    },
-  ];
+  const [error, setError] = useState("");
 
   // =====================================================
   // LOAD FEES
@@ -69,21 +33,18 @@ export default function Fee() {
   const loadFees = async () => {
     try {
       setLoading(true);
+      setError("");
 
-      /*
-        When backend is ready:
+      const response = await api.get("/fees/my-fees");
 
-        const response = await api.get("/fees/my-fees");
-        setFees(response.data);
-      */
+      setFees(Array.isArray(response.data) ? response.data : []);
+    } catch (err) {
+      console.error("Failed to load fees:", err);
 
-      await new Promise((resolve) =>
-        setTimeout(resolve, 500)
+      setError(
+        err?.response?.data?.message ||
+          "Unable to load your fee records."
       );
-
-      setFees(DEMO_FEES);
-    } catch (error) {
-      console.error("Failed to load fees:", error);
     } finally {
       setLoading(false);
     }
@@ -141,6 +102,15 @@ export default function Fee() {
     );
   };
 
+  // The API stores statuses in lowercase ("paid"); the page shows labels.
+  const statusLabel = (fee) => {
+    const value = fee.status || "pending";
+
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  };
+
+  const isPaid = (fee) => String(fee.status || "").toLowerCase() === "paid";
+
   // =====================================================
   // DOWNLOAD PDF STATEMENT
   // =====================================================
@@ -164,12 +134,12 @@ export default function Fee() {
 
       doc.setFontSize(20);
       doc.setFont("helvetica", "bold");
-      doc.text("CHAUTARI", 20, 20);
+      doc.text(school?.shortName || "School", 20, 20);
 
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       doc.text(
-        "Smart School Management System",
+        school?.name || "Fee statement",
         20,
         27
       );
@@ -334,7 +304,7 @@ export default function Fee() {
         );
 
         doc.text(
-          fee.status || "Pending",
+          statusLabel(fee),
           165,
           y
         );
@@ -355,14 +325,14 @@ export default function Fee() {
 
         doc.setFontSize(9);
 
-        if (fee.paymentDate) {
+        if (fee.paidAt) {
           y += 5;
 
           doc.setFontSize(8);
 
           doc.text(
             `Payment Date: ${formatDate(
-              fee.paymentDate
+              fee.paidAt
             )}`,
             22,
             y
@@ -461,7 +431,7 @@ export default function Fee() {
             <td>${formatCurrency(fee.amount)}</td>
             <td>${formatCurrency(fee.paidAmount)}</td>
             <td>${formatCurrency(remaining)}</td>
-            <td>${fee.status || "Pending"}</td>
+            <td>${statusLabel(fee)}</td>
             <td>${formatDate(fee.dueDate)}</td>
           </tr>
         `;
@@ -623,11 +593,11 @@ export default function Fee() {
           <div class="header">
             <div>
               <div class="school">
-                CHAUTARI
+                ${school?.shortName || "School"}
               </div>
 
               <div class="subtitle">
-                Smart School Management System
+                ${school?.name || "Fee statement"}
               </div>
             </div>
 
@@ -761,6 +731,23 @@ export default function Fee() {
   // UI
   // =====================================================
 
+  if (error) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
+          <p className="text-sm font-semibold text-red-700 dark:text-red-300">{error}</p>
+
+          <button
+            onClick={loadFees}
+            className="mt-4 rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-7xl space-y-6">
 
@@ -770,7 +757,7 @@ export default function Fee() {
 
       <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-medium text-emerald-600">
+          <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
             Student Portal
           </p>
 
@@ -790,7 +777,7 @@ export default function Fee() {
             <button
               type="button"
               onClick={printStatement}
-              className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+              className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-card px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
             >
               <Printer className="h-4 w-4" />
               Print Statement
@@ -818,14 +805,14 @@ export default function Fee() {
       ================================================= */}
 
       <div className="flex gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4">
-        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" />
+        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
 
         <div>
-          <p className="font-semibold text-blue-900">
+          <p className="font-semibold text-blue-900 dark:text-blue-300">
             Fee information
           </p>
 
-          <p className="mt-1 text-sm leading-6 text-blue-700">
+          <p className="mt-1 text-sm leading-6 text-blue-700 dark:text-blue-300">
             Fee amounts and payment status are managed
             by the school administration.
           </p>
@@ -839,7 +826,7 @@ export default function Fee() {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
 
         {/* Total */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-slate-500">
@@ -862,20 +849,20 @@ export default function Fee() {
         </div>
 
         {/* Paid */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-slate-500">
                 Paid
               </p>
 
-              <p className="mt-2 text-2xl font-bold text-emerald-600">
+              <p className="mt-2 text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                 {formatCurrency(summary.paid)}
               </p>
             </div>
 
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50">
-              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+              <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
 
@@ -885,7 +872,7 @@ export default function Fee() {
         </div>
 
         {/* Remaining */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-slate-500">
@@ -895,8 +882,8 @@ export default function Fee() {
               <p
                 className={`mt-2 text-2xl font-bold ${
                   summary.remaining > 0
-                    ? "text-amber-600"
-                    : "text-emerald-600"
+                    ? "text-amber-600 dark:text-amber-400"
+                    : "text-emerald-600 dark:text-emerald-400"
                 }`}
               >
                 {formatCurrency(summary.remaining)}
@@ -904,7 +891,7 @@ export default function Fee() {
             </div>
 
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50">
-              <Clock3 className="h-5 w-5 text-amber-600" />
+              <Clock3 className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
           </div>
 
@@ -919,7 +906,7 @@ export default function Fee() {
           FEE RECORDS
       ================================================= */}
 
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-sm">
 
         <div className="flex flex-col gap-2 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between">
 
@@ -1021,7 +1008,7 @@ export default function Fee() {
                           Paid
                         </p>
 
-                        <p className="mt-1 font-bold text-emerald-600">
+                        <p className="mt-1 font-bold text-emerald-600 dark:text-emerald-400">
                           {formatCurrency(fee.paidAmount)}
                         </p>
                       </div>
@@ -1031,7 +1018,7 @@ export default function Fee() {
                           Remaining
                         </p>
 
-                        <p className="mt-1 font-bold text-amber-600">
+                        <p className="mt-1 font-bold text-amber-600 dark:text-amber-400">
                           {formatCurrency(remaining)}
                         </p>
                       </div>
@@ -1039,29 +1026,29 @@ export default function Fee() {
                       {/* Status */}
                       <span
                         className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${
-                          fee.status === "Paid"
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-amber-50 text-amber-700"
+                          isPaid(fee)
+                            ? "bg-emerald-50 text-emerald-700 dark:text-emerald-300"
+                            : "bg-amber-50 text-amber-700 dark:text-amber-300"
                         }`}
                       >
-                        {fee.status === "Paid" ? (
+                        {isPaid(fee) ? (
                           <CheckCircle2 className="h-3.5 w-3.5" />
                         ) : (
                           <Clock3 className="h-3.5 w-3.5" />
                         )}
 
-                        {fee.status}
+                        {statusLabel(fee)}
                       </span>
 
                     </div>
                   </div>
 
                   {/* Payment Information */}
-                  {fee.paymentDate && (
+                  {fee.paidAt && (
                     <div className="mt-4 rounded-xl bg-slate-50 px-4 py-3 text-xs text-slate-500">
                       Payment recorded on{" "}
                       <strong className="text-slate-700">
-                        {formatDate(fee.paymentDate)}
+                        {formatDate(fee.paidAt)}
                       </strong>
                     </div>
                   )}
@@ -1079,7 +1066,7 @@ export default function Fee() {
           HELP
       ================================================= */}
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
+      <div className="rounded-2xl border border-slate-200 bg-card p-5">
 
         <div className="flex gap-3">
 

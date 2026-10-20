@@ -1,32 +1,59 @@
+import { useEffect, useState } from "react";
 import {
   CheckCircle,
   XCircle,
   Clock,
 } from "lucide-react";
 
+import api from "../../api/axios";
+
 export default function Attendance() {
-  const records = [
-    {
-      date: "2026-09-25",
-      subject: "Web Technology",
-      status: "Present",
-    },
-    {
-      date: "2026-09-24",
-      subject: "Economics",
-      status: "Present",
-    },
-    {
-      date: "2026-09-23",
-      subject: "Database",
-      status: "Absent",
-    },
-    {
-      date: "2026-09-22",
-      subject: "JavaScript",
-      status: "Present",
-    },
-  ];
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    // The backend auto-scopes /attendance to the parent's child, so no
+    // studentId is sent.
+    api
+      .get("/attendance")
+      .then(({ data }) => {
+        if (active) setRecords(data || []);
+      })
+      .catch((err) => {
+        if (active)
+          setError(
+            err?.response?.data?.message || "Unable to load attendance."
+          );
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const present = records.filter(
+    (record) => String(record.status).toLowerCase() === "present"
+  ).length;
+
+  const absent = records.filter(
+    (record) => String(record.status).toLowerCase() === "absent"
+  ).length;
+
+  const late = records.filter(
+    (record) => String(record.status).toLowerCase() === "late"
+  ).length;
+
+  const percent = records.length
+    ? Math.round(((present + late) / records.length) * 100)
+    : 0;
+
+  const summary = records.length ? `${percent}%` : "—";
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -39,29 +66,33 @@ export default function Attendance() {
         View your child's attendance record.
       </p>
 
+      {error && (
+        <p className="mt-4 text-sm text-red-500">{error}</p>
+      )}
+
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
 
         <Stat
           title="Attendance"
-          value="92%"
+          value={loading ? "—" : summary}
           icon={CheckCircle}
         />
 
         <Stat
           title="Present"
-          value="46"
+          value={loading ? "—" : present}
           icon={CheckCircle}
         />
 
         <Stat
           title="Absent"
-          value="4"
+          value={loading ? "—" : absent}
           icon={XCircle}
         />
 
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-2xl border bg-white shadow-sm">
+      <div className="mt-6 overflow-hidden rounded-2xl border bg-card shadow-sm">
 
         <table className="w-full">
 
@@ -73,7 +104,7 @@ export default function Attendance() {
               </th>
 
               <th className="p-4 text-left text-xs text-slate-500">
-                Subject
+                Class
               </th>
 
               <th className="p-4 text-left text-xs text-slate-500">
@@ -85,35 +116,58 @@ export default function Attendance() {
 
           <tbody className="divide-y">
 
-            {records.map((record) => (
-              <tr key={`${record.date}-${record.subject}`}>
-
-                <td className="p-4 text-sm">
-                  {record.date}
+            {loading ? (
+              <tr>
+                <td colSpan={3} className="p-6 text-center text-sm text-slate-500">
+                  Loading attendance…
                 </td>
-
-                <td className="p-4 text-sm font-medium">
-                  {record.subject}
-                </td>
-
-                <td className="p-4">
-
-                  {record.status === "Present" ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-                      <CheckCircle className="h-3 w-3" />
-                      Present
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
-                      <XCircle className="h-3 w-3" />
-                      Absent
-                    </span>
-                  )}
-
-                </td>
-
               </tr>
-            ))}
+            ) : records.length === 0 ? (
+              <tr>
+                <td colSpan={3} className="p-6 text-center text-sm text-slate-500">
+                  No attendance records yet.
+                </td>
+              </tr>
+            ) : (
+              records.map((record) => {
+                const status = String(record.status).toLowerCase();
+
+                return (
+                  <tr key={record._id || `${record.date}-${record.className}`}>
+
+                    <td className="p-4 text-sm">
+                      {record.date}
+                    </td>
+
+                    <td className="p-4 text-sm font-medium">
+                      {record.className || "—"}
+                    </td>
+
+                    <td className="p-4">
+
+                      {status === "present" ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                          <CheckCircle className="h-3 w-3" />
+                          Present
+                        </span>
+                      ) : status === "late" ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
+                          <Clock className="h-3 w-3" />
+                          Late
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 dark:text-red-300">
+                          <XCircle className="h-3 w-3" />
+                          Absent
+                        </span>
+                      )}
+
+                    </td>
+
+                  </tr>
+                );
+              })
+            )}
 
           </tbody>
 
@@ -127,9 +181,9 @@ export default function Attendance() {
 
 function Stat({ title, value, icon: Icon }) {
   return (
-    <div className="rounded-2xl border bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border bg-card p-5 shadow-sm">
 
-      <Icon className="h-5 w-5 text-emerald-600" />
+      <Icon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
 
       <p className="mt-3 text-sm text-slate-500">
         {title}

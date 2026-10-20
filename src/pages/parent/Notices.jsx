@@ -1,5 +1,5 @@
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Bell,
   CalendarDays,
@@ -10,80 +10,35 @@ import {
   ChevronRight,
   X,
 } from "lucide-react";
+import api from "../../api/axios";
 
 export default function Notices() {
   const [search, setSearch] = useState("");
   const [selectedNotice, setSelectedNotice] = useState(null);
+  const [notices, setNotices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Frontend demo data
-  // Later this will come from the backend API.
-  const notices = [
-    {
-      id: 1,
-      title: "Parent-Teacher Meeting",
-      message:
-        "A parent-teacher meeting will be conducted to discuss students' academic progress, attendance, and overall performance. Parents are requested to attend the meeting on time.",
-      teacher: "Mrs. Sita Sharma",
-      role: "Class Teacher",
-      date: "2026-09-28",
-      time: "10:30 AM",
-      priority: "Important",
-      category: "Meeting",
-      isNew: true,
-    },
-    {
-      id: 2,
-      title: "Monthly Examination Notice",
-      message:
-        "The monthly examination will begin from October 5, 2026. Students are requested to prepare according to the examination schedule provided by the school.",
-      teacher: "Mr. Ram Thapa",
-      role: "Mathematics Teacher",
-      date: "2026-09-25",
-      time: "09:15 AM",
-      priority: "Important",
-      category: "Exam",
-      isNew: true,
-    },
-    {
-      id: 3,
-      title: "School Holiday Notice",
-      message:
-        "The school will remain closed on October 2, 2026 due to a public holiday. Regular classes will resume from the following school day.",
-      teacher: "School Administration",
-      role: "Administration",
-      date: "2026-09-23",
-      time: "02:00 PM",
-      priority: "Normal",
-      category: "Holiday",
-      isNew: false,
-    },
-    {
-      id: 4,
-      title: "Attendance Reminder",
-      message:
-        "Parents are requested to regularly check their child's attendance. Please contact the class teacher if your child is absent for any reason.",
-      teacher: "Mr. Hari Gurung",
-      role: "Class Teacher",
-      date: "2026-09-20",
-      time: "11:45 AM",
-      priority: "Normal",
-      category: "Attendance",
-      isNew: false,
-    },
-    {
-      id: 5,
-      title: "School Program",
-      message:
-        "The school is organizing a student participation program this month. Detailed information regarding participation and schedule will be shared with students and parents.",
-      teacher: "Mrs. Mina KC",
-      role: "Coordinator",
-      date: "2026-09-18",
-      time: "01:20 PM",
-      priority: "Normal",
-      category: "Event",
-      isNew: false,
-    },
-  ];
+  useEffect(() => {
+    let active = true;
+
+    api
+      .get("/notices")
+      .then(({ data }) => {
+        if (active) setNotices(data);
+      })
+      .catch((err) => {
+        if (active)
+          setError(err?.response?.data?.message || "Unable to load notices.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const filteredNotices = useMemo(() => {
     const keyword = search.toLowerCase().trim();
@@ -94,10 +49,10 @@ export default function Notices() {
       (notice) =>
         notice.title.toLowerCase().includes(keyword) ||
         notice.message.toLowerCase().includes(keyword) ||
-        notice.teacher.toLowerCase().includes(keyword) ||
+        (notice.teacher || "").toLowerCase().includes(keyword) ||
         notice.category.toLowerCase().includes(keyword)
     );
-  }, [search]);
+  }, [search, notices]);
 
   const newNoticeCount = notices.filter((notice) => notice.isNew).length;
 
@@ -117,7 +72,7 @@ export default function Notices() {
           <div>
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100">
-                <Bell className="h-6 w-6 text-emerald-600" />
+                <Bell className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
               </div>
 
               <div>
@@ -132,8 +87,8 @@ export default function Notices() {
           </div>
 
           {/* New notice count */}
-          <div className="flex items-center gap-2 rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200">
-            <Bell className="h-5 w-5 text-emerald-600" />
+          <div className="flex items-center gap-2 rounded-xl bg-card px-4 py-3 shadow-sm ring-1 ring-slate-200">
+            <Bell className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             <span className="text-sm font-medium text-slate-700">
               {newNoticeCount} New Notices
             </span>
@@ -141,7 +96,7 @@ export default function Notices() {
         </div>
 
         {/* Search */}
-        <div className="mb-6 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+        <div className="mb-6 rounded-2xl bg-card p-4 shadow-sm ring-1 ring-slate-200">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
 
@@ -161,12 +116,12 @@ export default function Notices() {
             filteredNotices.map((notice) => (
               <div
                 key={notice.id}
-                className="group rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md"
+                className="group rounded-2xl bg-card p-5 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md"
               >
                 <div className="flex flex-col gap-4 md:flex-row md:items-start">
                   {/* Icon */}
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50">
-                    <Megaphone className="h-6 w-6 text-emerald-600" />
+                    <Megaphone className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
 
                   {/* Content */}
@@ -177,7 +132,7 @@ export default function Notices() {
                       </h2>
 
                       {notice.isNew && (
-                        <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                        <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                           New
                         </span>
                       )}
@@ -185,7 +140,7 @@ export default function Notices() {
                       <span
                         className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                           notice.priority === "Important"
-                            ? "bg-amber-100 text-amber-700"
+                            ? "bg-amber-100 text-amber-700 dark:text-amber-300"
                             : "bg-slate-100 text-slate-600"
                         }`}
                       >
@@ -225,7 +180,7 @@ export default function Notices() {
                   {/* View button */}
                   <button
                     onClick={() => setSelectedNotice(notice)}
-                    className="flex shrink-0 items-center justify-center gap-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700"
+                    className="flex shrink-0 items-center justify-center gap-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:text-emerald-300"
                   >
                     View
                     <ChevronRight className="h-4 w-4" />
@@ -234,15 +189,15 @@ export default function Notices() {
               </div>
             ))
           ) : (
-            <div className="rounded-2xl bg-white py-16 text-center shadow-sm ring-1 ring-slate-200">
+            <div className="rounded-2xl bg-card py-16 text-center shadow-sm ring-1 ring-slate-200">
               <Bell className="mx-auto mb-4 h-12 w-12 text-slate-300" />
 
               <h3 className="text-lg font-semibold text-slate-700">
-                No notices found
+                {error ? "Could not load notices" : loading ? "Loading notices" : "No notices found"}
               </h3>
 
               <p className="mt-1 text-sm text-slate-500">
-                Try searching with a different keyword.
+                {error || (loading ? "Please wait…" : "Try searching with a different keyword.")}
               </p>
             </div>
           )}
@@ -251,18 +206,18 @@ export default function Notices() {
 
       {/* Notice Details Modal */}
       {selectedNotice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 dark:bg-slate-950/70 p-4">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-card shadow-2xl">
             {/* Modal Header */}
             <div className="flex items-start justify-between border-b border-slate-200 p-6">
               <div className="pr-4">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                  <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                     {selectedNotice.category}
                   </span>
 
                   {selectedNotice.isNew && (
-                    <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                    <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:text-blue-300">
                       New
                     </span>
                   )}

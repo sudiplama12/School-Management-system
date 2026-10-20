@@ -2,9 +2,25 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/crest.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <title>Smart LMS · School Portal</title>
+    <script>
+      // Runs before first paint so a dark-mode visitor never sees a white flash.
+      // ThemeProvider takes the same value over once React mounts.
+      (function () {
+        try {
+          var saved = localStorage.getItem("lms_theme");
+          var dark =
+            saved === "dark" ||
+            ((saved === null || saved === "system") &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+          document.documentElement.classList.toggle("dark", dark);
+          document.documentElement.style.colorScheme = dark ? "dark" : "light";
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
