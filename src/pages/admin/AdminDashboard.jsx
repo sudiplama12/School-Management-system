@@ -153,7 +153,7 @@ function SectionHeading({ title, subtitle, action, to }) {
         <h2 className="text-lg font-bold text-slate-900">
           {title}
         </h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-600">
           {subtitle}
         </p>
       </div>
@@ -651,7 +651,7 @@ function AdminDashboard() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 pt-5 text-center text-xs text-slate-400">
+      <footer className="border-t border-slate-200 pt-5 text-center text-xs text-slate-600">
         {school?.name || "Smart LMS"} · {school?.session ? `Session ${school.session}` : "School portal"}
       </footer>
     </div>

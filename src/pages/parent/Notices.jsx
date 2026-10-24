@@ -190,7 +190,7 @@ export default function Notices() {
             ))
           ) : (
             <div className="rounded-2xl bg-card py-16 text-center shadow-sm ring-1 ring-slate-200">
-              <Bell className="mx-auto mb-4 h-12 w-12 text-slate-300" />
+              <Bell className="mx-auto mb-4 h-12 w-12 text-slate-400" />
 
               <h3 className="text-lg font-semibold text-slate-700">
                 {error ? "Could not load notices" : loading ? "Loading notices" : "No notices found"}

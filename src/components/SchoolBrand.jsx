@@ -54,7 +54,7 @@ export default function SchoolBrand({
 
         {portal && (
           <p
-            className={`${s.portal} mt-0.5 font-semibold uppercase tracking-[0.18em]`}
+            className={`${s.portal} mt-0.5 font-semibold uppercase tracking-[0.18em] ${t.portal}`}
           >
             {portal}
           </p>

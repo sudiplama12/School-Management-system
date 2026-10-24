@@ -272,7 +272,7 @@ export default function Jobs() {
 
         <div className="rounded-2xl border border-slate-200 bg-card p-12 text-center">
 
-          <Briefcase className="mx-auto h-10 w-10 text-slate-300" />
+          <Briefcase className="mx-auto h-10 w-10 text-slate-400" />
 
           <p className="mt-4 font-semibold text-slate-800">
             No vacancies found

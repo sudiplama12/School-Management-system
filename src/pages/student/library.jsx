@@ -484,7 +484,7 @@ export default function Library() {
 
           <div className="rounded-2xl border border-slate-200 bg-card p-10 text-center">
 
-            <BookOpen className="mx-auto h-10 w-10 text-slate-300" />
+            <BookOpen className="mx-auto h-10 w-10 text-slate-400" />
 
             <h3 className="mt-4 font-semibold text-slate-800">
               No resources found

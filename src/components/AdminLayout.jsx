@@ -12,12 +12,14 @@ import {
   BookMarked,
   RotateCcw,
   Wallet,
+  Newspaper,
 } from "lucide-react";
 
 import PortalShell from "./PortalShell";
 
 const navigation = [
   { name: "Dashboard", path: "/admin", icon: LayoutDashboard, end: true },
+  { name: "School Blog", path: "/admin/blog", icon: Newspaper },
 ];
 
 const groups = [
@@ -56,6 +58,13 @@ const groups = [
       { title: "Manage Books", path: "/admin/library/books", icon: BookOpen },
       { title: "Issue Books", path: "/admin/library/issue", icon: BookMarked },
       { title: "Return Books", path: "/admin/library/return", icon: RotateCcw },
+    ],
+  },
+  {
+    title: "Result Management",
+    icon: ClipboardCheck,
+    items: [
+      { title: "Subjects, Terms & Results", path: "/admin/results", icon: ClipboardCheck },
     ],
   },
   {

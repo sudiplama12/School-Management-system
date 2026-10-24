@@ -222,7 +222,7 @@ export default function ParentHome() {
       <Panel title="My Child" subtitle="Linked student profile">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 font-bold text-white">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-xl font-bold text-white">
               {child?.name?.charAt(0)?.toUpperCase() || <User className="h-7 w-7" />}
             </div>
 

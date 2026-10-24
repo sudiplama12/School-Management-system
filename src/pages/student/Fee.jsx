@@ -929,7 +929,7 @@ export default function Fee() {
 
         {fees.length === 0 ? (
           <div className="p-12 text-center">
-            <CreditCard className="mx-auto h-10 w-10 text-slate-300" />
+            <CreditCard className="mx-auto h-10 w-10 text-slate-400" />
 
             <h3 className="mt-4 font-semibold text-slate-800">
               No fee records

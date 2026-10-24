@@ -275,7 +275,7 @@ export default function VisitRequests() {
 
       {loading && (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-card p-12 text-center">
-          <CalendarClock className="mx-auto h-10 w-10 text-slate-300" />
+          <CalendarClock className="mx-auto h-10 w-10 text-slate-400" />
           <p className="mt-4 text-sm text-slate-500">Loading visit requests…</p>
         </div>
       )}
@@ -314,7 +314,7 @@ export default function VisitRequests() {
 
       {!loading && !error && visits.length === 0 && (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-card p-12 text-center">
-          <CalendarClock className="mx-auto h-10 w-10 text-slate-300" />
+          <CalendarClock className="mx-auto h-10 w-10 text-slate-400" />
 
           <h2 className="mt-4 font-semibold text-slate-700">
             No visit requests

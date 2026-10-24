@@ -167,7 +167,7 @@ export default function LocationRequests() {
 
       {loading && (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-card p-12 text-center">
-          <MapPin className="mx-auto h-10 w-10 text-slate-300" />
+          <MapPin className="mx-auto h-10 w-10 text-slate-400" />
           <p className="mt-4 text-sm text-slate-500">
             Loading location requests…
           </p>
@@ -291,7 +291,7 @@ export default function LocationRequests() {
       {/* Empty State */}
       {!loading && !error && requests.length === 0 && (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-card p-12 text-center">
-          <MapPin className="mx-auto h-10 w-10 text-slate-300" />
+          <MapPin className="mx-auto h-10 w-10 text-slate-400" />
 
           <h2 className="mt-4 font-semibold text-slate-700">
             No location requests

@@ -70,14 +70,14 @@ export default function VisitHistory() {
 
       {loading ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-card p-10 text-center">
-          <FileText className="mx-auto h-10 w-10 text-slate-300" />
+          <FileText className="mx-auto h-10 w-10 text-slate-400" />
           <p className="mt-3 text-sm text-slate-500">
             Loading home visit history…
           </p>
         </div>
       ) : error ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-card p-10 text-center">
-          <FileText className="mx-auto h-10 w-10 text-slate-300" />
+          <FileText className="mx-auto h-10 w-10 text-slate-400" />
           <p className="mt-3 text-sm text-red-500">
             {error}
           </p>
@@ -85,7 +85,7 @@ export default function VisitHistory() {
       ) : visits.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-card p-10 text-center">
 
-          <FileText className="mx-auto h-10 w-10 text-slate-300" />
+          <FileText className="mx-auto h-10 w-10 text-slate-400" />
 
           <p className="mt-3 text-sm text-slate-500">
             No home visit history available.

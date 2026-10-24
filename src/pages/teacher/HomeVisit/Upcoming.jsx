@@ -461,7 +461,7 @@ export default function Upcoming() {
 
           <div className="rounded-2xl border border-dashed border-slate-300 bg-card p-12 text-center shadow-sm">
 
-            <CalendarDays className="mx-auto h-12 w-12 text-slate-300" />
+            <CalendarDays className="mx-auto h-12 w-12 text-slate-400" />
 
             <h2 className="mt-4 font-semibold text-slate-700">
               No Open Visit Requests

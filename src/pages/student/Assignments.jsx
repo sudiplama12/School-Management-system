@@ -127,7 +127,7 @@ export default function Assignments() {
       ) : assignments.length === 0 ? (
         <div className="rounded-2xl border border-slate-200 bg-card p-12 text-center shadow-sm">
 
-          <FileText className="mx-auto h-14 w-14 text-slate-300" />
+          <FileText className="mx-auto h-14 w-14 text-slate-400" />
 
           <h2 className="mt-4 text-lg font-bold text-slate-800">
             No assignments available

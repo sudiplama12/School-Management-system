@@ -9,12 +9,14 @@ import {
   Briefcase,
   FileText,
   Bell,
+  Newspaper,
   Book,
   FilePen,
   History,
   Navigation,
   CalendarClock,
   ClipboardCheck,
+  GraduationCap,
 } from "lucide-react";
 
 import {
@@ -64,6 +66,11 @@ const navigation = [
     icon: FilePen,
   },
   {
+    name: "Marks",
+    path: "/teacher/results",
+    icon: GraduationCap,
+  },
+  {
     name: "Vacancies",
     path: "/teacher/vacancies",
     icon: Briefcase,
@@ -77,6 +84,11 @@ const navigation = [
     name: "Notices",
     path: "/teacher/notices",
     icon: Bell,
+  },
+  {
+    name: "Blog",
+    path: "/teacher/blog",
+    icon: Newspaper,
   },
 ];
 

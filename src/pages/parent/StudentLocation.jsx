@@ -123,21 +123,21 @@ export default function StudentLocation() {
 
       {loading && (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-card p-10 text-center">
-          <MapPin className="mx-auto h-10 w-10 text-slate-300" />
+          <MapPin className="mx-auto h-10 w-10 text-slate-400" />
           <p className="mt-3 text-sm text-slate-500">Loading location…</p>
         </div>
       )}
 
       {!loading && error && (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-card p-10 text-center">
-          <MapPin className="mx-auto h-10 w-10 text-slate-300" />
+          <MapPin className="mx-auto h-10 w-10 text-slate-400" />
           <p className="mt-3 text-sm text-slate-500">{error}</p>
         </div>
       )}
 
       {!loading && !error && !hasLocation && (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-card p-10 text-center">
-          <MapPin className="mx-auto h-10 w-10 text-slate-300" />
+          <MapPin className="mx-auto h-10 w-10 text-slate-400" />
           <h2 className="mt-4 font-semibold text-slate-700">
             No location on file
           </h2>
@@ -358,7 +358,7 @@ export default function StudentLocation() {
             <button
               type="button"
               onClick={openMap}
-              className="rounded-2xl bg-emerald-600 p-5 text-left text-white shadow-sm transition hover:bg-emerald-700"
+              className="rounded-2xl bg-emerald-700 p-5 text-left text-white shadow-sm transition hover:bg-emerald-800"
             >
 
               <Navigation className="h-6 w-6" />
@@ -367,7 +367,7 @@ export default function StudentLocation() {
                 Open Map
               </p>
 
-              <p className="mt-1 text-sm text-emerald-100">
+              <p className="mt-1 text-sm text-emerald-100 dark:text-white">
                 View this location on OpenStreetMap.
               </p>
 

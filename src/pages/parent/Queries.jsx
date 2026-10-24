@@ -273,7 +273,7 @@ export default function Queries() {
       ================================================= */}
       {loading ? (
         <div className="mt-6 rounded-2xl border border-slate-200 bg-card p-12 text-center shadow-sm">
-          <MessageCircleQuestion className="mx-auto h-12 w-12 text-slate-300" />
+          <MessageCircleQuestion className="mx-auto h-12 w-12 text-slate-400" />
 
           <p className="mt-4 text-sm text-slate-500">
             Loading your queries…
@@ -290,7 +290,7 @@ export default function Queries() {
       ) : (
         queries.length === 0 && (
           <div className="mt-6 rounded-2xl border border-slate-200 bg-card p-12 text-center shadow-sm">
-            <MessageCircleQuestion className="mx-auto h-12 w-12 text-slate-300" />
+            <MessageCircleQuestion className="mx-auto h-12 w-12 text-slate-400" />
 
             <h2 className="mt-4 text-lg font-semibold text-slate-700">
               No Queries Yet

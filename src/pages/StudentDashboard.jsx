@@ -12,9 +12,11 @@ import {
   User,
   Briefcase,
   FileText,
+  GraduationCap,
   MapPin,
   Settings,
   Bell,
+  Newspaper,
   Search,
   BookOpen,
   CreditCard,
@@ -64,6 +66,11 @@ const navigation = [
     icon: Bell,
   },
   {
+    name: "Blog",
+    path: "/student/blog",
+    icon: Newspaper,
+  },
+  {
     name: "Jobs",
     path: "/student/jobs",
     icon: Briefcase,
@@ -74,6 +81,11 @@ const navigation = [
     icon: FileText,
   },
 
+  {
+    name: "Result",
+    path: "/student/results",
+    icon: GraduationCap,
+  },
 
   {
     name: "Library",

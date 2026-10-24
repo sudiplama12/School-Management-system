@@ -4,6 +4,7 @@ import { ChevronDown, LogOut, Menu, X } from "lucide-react";
 
 import SchoolBrand from "./SchoolBrand";
 import ThemeToggle from "./ThemeToggle";
+import ThemeSettings from "./ThemeSettings";
 import { NoticeBell } from "./NoticeAlerts";
 import { useAuth } from "../context/AuthContext";
 
@@ -89,7 +90,7 @@ export default function PortalShell({
       </div>
 
       <nav className="qd-scrollbar qd-stagger-side min-h-0 flex-1 space-y-1.5 overflow-y-auto overscroll-contain px-3 py-5">
-        <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-500/70">
+        <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-300/70">
           Menu
         </p>
 
@@ -181,7 +182,7 @@ export default function PortalShell({
               {user?.name || user?.username || "Signed in"}
             </p>
 
-            <p className="truncate text-[11px] capitalize text-emerald-200/60">
+            <p className="truncate text-[11px] capitalize text-emerald-200/80">
               {user?.role || ""} · {school?.shortName || "School"}
             </p>
           </div>
@@ -200,7 +201,7 @@ export default function PortalShell({
   );
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="qd-canvas min-h-screen bg-slate-50">
       {mobileOpen && (
         <div
           onClick={() => setMobileOpen(false)}
@@ -209,7 +210,7 @@ export default function PortalShell({
       )}
 
       <aside
-        className={`qd-ink fixed inset-y-0 left-0 z-50 flex w-72 flex-col overflow-hidden bg-gradient-to-b from-emerald-950 via-emerald-950 to-slate-950 transition-transform duration-300 ease-out ${
+        className={`qd-ink qd-side fixed inset-y-0 left-0 z-50 flex w-72 flex-col overflow-hidden bg-gradient-to-b from-emerald-950 via-emerald-950 to-slate-950 transition-transform duration-300 ease-out ${
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
@@ -217,7 +218,7 @@ export default function PortalShell({
       </aside>
 
       <div className="lg:pl-72">
-        <header className="qd-fade-in sticky top-0 z-30 flex h-20 items-center justify-between gap-4 border-b border-slate-200 bg-card/85 px-4 backdrop-blur sm:px-6 lg:px-8">
+        <header className="qd-fade-in qd-bar sticky top-0 z-30 flex h-20 items-center justify-between gap-4 border-b border-slate-200 bg-card/85 px-4 backdrop-blur sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-4">
             <button
               type="button"
@@ -242,7 +243,9 @@ export default function PortalShell({
           </div>
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-            <ThemeToggle />
+            {/* Quick flip for the common case, full panel for the rest. */}
+            <ThemeToggle className="hidden sm:inline-flex" />
+            <ThemeSettings />
 
             <NoticeBell />
           </div>

@@ -379,7 +379,7 @@ export default function ActiveVisit() {
 
           <div className="rounded-2xl border border-slate-200 bg-card p-10 text-center shadow-sm">
 
-            <MapPin className="mx-auto h-12 w-12 text-slate-300" />
+            <MapPin className="mx-auto h-12 w-12 text-slate-400" />
 
             <h2 className="mt-4 text-lg font-bold text-slate-700">
               No Active Visit

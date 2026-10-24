@@ -327,13 +327,13 @@ export default function Students() {
 
         {loading ? (
           <div className="p-12 text-center">
-            <Users className="mx-auto h-12 w-12 text-slate-300" />
+            <Users className="mx-auto h-12 w-12 text-slate-400" />
 
             <p className="mt-4 text-sm text-slate-500">Loading students…</p>
           </div>
         ) : filteredStudents.length === 0 ? (
           <div className="p-12 text-center">
-            <Users className="mx-auto h-12 w-12 text-slate-300" />
+            <Users className="mx-auto h-12 w-12 text-slate-400" />
 
             <h3 className="mt-4 font-semibold text-slate-800">
               No students found

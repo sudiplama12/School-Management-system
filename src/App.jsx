@@ -16,6 +16,7 @@ import StudentAssignments from "./pages/student/Assignments";
 import TakeAssignment from "./pages/student/TakeAssignment";
 import StudentNotices from "./pages/student/Notices";
 import StudentFee from "./pages/student/Fee";
+import StudentResults from "./pages/student/Results";
 import StudentApplications from "./pages/student/application";
 
 // Teacher
@@ -24,6 +25,7 @@ import TeacherStudents from "./pages/teacher/Students";
 import TeacherAttendance from "./pages/teacher/Attendance";
 import TeacherAssignments from "./pages/teacher/Assignments";
 import TeacherNotices from "./pages/teacher/Notices";
+import TeacherResults from "./pages/teacher/Results";
 
 // Parent
 import ParentDashboard from "./pages/parent/ParentDashboard";
@@ -38,6 +40,7 @@ import ParentLocationRequests from "./pages/parent/LocationRequests";
 import ParentStudentDetails from "./pages/parent/StudentDetails";
 import ParentAttendance from "./pages/parent/Attendence";
 import ParentFees from "./pages/parent/Fees";
+import ParentResults from "./pages/parent/Results";
 import ParentStudentLocation from "./pages/parent/StudentLocation";
 
 // Teacher home visits
@@ -57,6 +60,11 @@ import AdminPermissions from "./pages/admin/Permissions";
 import AdminUsers from "./pages/admin/Users";
 import AdminLibrary from "./pages/admin/Library";
 import AdminFees from "./pages/admin/Fees";
+import AdminResults from "./pages/admin/Results";
+import AdminBlog from "./pages/admin/Blog";
+import AdminStudentAttendance from "./pages/admin/StudentAttendance";
+import AdminTeacherAttendance from "./pages/admin/TeacherAttendance";
+import BlogFeed from "./pages/shared/BlogFeed";
 
 // Temporary placeholder for pages not built yet
 function Placeholder({ title }) {  return (
@@ -135,8 +143,10 @@ export default function App() {
           <Route path="jobs" element={<StudentJobs />} />
           <Route path="applications" element={<StudentApplications />} />
           <Route path="notices" element={<StudentNotices />} />
+          <Route path="blog" element={<BlogFeed />} />
           <Route path="library" element={<StudentLibrary />} />
           <Route path="fee" element={<StudentFee />} />
+          <Route path="results" element={<StudentResults />} />
           <Route path="location" element={<Placeholder title="My Location" />} />
           <Route path="assignments" element={<StudentAssignments />} />
           <Route path="assignments/take" element={<TakeAssignment />} />
@@ -157,6 +167,8 @@ export default function App() {
           <Route path="attendance" element={<TeacherAttendance />} />
           <Route path="assignments" element={<TeacherAssignments />} />
           <Route path="notices" element={<TeacherNotices />} />
+          <Route path="blog" element={<BlogFeed />} />
+          <Route path="results" element={<TeacherResults />} />
 
           {/* Home visits */}
           <Route path="visits" element={<UpcomingVisits />} />
@@ -192,8 +204,10 @@ export default function App() {
           <Route path="attendance" element={<ParentAttendance />} />
           <Route path="assignments" element={<ParentAssignments />} />
           <Route path="notices" element={<ParentNotices />} />
+          <Route path="blog" element={<BlogFeed />} />
           <Route path="queries" element={<ParentQueries />} />
           <Route path="fees" element={<ParentFees />} />
+          <Route path="results" element={<ParentResults />} />
           <Route path="profile" element={<Placeholder title="Parent Profile" />} />
           <Route path="settings" element={<ParentSettings />} />
         </Route>
@@ -212,15 +226,17 @@ export default function App() {
           <Route path="teachers" element={<AdminTeachers />} />
           <Route path="parents" element={<AdminParents />} />
           <Route path="classes" element={<Placeholder title="Classes" />} />
-          <Route path="teacher-attendance" element={<Placeholder title="Teacher Attendance" />} />
-          <Route path="attendance" element={<Placeholder title="Student Attendance" />} />
+          <Route path="teacher-attendance" element={<AdminTeacherAttendance />} />
+          <Route path="attendance" element={<AdminStudentAttendance />} />
           <Route path="library" element={<AdminLibrary />} />
           <Route path="library/books" element={<AdminLibrary />} />
           <Route path="library/issue" element={<AdminLibrary />} />
           <Route path="library/return" element={<AdminLibrary />} />
           <Route path="fees" element={<AdminFees />} />
+          <Route path="results" element={<AdminResults />} />
           <Route path="permissions" element={<AdminPermissions />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="blog" element={<AdminBlog />} />
         </Route>
 
         {/* Default routes */}

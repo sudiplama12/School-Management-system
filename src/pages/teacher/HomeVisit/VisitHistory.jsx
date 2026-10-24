@@ -484,7 +484,7 @@ export default function VisitHistory() {
         ) : (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-card p-10 text-center">
 
-            <FileText className="mx-auto h-10 w-10 text-slate-300" />
+            <FileText className="mx-auto h-10 w-10 text-slate-400" />
 
             <p className="mt-3 text-sm font-medium text-slate-600">
               No visit history found.

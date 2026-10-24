@@ -145,7 +145,7 @@ export default function TakeAssignment() {
 
         {!loading && error && (
           <div className="rounded-2xl border border-slate-200 bg-card p-10 text-center shadow-sm">
-            <FileText className="mx-auto h-14 w-14 text-slate-300" />
+            <FileText className="mx-auto h-14 w-14 text-slate-400" />
             <h2 className="mt-4 text-lg font-bold text-slate-800">
               Assignment unavailable
             </h2>

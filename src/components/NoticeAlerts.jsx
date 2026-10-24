@@ -202,7 +202,7 @@ function NoticeAlertsModal() {
         <div className="max-h-[52vh] space-y-3 overflow-y-auto px-6 py-5">
           {unread.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-8 text-center">
-              <BellOff className="h-7 w-7 text-slate-300" />
+              <BellOff className="h-7 w-7 text-slate-400" />
               <p className="text-sm text-slate-500">
                 You are all caught up.
               </p>

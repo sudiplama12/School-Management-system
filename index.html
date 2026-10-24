@@ -6,18 +6,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Smart LMS · School Portal</title>
     <script>
-      // Runs before first paint so a dark-mode visitor never sees a white flash.
-      // ThemeProvider takes the same value over once React mounts.
+      // Runs before first paint so a reload never shows the wrong palette.
+      // ThemeProvider takes the same five values over once React mounts.
       (function () {
         try {
+          var root = document.documentElement;
           var saved = localStorage.getItem("lms_theme");
           var dark =
             saved === "dark" ||
             ((saved === null || saved === "system") &&
               window.matchMedia("(prefers-color-scheme: dark)").matches);
 
-          document.documentElement.classList.toggle("dark", dark);
-          document.documentElement.style.colorScheme = dark ? "dark" : "light";
+          root.classList.toggle("dark", dark);
+          root.style.colorScheme = dark ? "dark" : "light";
+
+          var accent = localStorage.getItem("lms_accent");
+          if (accent && accent !== "emerald") root.setAttribute("data-accent", accent);
+
+          var wallpaper = localStorage.getItem("lms_wallpaper");
+          if (wallpaper && wallpaper !== "plain") {
+            root.setAttribute("data-wallpaper", wallpaper);
+          }
+
+          // "solid" is the default surface and needs no attribute at all.
+          var surface = localStorage.getItem("lms_surface");
+          if (surface === "frosted" || surface === "glass") {
+            root.setAttribute("data-surface", surface);
+          }
+
+          // "full" is the normal degree and needs no attribute at all.
+          var motion = localStorage.getItem("lms_motion");
+          if (motion === "reduced" || motion === "rich") {
+            root.setAttribute("data-motion", motion);
+          }
         } catch (e) {}
       })();
     </script>

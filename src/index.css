@@ -128,6 +128,1130 @@
 }
 
 /* ---------------------------------------------------------------------------
+   Accent palettes
+
+   The whole app paints itself with two ramps: emerald for primary surfaces
+   and amber for highlights, with teal as the far end of the gradients. The
+   theme picker re-declares exactly those three ramps under `data-accent`, so
+   ~1,100 accent class sites recolour without a single one being touched.
+
+   Each accent needs three blocks because the layers above already specialise
+   them: the plain light values, the low-alpha tints `.dark` uses for chips,
+   and the light values `.qd-ink` restores inside always-dark chrome. The
+   `:root.dark[...]` selectors outrank both `.dark` and `.dark .qd-ink`.
+--------------------------------------------------------------------------- */
+
+/* Ocean — blue primary, cyan highlight, sky gradient partner. */
+:root[data-accent="ocean"] {
+  --color-emerald-50: #eff6ff;
+  --color-emerald-100: #dbeafe;
+  --color-emerald-200: #bfdbfe;
+  --color-emerald-300: #93c5fd;
+  --color-emerald-400: #60a5fa;
+  --color-emerald-500: #3b82f6;
+  --color-emerald-600: #2563eb;
+  --color-emerald-700: #1d4ed8;
+  --color-emerald-800: #1e40af;
+  --color-emerald-900: #1e3a8a;
+  --color-emerald-950: #172554;
+
+  --color-amber-50: #ecfeff;
+  --color-amber-100: #cffafe;
+  --color-amber-200: #a5f3fc;
+  --color-amber-300: #67e8f9;
+  --color-amber-400: #22d3ee;
+  --color-amber-500: #06b6d4;
+  --color-amber-600: #0891b2;
+  --color-amber-700: #0e7490;
+  --color-amber-800: #155e75;
+  --color-amber-900: #164e63;
+  --color-amber-950: #083344;
+
+  --color-teal-50: #f0f9ff;
+  --color-teal-100: #e0f2fe;
+  --color-teal-300: #38bdf8;
+  --color-teal-400: #0ea5e9;
+  --color-teal-500: #0284c7;
+  --color-teal-600: #0369a1;
+  --color-teal-700: #075985;
+}
+
+:root.dark[data-accent="ocean"] {
+  --color-emerald-50: rgb(59 130 246 / 0.1);
+  --color-emerald-100: rgb(59 130 246 / 0.17);
+  --color-emerald-200: rgb(59 130 246 / 0.3);
+  --color-amber-50: rgb(34 211 238 / 0.11);
+  --color-amber-100: rgb(34 211 238 / 0.18);
+  --color-amber-200: rgb(34 211 238 / 0.32);
+  --color-teal-50: rgb(56 189 248 / 0.11);
+  --color-teal-100: rgb(56 189 248 / 0.18);
+}
+
+:root.dark[data-accent="ocean"] .qd-ink {
+  --color-emerald-50: #eff6ff;
+  --color-emerald-100: #dbeafe;
+  --color-emerald-200: #bfdbfe;
+  --color-amber-50: #ecfeff;
+  --color-amber-100: #cffafe;
+  --color-amber-200: #a5f3fc;
+  --color-teal-50: #f0f9ff;
+  --color-teal-100: #e0f2fe;
+}
+
+/* Amethyst — violet primary, fuchsia highlight, indigo gradient partner. */
+:root[data-accent="amethyst"] {
+  --color-emerald-50: #f5f3ff;
+  --color-emerald-100: #ede9fe;
+  --color-emerald-200: #ddd6fe;
+  --color-emerald-300: #c4b5fd;
+  --color-emerald-400: #a78bfa;
+  --color-emerald-500: #8b5cf6;
+  --color-emerald-600: #7c3aed;
+  --color-emerald-700: #6d28d9;
+  --color-emerald-800: #5b21b6;
+  --color-emerald-900: #4c1d95;
+  --color-emerald-950: #2e1065;
+
+  --color-amber-50: #fdf4ff;
+  --color-amber-100: #fae8ff;
+  --color-amber-200: #f5d0fe;
+  --color-amber-300: #f0abfc;
+  --color-amber-400: #e879f9;
+  --color-amber-500: #d946ef;
+  --color-amber-600: #c026d3;
+  --color-amber-700: #a21caf;
+  --color-amber-800: #86198f;
+  --color-amber-900: #701a75;
+  --color-amber-950: #4a044e;
+
+  --color-teal-50: #eef2ff;
+  --color-teal-100: #e0e7ff;
+  --color-teal-300: #a5b4fc;
+  --color-teal-400: #818cf8;
+  --color-teal-500: #6366f1;
+  --color-teal-600: #4f46e5;
+  --color-teal-700: #4338ca;
+}
+
+:root.dark[data-accent="amethyst"] {
+  --color-emerald-50: rgb(139 92 246 / 0.1);
+  --color-emerald-100: rgb(139 92 246 / 0.17);
+  --color-emerald-200: rgb(139 92 246 / 0.3);
+  --color-amber-50: rgb(232 121 249 / 0.11);
+  --color-amber-100: rgb(232 121 249 / 0.18);
+  --color-amber-200: rgb(232 121 249 / 0.32);
+  --color-teal-50: rgb(129 140 248 / 0.11);
+  --color-teal-100: rgb(129 140 248 / 0.18);
+}
+
+:root.dark[data-accent="amethyst"] .qd-ink {
+  --color-emerald-50: #f5f3ff;
+  --color-emerald-100: #ede9fe;
+  --color-emerald-200: #ddd6fe;
+  --color-amber-50: #fdf4ff;
+  --color-amber-100: #fae8ff;
+  --color-amber-200: #f5d0fe;
+  --color-teal-50: #eef2ff;
+  --color-teal-100: #e0e7ff;
+}
+
+/* Rose — rose primary, orange highlight, pink gradient partner. */
+:root[data-accent="rose"] {
+  --color-emerald-50: #fff1f2;
+  --color-emerald-100: #ffe4e6;
+  --color-emerald-200: #fecdd3;
+  --color-emerald-300: #fda4af;
+  --color-emerald-400: #fb7185;
+  --color-emerald-500: #f43f5e;
+  --color-emerald-600: #e11d48;
+  --color-emerald-700: #be123c;
+  --color-emerald-800: #9f1239;
+  --color-emerald-900: #881337;
+  --color-emerald-950: #4c0519;
+
+  --color-amber-50: #fff7ed;
+  --color-amber-100: #ffedd5;
+  --color-amber-200: #fed7aa;
+  --color-amber-300: #fdba74;
+  --color-amber-400: #fb923c;
+  --color-amber-500: #f97316;
+  --color-amber-600: #ea580c;
+  --color-amber-700: #c2410c;
+  --color-amber-800: #9a3412;
+  --color-amber-900: #7c2d12;
+  --color-amber-950: #431407;
+
+  --color-teal-50: #fdf2f8;
+  --color-teal-100: #fce7f3;
+  --color-teal-300: #f9a8d4;
+  --color-teal-400: #f472b6;
+  --color-teal-500: #ec4899;
+  --color-teal-600: #db2777;
+  --color-teal-700: #be185d;
+}
+
+:root.dark[data-accent="rose"] {
+  --color-emerald-50: rgb(244 63 94 / 0.1);
+  --color-emerald-100: rgb(244 63 94 / 0.17);
+  --color-emerald-200: rgb(244 63 94 / 0.3);
+  --color-amber-50: rgb(251 146 60 / 0.11);
+  --color-amber-100: rgb(251 146 60 / 0.18);
+  --color-amber-200: rgb(251 146 60 / 0.32);
+  --color-teal-50: rgb(244 114 182 / 0.11);
+  --color-teal-100: rgb(244 114 182 / 0.18);
+}
+
+:root.dark[data-accent="rose"] .qd-ink {
+  --color-emerald-50: #fff1f2;
+  --color-emerald-100: #ffe4e6;
+  --color-emerald-200: #fecdd3;
+  --color-amber-50: #fff7ed;
+  --color-amber-100: #ffedd5;
+  --color-amber-200: #fed7aa;
+  --color-teal-50: #fdf2f8;
+  --color-teal-100: #fce7f3;
+}
+
+/* Lagoon — teal primary, lime highlight, cyan gradient partner. */
+:root[data-accent="lagoon"] {
+  --color-emerald-50: #f0fdfa;
+  --color-emerald-100: #ccfbf1;
+  --color-emerald-200: #99f6e4;
+  --color-emerald-300: #5eead4;
+  --color-emerald-400: #2dd4bf;
+  --color-emerald-500: #14b8a6;
+  --color-emerald-600: #0d9488;
+  --color-emerald-700: #0f766e;
+  --color-emerald-800: #115e59;
+  --color-emerald-900: #134e4a;
+  --color-emerald-950: #042f2e;
+
+  --color-amber-50: #f7fee7;
+  --color-amber-100: #ecfccb;
+  --color-amber-200: #d9f99d;
+  --color-amber-300: #bef264;
+  --color-amber-400: #a3e635;
+  --color-amber-500: #84cc16;
+  --color-amber-600: #65a30d;
+  --color-amber-700: #4d7c0f;
+  --color-amber-800: #3f6212;
+  --color-amber-900: #365314;
+  --color-amber-950: #1a2e05;
+
+  --color-teal-50: #ecfeff;
+  --color-teal-100: #cffafe;
+  --color-teal-300: #67e8f9;
+  --color-teal-400: #22d3ee;
+  --color-teal-500: #06b6d4;
+  --color-teal-600: #0891b2;
+  --color-teal-700: #0e7490;
+}
+
+:root.dark[data-accent="lagoon"] {
+  --color-emerald-50: rgb(20 184 166 / 0.1);
+  --color-emerald-100: rgb(20 184 166 / 0.17);
+  --color-emerald-200: rgb(20 184 166 / 0.3);
+  --color-amber-50: rgb(163 230 53 / 0.11);
+  --color-amber-100: rgb(163 230 53 / 0.18);
+  --color-amber-200: rgb(163 230 53 / 0.32);
+  --color-teal-50: rgb(34 211 238 / 0.11);
+  --color-teal-100: rgb(34 211 238 / 0.18);
+}
+
+:root.dark[data-accent="lagoon"] .qd-ink {
+  --color-emerald-50: #f0fdfa;
+  --color-emerald-100: #ccfbf1;
+  --color-emerald-200: #99f6e4;
+  --color-amber-50: #f7fee7;
+  --color-amber-100: #ecfccb;
+  --color-amber-200: #d9f99d;
+  --color-teal-50: #ecfeff;
+  --color-teal-100: #cffafe;
+}
+
+/* Sunset — orange primary, gold highlight, rose gradient partner. */
+:root[data-accent="sunset"] {
+  --color-emerald-50: #fff7ed;
+  --color-emerald-100: #ffedd5;
+  --color-emerald-200: #fed7aa;
+  --color-emerald-300: #fdba74;
+  --color-emerald-400: #fb923c;
+  --color-emerald-500: #f97316;
+  --color-emerald-600: #ea580c;
+  --color-emerald-700: #c2410c;
+  --color-emerald-800: #9a3412;
+  --color-emerald-900: #7c2d12;
+  --color-emerald-950: #431407;
+
+  --color-amber-50: #fefce8;
+  --color-amber-100: #fef9c3;
+  --color-amber-200: #fef08a;
+  --color-amber-300: #fde047;
+  --color-amber-400: #facc15;
+  --color-amber-500: #eab308;
+  --color-amber-600: #ca8a04;
+  --color-amber-700: #a16207;
+  --color-amber-800: #854d0e;
+  --color-amber-900: #713f12;
+  --color-amber-950: #422006;
+
+  --color-teal-50: #fff1f2;
+  --color-teal-100: #ffe4e6;
+  --color-teal-300: #fda4af;
+  --color-teal-400: #fb7185;
+  --color-teal-500: #f43f5e;
+  --color-teal-600: #e11d48;
+  --color-teal-700: #be123c;
+}
+
+:root.dark[data-accent="sunset"] {
+  --color-emerald-50: rgb(249 115 22 / 0.1);
+  --color-emerald-100: rgb(249 115 22 / 0.17);
+  --color-emerald-200: rgb(249 115 22 / 0.3);
+  --color-amber-50: rgb(250 204 21 / 0.12);
+  --color-amber-100: rgb(250 204 21 / 0.19);
+  --color-amber-200: rgb(250 204 21 / 0.33);
+  --color-teal-50: rgb(251 113 133 / 0.11);
+  --color-teal-100: rgb(251 113 133 / 0.18);
+}
+
+:root.dark[data-accent="sunset"] .qd-ink {
+  --color-emerald-50: #fff7ed;
+  --color-emerald-100: #ffedd5;
+  --color-emerald-200: #fed7aa;
+  --color-amber-50: #fefce8;
+  --color-amber-100: #fef9c3;
+  --color-amber-200: #fef08a;
+  --color-teal-50: #fff1f2;
+  --color-teal-100: #ffe4e6;
+}
+
+/* Indigo — indigo primary, sky highlight, violet gradient partner. */
+:root[data-accent="indigo"] {
+  --color-emerald-50: #eef2ff;
+  --color-emerald-100: #e0e7ff;
+  --color-emerald-200: #c7d2fe;
+  --color-emerald-300: #a5b4fc;
+  --color-emerald-400: #818cf8;
+  --color-emerald-500: #6366f1;
+  --color-emerald-600: #4f46e5;
+  --color-emerald-700: #4338ca;
+  --color-emerald-800: #3730a3;
+  --color-emerald-900: #312e81;
+  --color-emerald-950: #1e1b4b;
+
+  --color-amber-50: #f0f9ff;
+  --color-amber-100: #e0f2fe;
+  --color-amber-200: #bae6fd;
+  --color-amber-300: #7dd3fc;
+  --color-amber-400: #38bdf8;
+  --color-amber-500: #0ea5e9;
+  --color-amber-600: #0284c7;
+  --color-amber-700: #0369a1;
+  --color-amber-800: #075985;
+  --color-amber-900: #0c4a6e;
+  --color-amber-950: #082f49;
+
+  --color-teal-50: #f5f3ff;
+  --color-teal-100: #ede9fe;
+  --color-teal-300: #c4b5fd;
+  --color-teal-400: #a78bfa;
+  --color-teal-500: #8b5cf6;
+  --color-teal-600: #7c3aed;
+  --color-teal-700: #6d28d9;
+}
+
+:root.dark[data-accent="indigo"] {
+  --color-emerald-50: rgb(99 102 241 / 0.11);
+  --color-emerald-100: rgb(99 102 241 / 0.18);
+  --color-emerald-200: rgb(99 102 241 / 0.31);
+  --color-amber-50: rgb(56 189 248 / 0.11);
+  --color-amber-100: rgb(56 189 248 / 0.18);
+  --color-amber-200: rgb(56 189 248 / 0.32);
+  --color-teal-50: rgb(167 139 250 / 0.11);
+  --color-teal-100: rgb(167 139 250 / 0.18);
+}
+
+:root.dark[data-accent="indigo"] .qd-ink {
+  --color-emerald-50: #eef2ff;
+  --color-emerald-100: #e0e7ff;
+  --color-emerald-200: #c7d2fe;
+  --color-amber-50: #f0f9ff;
+  --color-amber-100: #e0f2fe;
+  --color-amber-200: #bae6fd;
+  --color-teal-50: #f5f3ff;
+  --color-teal-100: #ede9fe;
+}
+
+/* Graphite — a sober monochrome register: slate, zinc and stone. */
+:root[data-accent="graphite"] {
+  --color-emerald-50: #f8fafc;
+  --color-emerald-100: #f1f5f9;
+  --color-emerald-200: #e2e8f0;
+  --color-emerald-300: #cbd5e1;
+  --color-emerald-400: #94a3b8;
+  --color-emerald-500: #64748b;
+  --color-emerald-600: #475569;
+  --color-emerald-700: #334155;
+  --color-emerald-800: #1e293b;
+  --color-emerald-900: #0f172a;
+  --color-emerald-950: #020617;
+
+  --color-amber-50: #fafafa;
+  --color-amber-100: #f4f4f5;
+  --color-amber-200: #e4e4e7;
+  --color-amber-300: #d4d4d8;
+  --color-amber-400: #a1a1aa;
+  --color-amber-500: #71717a;
+  --color-amber-600: #52525b;
+  --color-amber-700: #3f3f46;
+  --color-amber-800: #27272a;
+  --color-amber-900: #18181b;
+  --color-amber-950: #09090b;
+
+  --color-teal-50: #fafaf9;
+  --color-teal-100: #f5f5f4;
+  --color-teal-300: #d6d3d1;
+  --color-teal-400: #a8a29e;
+  --color-teal-500: #78716c;
+  --color-teal-600: #57534e;
+  --color-teal-700: #44403c;
+}
+
+:root.dark[data-accent="graphite"] {
+  --color-emerald-50: rgb(148 163 184 / 0.1);
+  --color-emerald-100: rgb(148 163 184 / 0.17);
+  --color-emerald-200: rgb(148 163 184 / 0.3);
+  --color-amber-50: rgb(161 161 170 / 0.11);
+  --color-amber-100: rgb(161 161 170 / 0.18);
+  --color-amber-200: rgb(161 161 170 / 0.32);
+  --color-teal-50: rgb(168 162 158 / 0.11);
+  --color-teal-100: rgb(168 162 158 / 0.18);
+}
+
+:root.dark[data-accent="graphite"] .qd-ink {
+  --color-emerald-50: #f8fafc;
+  --color-emerald-100: #f1f5f9;
+  --color-emerald-200: #e2e8f0;
+  --color-amber-50: #fafafa;
+  --color-amber-100: #f4f4f5;
+  --color-amber-200: #e4e4e7;
+  --color-teal-50: #fafaf9;
+  --color-teal-100: #f5f5f4;
+}
+
+/* ---------------------------------------------------------------------------
+   Motion degrees
+
+   The Animation control in the theme panel writes `data-motion` with one of
+   three values, and they are labelled Calm / Normal / Rich:
+
+     reduced  — the block below, everything settles at once
+     (unset)  — Normal, the base timings further down this file
+     rich     — longer springier entrances, wider stagger gaps, hover sheens
+
+   Easing and stagger gaps live in custom properties so a degree is two variable
+   changes rather than a hunt through every animation shorthand. Travelling
+   further needs its own keyframes, so `rich` also swaps in the `-rich` pairs.
+
+   Deliberately not tied to the OS `prefers-reduced-motion` media query: this
+   control is the user's own choice, and Windows turns that query on whenever
+   desktop animation is disabled, which would silently freeze the entrance
+   motion the rest of this file exists to provide.
+--------------------------------------------------------------------------- */
+
+:root {
+  --qd-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --qd-ease-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --qd-step: 70ms;
+  --qd-stagger-step: 60ms;
+}
+
+:root[data-motion="rich"] {
+  --qd-ease: var(--qd-ease-back);
+  --qd-step: 110ms;
+  --qd-stagger-step: 95ms;
+}
+
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before,
+:root[data-motion="reduced"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+@keyframes qd-fade-up-rich {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 34px, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes qd-slide-right-rich {
+  from {
+    opacity: 0;
+    transform: translate3d(-32px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes qd-scale-in-rich {
+  from {
+    opacity: 0;
+    transform: scale(0.84) rotate(-1.5deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes qd-pop-menu-rich {
+  from {
+    opacity: 0;
+    transform: scale(0.88) translate3d(0, -14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes qd-drawer-rich {
+  from {
+    opacity: 0.4;
+    transform: translate3d(100%, 0, 0) skewX(-3deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+:root[data-motion="rich"] .qd-fade-up {
+  animation: qd-fade-up-rich 0.95s var(--qd-ease) both;
+}
+
+:root[data-motion="rich"] .qd-slide-right {
+  animation: qd-slide-right-rich 0.85s var(--qd-ease) both;
+}
+
+:root[data-motion="rich"] .qd-scale-in {
+  animation: qd-scale-in-rich 0.8s var(--qd-ease) both;
+}
+
+:root[data-motion="rich"] .qd-pop {
+  animation: qd-pop 0.7s var(--qd-ease-back) both;
+}
+
+:root[data-motion="rich"] .qd-pop-tl,
+:root[data-motion="rich"] .qd-pop-tr {
+  animation: qd-pop-menu-rich 0.4s var(--qd-ease) both;
+}
+
+:root[data-motion="rich"] .qd-drawer {
+  animation: qd-drawer-rich 0.55s var(--qd-ease) both;
+}
+
+:root[data-motion="rich"] .qd-stagger > * {
+  animation: qd-fade-up-rich 0.9s var(--qd-ease) both;
+}
+
+:root[data-motion="rich"] .qd-stagger-side > * {
+  animation: qd-slide-right-rich 0.75s var(--qd-ease) both;
+}
+
+:root[data-motion="rich"] .qd-float {
+  animation-duration: 4.5s;
+}
+
+:root[data-motion="rich"] .qd-drift {
+  animation-duration: 15s;
+}
+
+:root[data-motion="rich"] .qd-drift-slow {
+  animation-duration: 21s;
+}
+
+/* A light bar that wipes across the surface on hover. Inert outside `rich`, so
+   pages can carry the class without committing to it. */
+:root[data-motion="rich"] .qd-sheen {
+  position: relative;
+  overflow: hidden;
+}
+
+:root[data-motion="rich"] .qd-sheen::after {
+  content: "";
+  position: absolute;
+  inset: -25% auto -25% 0;
+  width: 32%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 0.3),
+    transparent
+  );
+  transform: translateX(-150%) skewX(-18deg);
+  transition: transform 0.9s var(--qd-ease);
+  pointer-events: none;
+}
+
+:root[data-motion="rich"] .qd-sheen:hover::after,
+:root[data-motion="rich"] .qd-sheen:focus-within::after {
+  transform: translateX(360%) skewX(-18deg);
+}
+
+/* The white bar would flash over dark surfaces. `dark` lives on <html>, so the
+   selector has to hang both attributes off the same element. */
+:root[data-motion="rich"].dark .qd-sheen::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 0.12),
+    transparent
+  );
+}
+
+/* ---------------------------------------------------------------------------
+   Wallpapers
+
+   The Wallpaper control writes `data-wallpaper`. Only `.qd-canvas` reads it,
+   and that class goes on the shell element that already carries `bg-slate-50`
+   — painting the backdrop there means the artwork needs no extra layer, so the
+   fixed sidebar and the sticky header keep their own stacking order untouched.
+
+   Every gradient is mixed from the accent ramps, which is why a wallpaper
+   recolours along with the accent picker. Alphas stay low on purpose: gutters
+   and empty page space take the colour, and text never spends its contrast
+   budget on the backdrop because content always sits on a card.
+--------------------------------------------------------------------------- */
+
+/* Every wallpaper is declared twice — a light and a dark strength — and stored
+   under its own name. `data-wallpaper` only ever *points* at one of them, and
+   the picker tiles read the same variables, so a preview cannot drift away from
+   what the app paints, accent changes included. */
+:root {
+  --qd-wp-aurora: radial-gradient(
+      46rem 30rem at 6% -8%,
+      color-mix(in oklab, var(--color-emerald-500) 12%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      38rem 26rem at 98% 4%,
+      color-mix(in oklab, var(--color-amber-500) 10%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      44rem 34rem at 62% 108%,
+      color-mix(in oklab, var(--color-teal-500) 9%, transparent),
+      transparent 70%
+    );
+
+  --qd-wp-blueprint: repeating-linear-gradient(
+      to right,
+      color-mix(in oklab, var(--color-emerald-500) 7%, transparent) 0 1px,
+      transparent 1px 34px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-emerald-500) 7%, transparent) 0 1px,
+      transparent 1px 34px
+    );
+
+  --qd-wp-dots: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in oklab, var(--color-emerald-600) 14%, transparent) 1.4px,
+    transparent 2px
+  );
+  --qd-wp-dots-size: 22px 22px;
+
+  --qd-wp-beams: repeating-linear-gradient(
+    115deg,
+    transparent 0 30px,
+    color-mix(in oklab, var(--color-amber-500) 9%, transparent) 30px 31px,
+    transparent 31px 62px
+  );
+
+  --qd-wp-rings: repeating-radial-gradient(
+    circle at 4% 96%,
+    transparent 0 52px,
+    color-mix(in oklab, var(--color-emerald-500) 10%, transparent) 52px 53px
+  );
+
+  --qd-wp-tartan: repeating-linear-gradient(
+      45deg,
+      transparent 0 26px,
+      color-mix(in oklab, var(--color-emerald-500) 8%, transparent) 26px 29px,
+      transparent 29px 52px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0 26px,
+      color-mix(in oklab, var(--color-amber-500) 7%, transparent) 26px 29px,
+      transparent 29px 52px
+    );
+
+  /* Nature set. These keep their own foliage palette rather than following the
+     accent, because a meadow is green whatever the buttons are. The sunlight
+     blob is the one shared warm note. */
+  --qd-wp-meadow:
+    radial-gradient(
+      48rem 30rem at 10% 106%,
+      color-mix(in oklab, #34d399 15%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      40rem 26rem at 92% -6%,
+      color-mix(in oklab, #fde68a 19%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      30rem 22rem at 48% 108%,
+      color-mix(in oklab, #16a34a 11%, transparent),
+      transparent 68%
+    );
+
+  --qd-wp-hills:
+    radial-gradient(
+      70rem 26rem at 18% 114%,
+      color-mix(in oklab, #15803d 19%, transparent),
+      transparent 64%
+    ),
+    radial-gradient(
+      60rem 22rem at 86% 120%,
+      color-mix(in oklab, #166534 15%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      26rem 18rem at 80% 4%,
+      color-mix(in oklab, #fcd34d 17%, transparent),
+      transparent 70%
+    );
+
+  --qd-wp-sky:
+    radial-gradient(
+      46rem 28rem at 76% -8%,
+      color-mix(in oklab, #7dd3fc 21%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      38rem 24rem at 10% 2%,
+      color-mix(in oklab, #bae6fd 24%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      50rem 30rem at 52% 110%,
+      color-mix(in oklab, #86efac 13%, transparent),
+      transparent 68%
+    );
+
+  /* Grove — leaf shadows seen through a canopy. */
+  --qd-wp-grove:
+    radial-gradient(
+      30rem 22rem at 6% -6%,
+      color-mix(in oklab, #4ade80 13%, transparent),
+      transparent 66%
+    ),
+    radial-gradient(
+      26rem 20rem at 96% 14%,
+      color-mix(in oklab, #fbbf24 11%, transparent),
+      transparent 68%
+    ),
+    radial-gradient(
+      34rem 24rem at 62% 108%,
+      color-mix(in oklab, #14532d 15%, transparent),
+      transparent 66%
+    );
+}
+
+:root.dark {
+  --qd-wp-aurora: radial-gradient(
+      46rem 30rem at 6% -8%,
+      color-mix(in oklab, var(--color-emerald-500) 14%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      38rem 26rem at 98% 4%,
+      color-mix(in oklab, var(--color-amber-500) 12%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      44rem 34rem at 62% 108%,
+      color-mix(in oklab, var(--color-teal-500) 11%, transparent),
+      transparent 70%
+    );
+
+  --qd-wp-blueprint: repeating-linear-gradient(
+      to right,
+      color-mix(in oklab, var(--color-emerald-500) 12%, transparent) 0 1px,
+      transparent 1px 34px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-emerald-500) 12%, transparent) 0 1px,
+      transparent 1px 34px
+    );
+
+  --qd-wp-dots: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in oklab, var(--color-emerald-400) 20%, transparent) 1.4px,
+    transparent 2px
+  );
+
+  --qd-wp-beams: repeating-linear-gradient(
+    115deg,
+    transparent 0 30px,
+    color-mix(in oklab, var(--color-amber-500) 13%, transparent) 30px 31px,
+    transparent 31px 62px
+  );
+
+  --qd-wp-rings: repeating-radial-gradient(
+    circle at 4% 96%,
+    transparent 0 52px,
+    color-mix(in oklab, var(--color-emerald-500) 15%, transparent) 52px 53px
+  );
+
+  --qd-wp-tartan: repeating-linear-gradient(
+      45deg,
+      transparent 0 26px,
+      color-mix(in oklab, var(--color-emerald-500) 13%, transparent) 26px 29px,
+      transparent 29px 52px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0 26px,
+      color-mix(in oklab, var(--color-amber-500) 11%, transparent) 26px 29px,
+      transparent 29px 52px
+    );
+
+  /* The same four scenes after dusk: foliage becomes the light source, so the
+     alphas stay in the aurora band (≤18%) and the warm note goes from sunlight
+     to lamplight. */
+  --qd-wp-meadow:
+    radial-gradient(
+      48rem 30rem at 10% 106%,
+      color-mix(in oklab, #34d399 17%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      40rem 26rem at 92% -6%,
+      color-mix(in oklab, #fcd34d 12%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      30rem 22rem at 48% 108%,
+      color-mix(in oklab, #10b981 14%, transparent),
+      transparent 68%
+    );
+
+  --qd-wp-hills:
+    radial-gradient(
+      70rem 26rem at 18% 114%,
+      color-mix(in oklab, #22c55e 15%, transparent),
+      transparent 64%
+    ),
+    radial-gradient(
+      60rem 22rem at 86% 120%,
+      color-mix(in oklab, #4ade80 11%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      26rem 18rem at 80% 4%,
+      color-mix(in oklab, #fbbf24 13%, transparent),
+      transparent 70%
+    );
+
+  --qd-wp-sky:
+    radial-gradient(
+      46rem 28rem at 76% -8%,
+      color-mix(in oklab, #38bdf8 16%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      38rem 24rem at 10% 2%,
+      color-mix(in oklab, #818cf8 14%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      50rem 30rem at 52% 110%,
+      color-mix(in oklab, #22d3ee 11%, transparent),
+      transparent 68%
+    );
+
+  --qd-wp-grove:
+    radial-gradient(
+      30rem 22rem at 6% -6%,
+      color-mix(in oklab, #4ade80 15%, transparent),
+      transparent 66%
+    ),
+    radial-gradient(
+      26rem 20rem at 96% 14%,
+      color-mix(in oklab, #fde68a 10%, transparent),
+      transparent 68%
+    ),
+    radial-gradient(
+      34rem 24rem at 62% 108%,
+      color-mix(in oklab, #16a34a 18%, transparent),
+      transparent 66%
+    );
+}
+
+.qd-canvas {
+  background-image: var(--qd-wallpaper, none);
+  background-repeat: var(--qd-wallpaper-repeat, no-repeat);
+  background-size: var(--qd-wallpaper-size, auto);
+  background-attachment: fixed;
+}
+
+:root[data-wallpaper="aurora"] {
+  --qd-wallpaper: var(--qd-wp-aurora);
+}
+
+:root[data-wallpaper="blueprint"] {
+  --qd-wallpaper: var(--qd-wp-blueprint);
+}
+
+:root[data-wallpaper="dots"] {
+  --qd-wallpaper: var(--qd-wp-dots);
+  --qd-wallpaper-size: var(--qd-wp-dots-size);
+  --qd-wallpaper-repeat: repeat;
+}
+
+:root[data-wallpaper="beams"] {
+  --qd-wallpaper: var(--qd-wp-beams);
+}
+
+:root[data-wallpaper="rings"] {
+  --qd-wallpaper: var(--qd-wp-rings);
+}
+
+:root[data-wallpaper="tartan"] {
+  --qd-wallpaper: var(--qd-wp-tartan);
+}
+
+:root[data-wallpaper="meadow"] {
+  --qd-wallpaper: var(--qd-wp-meadow);
+}
+
+:root[data-wallpaper="hills"] {
+  --qd-wallpaper: var(--qd-wp-hills);
+}
+
+:root[data-wallpaper="sky"] {
+  --qd-wallpaper: var(--qd-wp-sky);
+}
+
+:root[data-wallpaper="grove"] {
+  --qd-wallpaper: var(--qd-wp-grove);
+}
+
+/* ---------------------------------------------------------------------------
+   Animated backdrop
+
+   A wallpaper is a background image, so by itself it can never move, and panning
+   one with `background-size` repaints the whole backdrop every frame. Instead the
+   shell carries its own layer of accent light that drifts on the compositor:
+   `.qd-canvas` is isolated so a negative z-index child lands *above* the shell's
+   colour and wallpaper but *below* every card. That is what gives a translucent
+   Surface something living to show, and it works with any wallpaper — including
+   Plain.
+
+   The pools are `fixed` and oversized by 30% of the viewport on each side, so
+   they can travel without ever exposing an edge. The animation durations come
+   from the same `--qd-step` ladder as everything else... except they must not: a
+   36s loop is the effect, so it is written out. Calm stops it through the global
+   reduced-motion guard, which leaves a still wash — indistinguishable from a
+   plain wallpaper.
+--------------------------------------------------------------------------- */
+
+.qd-canvas {
+  position: relative;
+  isolation: isolate;
+}
+
+.qd-canvas::before {
+  content: "";
+  position: fixed;
+  inset: -30vh -30vw;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(
+      34rem 26rem at 22% 28%,
+      color-mix(in oklab, var(--color-emerald-500) 13%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      30rem 22rem at 74% 66%,
+      color-mix(in oklab, var(--color-amber-500) 11%, transparent),
+      transparent 64%
+    );
+  animation: qd-bg-drift 36s ease-in-out infinite alternate;
+}
+
+/* Dark shells swallow a pale pool, so the same two blooms carry a little more
+   of the accent. */
+:root.dark .qd-canvas::before {
+  background-image: radial-gradient(
+      34rem 26rem at 22% 28%,
+      color-mix(in oklab, var(--color-emerald-500) 17%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      30rem 22rem at 74% 66%,
+      color-mix(in oklab, var(--color-amber-500) 14%, transparent),
+      transparent 64%
+    );
+}
+
+/* Rich adds a second pool sweeping the other way, and the parallax between the
+   two is what reads as depth rather than as a screensaver. */
+:root[data-motion="rich"] .qd-canvas::before {
+  animation-duration: 26s;
+}
+
+:root[data-motion="rich"] .qd-canvas::after {
+  content: "";
+  position: fixed;
+  inset: -30vh -30vw;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(
+      28rem 22rem at 64% 18%,
+      color-mix(in oklab, var(--color-teal-500) 12%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      26rem 20rem at 18% 82%,
+      color-mix(in oklab, var(--color-emerald-600) 10%, transparent),
+      transparent 62%
+    );
+  animation: qd-bg-sweep 30s ease-in-out infinite alternate;
+}
+
+@keyframes qd-bg-drift {
+  from {
+    transform: translate3d(-5%, -3%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(5%, 4%, 0) scale(1.14);
+  }
+}
+
+@keyframes qd-bg-sweep {
+  from {
+    transform: translate3d(6%, 3%, 0) scale(1.08);
+  }
+  to {
+    transform: translate3d(-6%, -4%, 0) scale(1);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Surface: how much of the backdrop is allowed through the cards.
+
+   `data-surface` is unset for Solid, so only the two transparent degrees are
+   declared. Each one sets a colour and a blur rather than carrying its own rule
+   block — every surface then shares the single selector list below, which keeps
+   the specificity (and the resets for chrome that must stay opaque) in one spot.
+--------------------------------------------------------------------------- */
+
+:root[data-surface="frosted"] {
+  --qd-surface: rgb(255 255 255 / 0.8);
+  --qd-surface-blur: blur(6px) saturate(1.2);
+}
+:root[data-surface="glass"] {
+  --qd-surface: rgb(255 255 255 / 0.6);
+  --qd-surface-blur: blur(14px) saturate(1.5);
+}
+:root.dark[data-surface="frosted"] {
+  --qd-surface: rgb(16 26 36 / 0.78);
+  --qd-surface-blur: blur(6px) saturate(1.15);
+}
+:root.dark[data-surface="glass"] {
+  --qd-surface: rgb(16 26 36 / 0.56);
+  --qd-surface-blur: blur(14px) saturate(1.3);
+}
+
+:root[data-surface] .bg-card {
+  background-color: var(--qd-surface);
+  -webkit-backdrop-filter: var(--qd-surface-blur);
+  backdrop-filter: var(--qd-surface-blur);
+}
+
+/* Two surfaces have to stay opaque no matter what, and both are heavier than
+   the rule above because they add a class:
+   - `.qd-ink` chrome (sidebar, hero cards, sign-in brand panel) restores a
+     white `--color-card` for the light chips inside it.
+   - A modal panel is a `bg-card` sitting on a dark scrim, not on the canvas —
+     blurring it would turn the sheet grey behind near-black text. */
+:root[data-surface] .qd-ink .bg-card,
+:root[data-surface] .fixed .bg-card {
+  background-color: var(--color-card);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* A translucent card blends its caption text with the wallpaper behind it, which
+   costs a muted colour most of its margin: slate-500 on Glass over the darkest
+   nature bloom lands at 4.2:1. The same variable the utilities already use is
+   pushed one step darker while any transparent degree is on, so every caption
+   inherits the budget back (6.3:1) without a single class changing. Dark mode
+   needs none of this — there the muted ramp is already the light end. */
+:root[data-surface]:not(.dark) {
+  --color-slate-500: #475569;
+}
+
+/* The sticky header already lets the page scroll under it, so on a transparent
+   degree it joins the cards — same colour, same blur, one variable each. */
+:root[data-surface] .qd-bar {
+  background-color: var(--qd-surface);
+  -webkit-backdrop-filter: var(--qd-surface-blur);
+  backdrop-filter: var(--qd-surface-blur);
+}
+
+/* The sidebar is dark in both palettes, so it gets its own alpha instead of the
+   card colour — and it stays much more opaque than a card ever would. Its nav
+   labels are `emerald-100` at 65% on a near-black panel, which is 7:1 there and
+   only 3.8:1 if the light canvas shows through at 0.7; at 0.86 they keep 6:1 and
+   the drifting pools still read behind the crest. */
+:root[data-surface="frosted"] {
+  --qd-side: linear-gradient(
+    to bottom,
+    rgb(2 44 34 / 0.94),
+    rgb(2 44 34 / 0.92),
+    rgb(2 6 23 / 0.94)
+  );
+  --qd-side-blur: blur(6px);
+}
+:root[data-surface="glass"] {
+  --qd-side: linear-gradient(
+    to bottom,
+    rgb(2 44 34 / 0.86),
+    rgb(2 44 34 / 0.86),
+    rgb(2 6 23 / 0.88)
+  );
+  --qd-side-blur: blur(14px) saturate(1.3);
+}
+
+:root[data-surface] .qd-side {
+  background-image: var(--qd-side);
+  -webkit-backdrop-filter: var(--qd-side-blur);
+  backdrop-filter: var(--qd-side-blur);
+}
+
+
+/* ---------------------------------------------------------------------------
    Shared motion layer for the sign-in page and every role dashboard.
 
    The colour system is emerald (school crest) with amber highlights on slate,
@@ -263,7 +1387,7 @@
 }
 
 .qd-fade-up {
-  animation: qd-fade-up 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation: qd-fade-up 0.6s var(--qd-ease) both;
 }
 
 .qd-fade-in {
@@ -271,15 +1395,50 @@
 }
 
 .qd-scale-in {
-  animation: qd-scale-in 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation: qd-scale-in 0.45s var(--qd-ease) both;
 }
 
 .qd-slide-right {
-  animation: qd-slide-right 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation: qd-slide-right 0.5s var(--qd-ease) both;
+}
+
+.qd-drawer {
+  animation: qd-drawer 0.35s var(--qd-ease) both;
+}
+
+@keyframes qd-drawer {
+  from {
+    transform: translate3d(100%, 0, 0);
+  }
+  to {
+    transform: none;
+  }
 }
 
 .qd-pop {
-  animation: qd-pop 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation: qd-pop 0.5s var(--qd-ease) both;
+}
+
+/* Menus and popovers hinge from wherever they are anchored, not from centre. */
+.qd-pop-tl {
+  animation: qd-pop-menu 0.28s var(--qd-ease) both;
+  transform-origin: top left;
+}
+
+.qd-pop-tr {
+  animation: qd-pop-menu 0.28s var(--qd-ease) both;
+  transform-origin: top right;
+}
+
+@keyframes qd-pop-menu {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translate3d(0, -8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .qd-float {
@@ -303,61 +1462,61 @@
 }
 
 .qd-d-1 {
-  animation-delay: 70ms;
+  animation-delay: calc(var(--qd-step) * 1);
 }
 .qd-d-2 {
-  animation-delay: 140ms;
+  animation-delay: calc(var(--qd-step) * 2);
 }
 .qd-d-3 {
-  animation-delay: 210ms;
+  animation-delay: calc(var(--qd-step) * 3);
 }
 .qd-d-4 {
-  animation-delay: 280ms;
+  animation-delay: calc(var(--qd-step) * 4);
 }
 .qd-d-5 {
-  animation-delay: 350ms;
+  animation-delay: calc(var(--qd-step) * 5);
 }
 .qd-d-6 {
-  animation-delay: 420ms;
+  animation-delay: calc(var(--qd-step) * 6);
 }
 .qd-d-7 {
-  animation-delay: 490ms;
+  animation-delay: calc(var(--qd-step) * 7);
 }
 .qd-d-8 {
-  animation-delay: 560ms;
+  animation-delay: calc(var(--qd-step) * 8);
 }
 
 /* Cascade the children of a grid, list or nav without counting them out. */
 .qd-stagger > * {
-  animation: qd-fade-up 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation: qd-fade-up 0.55s var(--qd-ease) both;
 }
 
 .qd-stagger > *:nth-child(1) {
-  animation-delay: 40ms;
+  animation-delay: calc(var(--qd-stagger-step) * 1);
 }
 .qd-stagger > *:nth-child(2) {
-  animation-delay: 100ms;
+  animation-delay: calc(var(--qd-stagger-step) * 2);
 }
 .qd-stagger > *:nth-child(3) {
-  animation-delay: 160ms;
+  animation-delay: calc(var(--qd-stagger-step) * 3);
 }
 .qd-stagger > *:nth-child(4) {
-  animation-delay: 220ms;
+  animation-delay: calc(var(--qd-stagger-step) * 4);
 }
 .qd-stagger > *:nth-child(5) {
-  animation-delay: 280ms;
+  animation-delay: calc(var(--qd-stagger-step) * 5);
 }
 .qd-stagger > *:nth-child(6) {
-  animation-delay: 340ms;
+  animation-delay: calc(var(--qd-stagger-step) * 6);
 }
 .qd-stagger > *:nth-child(7) {
-  animation-delay: 400ms;
+  animation-delay: calc(var(--qd-stagger-step) * 7);
 }
 .qd-stagger > *:nth-child(8) {
-  animation-delay: 460ms;
+  animation-delay: calc(var(--qd-stagger-step) * 8);
 }
 .qd-stagger > *:nth-child(n + 9) {
-  animation-delay: 520ms;
+  animation-delay: calc(var(--qd-stagger-step) * 9);
 }
 
 /* Animated sheen for loading placeholders: pair with overflow-hidden. */
@@ -380,18 +1539,24 @@
   animation: qd-shimmer 1.6s ease-in-out infinite;
 }
 
-/* Moving emerald gradient used by the primary sign-in button. */
+/* Moving gradient used by the primary sign-in button. Built from the accent
+   ramps so it recolours with the picker; -600/-700 are the one end of a ramp
+   that dark mode never remaps, so the button keeps its depth in both themes. */
 .qd-gradient {
   background-image: linear-gradient(
     110deg,
-    #047857,
-    #059669,
-    #0d9488,
-    #059669,
-    #047857
+    var(--color-emerald-700),
+    var(--color-emerald-600),
+    var(--color-teal-600),
+    var(--color-emerald-600),
+    var(--color-emerald-700)
   );
   background-size: 200% 100%;
   animation: qd-gradient-pan 7s linear infinite;
+}
+
+:root[data-motion="rich"] .qd-gradient {
+  animation-duration: 4.5s;
 }
 
 /* ---------------------------------------------------------------------------
@@ -477,7 +1642,7 @@
 
 .qd-word {
   display: inline-block;
-  animation: qd-word-rise 0.75s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation: qd-word-rise 0.75s var(--qd-ease) both;
 }
 
 .qd-curtain-out {
@@ -494,7 +1659,7 @@
 
 .qd-line {
   transform-origin: center;
-  animation: qd-line-grow 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation: qd-line-grow 0.9s var(--qd-ease) both;
 }
 
 /* Progress track inside the reveal badge. */
@@ -526,35 +1691,35 @@
 
 /* Sidebar nav cascade: children slide in from the crest side. */
 .qd-stagger-side > * {
-  animation: qd-slide-right 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation: qd-slide-right 0.45s var(--qd-ease) both;
 }
 
 .qd-stagger-side > *:nth-child(1) {
-  animation-delay: 60ms;
+  animation-delay: calc(var(--qd-stagger-step) * 1);
 }
 .qd-stagger-side > *:nth-child(2) {
-  animation-delay: 110ms;
+  animation-delay: calc(var(--qd-stagger-step) * 2);
 }
 .qd-stagger-side > *:nth-child(3) {
-  animation-delay: 160ms;
+  animation-delay: calc(var(--qd-stagger-step) * 3);
 }
 .qd-stagger-side > *:nth-child(4) {
-  animation-delay: 210ms;
+  animation-delay: calc(var(--qd-stagger-step) * 4);
 }
 .qd-stagger-side > *:nth-child(5) {
-  animation-delay: 260ms;
+  animation-delay: calc(var(--qd-stagger-step) * 5);
 }
 .qd-stagger-side > *:nth-child(6) {
-  animation-delay: 310ms;
+  animation-delay: calc(var(--qd-stagger-step) * 6);
 }
 .qd-stagger-side > *:nth-child(7) {
-  animation-delay: 360ms;
+  animation-delay: calc(var(--qd-stagger-step) * 7);
 }
 .qd-stagger-side > *:nth-child(8) {
-  animation-delay: 410ms;
+  animation-delay: calc(var(--qd-stagger-step) * 8);
 }
 .qd-stagger-side > *:nth-child(n + 9) {
-  animation-delay: 460ms;
+  animation-delay: calc(var(--qd-stagger-step) * 9);
 }
 
 html {
@@ -611,15 +1776,4 @@ body {
 
 .dark .leaflet-control-attribution a {
   color: #34d399;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: 0.001ms !important;
-  }
 }

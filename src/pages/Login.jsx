@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import SchoolBrand from "../components/SchoolBrand";
 import ThemeToggle from "../components/ThemeToggle";
+import ThemeSettings from "../components/ThemeSettings";
 import { useAuth } from "../context/AuthContext";
 
 const roles = [
@@ -120,7 +121,7 @@ export default function Login() {
   return (
     /* The auth screens are one fixed viewport tall: only the form column
        scrolls, and only when the window is shorter than the card. */
-    <main className="relative h-dvh overflow-hidden bg-slate-50 lg:grid lg:grid-cols-[1.05fr_1fr]">
+    <main className="qd-canvas relative h-dvh overflow-hidden bg-slate-50 lg:grid lg:grid-cols-[1.05fr_1fr]">
       {/* Brand panel */}
       <section className="qd-ink relative hidden overflow-hidden bg-emerald-950 p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-12">
         <div className="qd-drift absolute -right-28 -top-28 h-[26rem] w-[26rem] rounded-full bg-emerald-500/25 blur-3xl" />
@@ -179,8 +180,9 @@ export default function Login() {
         <div className="qd-drift absolute -right-24 -top-24 h-72 w-72 rounded-full bg-emerald-200/50 blur-3xl" />
         <div className="qd-drift-slow absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-amber-200/50 blur-3xl" />
 
-        <div className="qd-fade-up absolute right-4 top-4 sm:right-7 sm:top-6">
+        <div className="qd-fade-up absolute right-4 top-4 flex items-center gap-2 sm:right-7 sm:top-6">
           <ThemeToggle />
+          <ThemeSettings />
         </div>
 
         <div className="qd-scrollbar relative max-h-full w-full max-w-md overflow-y-auto overscroll-contain py-1">
@@ -201,7 +203,7 @@ export default function Login() {
               Sign in to your school portal
             </h2>
 
-            <p className="mt-1 text-xs leading-4 text-slate-500">
+            <p className="mt-1 text-xs leading-4 text-slate-600">
               The same school code works for every portal.
             </p>
           </div>

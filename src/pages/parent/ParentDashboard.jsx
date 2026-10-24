@@ -9,7 +9,9 @@ import {
   CalendarClock,
   ClipboardList,
   Bell,
+  Newspaper,
   Wallet,
+  GraduationCap,
   Settings,
   FileText,
 } from "lucide-react";
@@ -64,9 +66,19 @@ const navigation = [
     icon: Bell,
   },
   {
+    name: "Blog",
+    path: "/parent/blog",
+    icon: Newspaper,
+  },
+  {
     name: "Fees",
     path: "/parent/fees",
     icon: Wallet,
+  },
+  {
+    name: "Results",
+    path: "/parent/results",
+    icon: GraduationCap,
   },
   {
     name: "Queries",
