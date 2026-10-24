@@ -14,12 +14,14 @@ import {
   Wallet,
   Newspaper,
   Settings,
+  Building2,
 } from "lucide-react";
 
 import PortalShell from "./PortalShell";
 
 const navigation = [
   { name: "Dashboard", path: "/admin", icon: LayoutDashboard, end: true },
+  { name: "School Profile", path: "/admin/school", icon: Building2 },
   { name: "School Blog", path: "/admin/blog", icon: Newspaper },
   { name: "Settings", path: "/admin/settings", icon: Settings },
 ];

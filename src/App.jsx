@@ -57,6 +57,7 @@ import AdminStudents from "./pages/admin/Students";
 import AdminTeachers from "./pages/admin/Teachers";
 import AdminParents from "./pages/admin/Parents";
 import AdminPermissions from "./pages/admin/Permissions";
+import AdminSchoolProfile from "./pages/admin/SchoolProfile";
 import AdminUsers from "./pages/admin/Users";
 import AdminLibrary from "./pages/admin/Library";
 import AdminFees from "./pages/admin/Fees";
@@ -236,6 +237,7 @@ export default function App() {
           <Route path="fees" element={<AdminFees />} />
           <Route path="results" element={<AdminResults />} />
           <Route path="permissions" element={<AdminPermissions />} />
+          <Route path="school" element={<AdminSchoolProfile />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="blog" element={<AdminBlog />} />
           <Route path="settings" element={<AccountSettings />} />
