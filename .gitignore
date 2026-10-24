@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# The API URL is public, but keep the habit: local config never gets published.
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
