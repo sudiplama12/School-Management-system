@@ -17,6 +17,7 @@ import {
   CalendarClock,
   ClipboardCheck,
   GraduationCap,
+  Settings,
 } from "lucide-react";
 
 import {
@@ -89,6 +90,11 @@ const navigation = [
     name: "Blog",
     path: "/teacher/blog",
     icon: Newspaper,
+  },
+  {
+    name: "Settings",
+    path: "/teacher/settings",
+    icon: Settings,
   },
 ];
 

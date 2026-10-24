@@ -13,6 +13,7 @@ import {
   RotateCcw,
   Wallet,
   Newspaper,
+  Settings,
 } from "lucide-react";
 
 import PortalShell from "./PortalShell";
@@ -20,6 +21,7 @@ import PortalShell from "./PortalShell";
 const navigation = [
   { name: "Dashboard", path: "/admin", icon: LayoutDashboard, end: true },
   { name: "School Blog", path: "/admin/blog", icon: Newspaper },
+  { name: "Settings", path: "/admin/settings", icon: Settings },
 ];
 
 const groups = [

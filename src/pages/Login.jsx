@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   GraduationCap,
   Mail,
@@ -43,7 +43,12 @@ const portals = [
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, requestReveal } = useAuth();
+
+  // Changing a password ends the session that made the change, so this screen is
+  // where the confirmation has to appear.
+  const notice = location.state?.notice;
 
   const [schoolCode, setSchoolCode] = useState("");
   const [identifier, setIdentifier] = useState("");
@@ -331,6 +336,16 @@ export default function Login() {
                 </button>
               </div>
             </div>
+
+            {notice && !error && (
+              <div
+                role="status"
+                className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-[13px] text-emerald-700 dark:text-emerald-300"
+              >
+                <ShieldCheck size={16} className="mt-0.5 shrink-0" />
+                <span>{notice}</span>
+              </div>
+            )}
 
             {error && (
               <div

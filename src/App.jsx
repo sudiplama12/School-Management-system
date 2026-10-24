@@ -65,6 +65,7 @@ import AdminBlog from "./pages/admin/Blog";
 import AdminStudentAttendance from "./pages/admin/StudentAttendance";
 import AdminTeacherAttendance from "./pages/admin/TeacherAttendance";
 import BlogFeed from "./pages/shared/BlogFeed";
+import AccountSettings from "./pages/shared/AccountSettings";
 
 // Temporary placeholder for pages not built yet
 function Placeholder({ title }) {  return (
@@ -150,7 +151,7 @@ export default function App() {
           <Route path="location" element={<Placeholder title="My Location" />} />
           <Route path="assignments" element={<StudentAssignments />} />
           <Route path="assignments/take" element={<TakeAssignment />} />
-          <Route path="settings" element={<Placeholder title="Settings" />} />
+          <Route path="settings" element={<AccountSettings />} />
         </Route>
 
         {/* Teacher */}
@@ -182,7 +183,7 @@ export default function App() {
           <Route path="vacancies" element={<Placeholder title="Vacancies" />} />
           <Route path="applications" element={<Placeholder title="Applications" />} />
           <Route path="profile" element={<Placeholder title="Teacher Profile" />} />
-          <Route path="settings" element={<Placeholder title="Teacher Settings" />} />
+          <Route path="settings" element={<AccountSettings />} />
         </Route>
 
         {/* Parent */}
@@ -237,6 +238,7 @@ export default function App() {
           <Route path="permissions" element={<AdminPermissions />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="blog" element={<AdminBlog />} />
+          <Route path="settings" element={<AccountSettings />} />
         </Route>
 
         {/* Default routes */}

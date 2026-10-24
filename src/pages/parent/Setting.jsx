@@ -1,4 +1,6 @@
-import { Settings, Bell, MapPin } from "lucide-react";
+import { Bell, MapPin } from "lucide-react";
+
+import ChangePassword from "../shared/ChangePassword";
 
 export default function SettingsPage() {
   return (
@@ -22,11 +24,7 @@ export default function SettingsPage() {
           description="Allow teachers to request your child's home location."
         />
 
-        <Setting
-          icon={Settings}
-          title="Account Settings"
-          description="Manage your parent account."
-        />
+        <ChangePassword />
 
       </div>
 
