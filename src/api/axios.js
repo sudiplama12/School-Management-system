@@ -1,10 +1,10 @@
 import axios from "axios";
 
+// No default Content-Type: axios keeps one it finds, and with
+// "application/json" set here it JSON-stringifies FormData and silently drops
+// every file part. Plain objects still get application/json automatically.
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 api.interceptors.request.use(
