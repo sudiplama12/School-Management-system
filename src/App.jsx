@@ -36,7 +36,6 @@ import ParentVisitHistory from "./pages/parent/VisitHistory";
 import ParentVisitRequests from "./pages/parent/VisitRequests";
 import ParentSettings from "./pages/parent/Setting";
 import ParentQueries from "./pages/parent/Queries";
-import ParentLocationRequests from "./pages/parent/LocationRequests";
 import ParentStudentDetails from "./pages/parent/StudentDetails";
 import ParentAttendance from "./pages/parent/Attendence";
 import ParentFees from "./pages/parent/Fees";
@@ -47,6 +46,7 @@ import ParentStudentLocation from "./pages/parent/StudentLocation";
 import ActiveVisit from "./pages/teacher/HomeVisit/ActiveVisit";
 import VisitLocation from "./pages/teacher/HomeVisit/Location";
 import StudentLocationMap from "./pages/teacher/HomeVisit/StudentLocation";
+import RoutePlanner from "./pages/teacher/HomeVisit/RoutePlanner";
 import UpcomingVisits from "./pages/teacher/HomeVisit/Upcoming";
 import TeacherVisitHistory from "./pages/teacher/HomeVisit/VisitHistory";
 
@@ -67,6 +67,7 @@ import AdminStudentAttendance from "./pages/admin/StudentAttendance";
 import AdminTeacherAttendance from "./pages/admin/TeacherAttendance";
 import BlogFeed from "./pages/shared/BlogFeed";
 import AccountSettings from "./pages/shared/AccountSettings";
+import LocationRequests from "./pages/shared/LocationRequests";
 
 // Temporary placeholder for pages not built yet
 function Placeholder({ title }) {  return (
@@ -149,7 +150,7 @@ export default function App() {
           <Route path="library" element={<StudentLibrary />} />
           <Route path="fee" element={<StudentFee />} />
           <Route path="results" element={<StudentResults />} />
-          <Route path="location" element={<Placeholder title="My Location" />} />
+          <Route path="location" element={<LocationRequests />} />
           <Route path="assignments" element={<StudentAssignments />} />
           <Route path="assignments/take" element={<TakeAssignment />} />
           <Route path="settings" element={<AccountSettings />} />
@@ -177,6 +178,7 @@ export default function App() {
           <Route path="visits/active" element={<ActiveVisit />} />
           <Route path="visits/location" element={<VisitLocation />} />
           <Route path="visits/student-location" element={<StudentLocationMap />} />
+          <Route path="visits/route" element={<RoutePlanner />} />
           <Route path="visits/upcoming" element={<UpcomingVisits />} />
           <Route path="visits/history" element={<TeacherVisitHistory />} />
           <Route path="visits/map" element={<Placeholder title="Visit Map" />} />
@@ -199,8 +201,8 @@ export default function App() {
           <Route index element={<ParentHome />} />
           <Route path="student" element={<ParentStudentDetails />} />
           <Route path="student-location" element={<ParentStudentLocation />} />
-          <Route path="location-requests" element={<ParentLocationRequests />} />
-          <Route path="location-request" element={<ParentLocationRequests />} />
+          <Route path="location-requests" element={<LocationRequests />} />
+          <Route path="location-request" element={<LocationRequests />} />
           <Route path="visits" element={<ParentVisitHistory />} />
           <Route path="visit-requests" element={<ParentVisitRequests />} />
           <Route path="attendance" element={<ParentAttendance />} />

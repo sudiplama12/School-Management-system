@@ -99,6 +99,11 @@ const navigation = [
     icon: CreditCard,
   },
   {
+    name: "My Location",
+    path: "/student/location",
+    icon: MapPin,
+  },
+  {
     name: "Settings",
     path: "/student/settings",
     icon: Settings,

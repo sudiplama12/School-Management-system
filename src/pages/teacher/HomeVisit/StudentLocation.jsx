@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Search,
   MapPin,
@@ -13,6 +14,7 @@ import { useAuth } from "../../../context/AuthContext";
 
 export default function StudentLocation() {
   const { user, teacherId } = useAuth();
+  const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
   const [students, setStudents] = useState([]);
@@ -89,7 +91,7 @@ export default function StudentLocation() {
         teacherName: user?.name,
         studentId: student.id,
         studentName: student.name,
-        reason: "Home visit location request",
+        reason: "Home visit — please share the current location",
         status: "pending",
       });
 
@@ -275,10 +277,13 @@ export default function StudentLocation() {
 
                   {status === "approved" && (
                     <button
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-100 px-4 py-3 text-sm font-semibold text-emerald-700 dark:text-emerald-300"
+                      onClick={() =>
+                        navigate(`/teacher/visits/route?student=${student.id}`)
+                      }
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
                     >
                       <MapPin className="h-4 w-4" />
-                      View Location
+                      View Location & Route
                     </button>
                   )}
                 </div>

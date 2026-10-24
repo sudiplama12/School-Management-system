@@ -14,6 +14,7 @@ import {
   FilePen,
   History,
   Navigation,
+  Route,
   CalendarClock,
   ClipboardCheck,
   GraduationCap,
@@ -107,6 +108,16 @@ const homeVisitNavigation = [
     name: "Student Location",
     path: "/teacher/visits/location",
     icon: Navigation,
+  },
+  {
+    name: "Request Location",
+    path: "/teacher/visits/student-location",
+    icon: MapPin,
+  },
+  {
+    name: "Best Route",
+    path: "/teacher/visits/route",
+    icon: Route,
   },
   {
     name: "Upcoming Visits",
