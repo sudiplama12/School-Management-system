@@ -1,10 +1,20 @@
 import axios from "axios";
 
+// A deployed build has no Vite dev proxy, so "/api" would ask the frontend's own
+// host for the API and get a 404. VITE_API_URL is baked in at build time, and the
+// live site was built with an address that no longer resolves, which showed the
+// office "Unable to sign in" while the API itself was healthy. This fallback sends
+// any production build to the current API even when that variable is missing or
+// stale; VITE_API_URL still wins when it is set and correct.
+const DEPLOYED_API_URL = "https://backend-smart-lms.onrender.com/api";
+
 // No default Content-Type: axios keeps one it finds, and with
 // "application/json" set here it JSON-stringifies FormData and silently drops
 // every file part. Plain objects still get application/json automatically.
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "/api",
+  baseURL:
+    import.meta.env.VITE_API_URL ||
+    (import.meta.env.PROD ? DEPLOYED_API_URL : "/api"),
 });
 
 api.interceptors.request.use(
