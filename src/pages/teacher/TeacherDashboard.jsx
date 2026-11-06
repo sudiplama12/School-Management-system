@@ -68,7 +68,7 @@ const navigation = [
     icon: FilePen,
   },
   {
-    name: "Marks",
+    name: "Marks & Cards",
     path: "/teacher/results",
     icon: GraduationCap,
   },

@@ -23,6 +23,8 @@ const COLUMNS = [
 const GRADE_KEY =
   "Grades: A+ 90-100 (4.0) · A 80-89 (3.6) · B+ 70-79 (3.2) · B 60-69 (2.8) · C+ 50-59 (2.4) · C 40-49 (2.0) · D 35-39 (1.6) · F below 35. Pass mark is 35% of each paper.";
 
+const DRAFT_NOTE = "Draft proof — not published. Do not hand this copy to the family.";
+
 const formatDate = (value) => {
   if (!value) return "-";
 
@@ -81,6 +83,13 @@ export const buildCardHtml = ({ school, result }) => {
     ? `${result.attendance.present + result.attendance.late} / ${result.attendance.total} (${result.attendance.percentage}%)`
     : "-";
 
+  // Staff can proof a card before the office releases it. The sheet has to say
+  // so on paper, or a half-entered term leaves the office looking final.
+  const draft =
+    result.status && result.status !== "published"
+      ? `<div class="draft">${escape(DRAFT_NOTE)}</div>`
+      : "";
+
   return `<!doctype html>
 <html>
   <head>
@@ -105,6 +114,8 @@ export const buildCardHtml = ({ school, result }) => {
       .meta .doc { font-size: 16px; font-weight: 700; color: #0f172a; }
       .band { background: #f1f5f9; text-align: center; font-weight: 700; font-size: 14px;
         letter-spacing: 1px; padding: 8px; margin: 14px 0 12px; }
+      .draft { background: #fef2f2; border: 1px dashed #dc2626; color: #b91c1c; text-align: center;
+        font-weight: 700; font-size: 12px; padding: 7px; margin: 12px 0 0; }
       .who { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 20px; margin-bottom: 14px; }
       .who div { display: flex; gap: 6px; }
       .who b { min-width: 92px; }
@@ -142,6 +153,8 @@ export const buildCardHtml = ({ school, result }) => {
         <div>Session ${escape(school?.session || result.term?.academicYear || "")}</div>
       </div>
     </div>
+
+    ${draft}
 
     <div class="band">STUDENT PROGRESS REPORT CARD</div>
 
@@ -223,6 +236,8 @@ export const printReportCard = ({ school, result }) => {
 export const downloadReportCard = ({ school, result }) => {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
 
+  const draftProof = Boolean(result.status) && result.status !== "published";
+
   let y = MARGIN + 5;
 
   const draw = (value, x, size = 9, style = "normal", align = "left") => {
@@ -284,6 +299,19 @@ export const downloadReportCard = ({ school, result }) => {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.text("STUDENT PROGRESS REPORT CARD", WIDTH / 2, y, { align: "center" });
+
+  if (draftProof) {
+    y += 7;
+    doc.setDrawColor(220, 38, 38);
+    doc.setLineWidth(0.3);
+    doc.setLineDashPattern([2, 1.4], 0);
+    doc.rect(MARGIN, y - 4.5, RIGHT - MARGIN, 7, "S");
+    doc.setLineDashPattern([], 0);
+    doc.setTextColor(185, 28, 28);
+    doc.setFontSize(8.5);
+    doc.text(DRAFT_NOTE, WIDTH / 2, y, { align: "center" });
+    doc.setTextColor(15, 23, 42);
+  }
 
   // ----------------------------------------------------------- student block
   const mid = MARGIN + 92;

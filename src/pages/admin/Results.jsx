@@ -462,9 +462,9 @@ export default function AdminResults() {
       setCard(res.data);
       setRemarks(res.data?.officeRemarks || "");
     } catch (err) {
-      // Drafts are not printable yet, but the office still wants to see them.
-      setCard({ draft: true, row });
-      notify(err?.response?.data?.message || "This card is not published.", "error");
+      setCard(null);
+      setCardRow(null);
+      notify(err?.response?.data?.message || "Unable to open this card.", "error");
     }
   };
 
@@ -1311,13 +1311,15 @@ export default function AdminResults() {
             <p className="flex items-center gap-2 text-sm text-slate-500">
               <Loader2 size={16} className="animate-spin" /> Opening the card…
             </p>
-          ) : card?.draft ? (
-            <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-700 dark:text-amber-300">
-              This sheet is still a draft. Publish the class before it can be printed or sent to the
-              family.
-            </p>
           ) : card ? (
             <div className="space-y-5">
+              {card.status !== "published" && (
+                <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-700 dark:text-amber-300">
+                  This sheet is still a draft. Proof it now — the printed copy is marked as a draft —
+                  and it reaches the family once you publish the class.
+                </p>
+              )}
+
               <div className="grid gap-3 sm:grid-cols-4">
                 <Tile label="Obtained" value={`${card.obtained}/${card.maximum}`} />
                 <Tile label="GPA" value={card.gpa} />
