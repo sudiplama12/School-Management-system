@@ -5,7 +5,7 @@
 export function Panel({ title, subtitle, action, children, className = "" }) {
   return (
     <section
-      className={`qd-fade-up rounded-3xl border border-slate-200/70 bg-card p-5 shadow-sm transition duration-300 hover:shadow-md hover:shadow-slate-200/70 sm:p-6 ${className}`}
+      className={`qd-fade-up qd-paper rounded-3xl border border-slate-200/70 bg-card p-5 shadow-sm transition duration-300 hover:shadow-md hover:shadow-slate-200/70 sm:p-6 ${className}`}
     >
       {(title || action) && (
         <div className="mb-5 flex items-start justify-between gap-3">
@@ -35,7 +35,7 @@ export function StatCard({
   accent = "from-emerald-500 to-teal-500",
 }) {
   return (
-    <div className="qd-fade-up group relative overflow-hidden rounded-3xl border border-slate-200/70 bg-card p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100/60">
+    <div className="qd-fade-up qd-paper group relative overflow-hidden rounded-3xl border border-slate-200/70 bg-card p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100/60">
       <div
         className={`qd-drift absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br ${accent} opacity-10 blur-xl transition duration-500 group-hover:opacity-20`}
       />
@@ -104,7 +104,7 @@ export function QuickAction({ icon: Icon, title, description, onClick, accent = 
     <button
       type="button"
       onClick={onClick}
-      className="qd-fade-up group rounded-3xl border border-slate-200/70 bg-card p-5 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-transparent hover:shadow-lg hover:shadow-emerald-100/60"
+      className="qd-fade-up qd-paper group rounded-3xl border border-slate-200/70 bg-card p-5 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-transparent hover:shadow-lg hover:shadow-emerald-100/60"
     >
       <div
         className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${accent} text-white shadow-sm`}

@@ -1777,3 +1777,130 @@ body {
 .dark .leaflet-control-attribution a {
   color: #34d399;
 }
+
+/* ---------------------------------------------------------------------------
+   Storybook skin
+
+   The look taken from the reference art: a flat Nepali-school illustration
+   behind a rounded white card, set in soft, rounded letterforms. Three levers
+   get every page there at once, because none of them is a colour:
+
+   1. Type. Baloo 2 is a chunky rounded face that also carries Devanagari, so
+      the same wordmark works in both scripts; Mukta is its calmer companion
+      and is readable at 11px. They are loaded in index.html, not bundled.
+   2. Radius. Tailwind v4 builds `rounded-xl` on `--radius-xl`, so widening
+      three steps re-corners every card, input and button in the app.
+   3. Neutrals. `bg-slate-50` and friends are variables too, so the light
+      ramps take on the pale sky of the drawing.
+
+   Scope matters: `.dark` appears earlier in this file at the same specificity,
+   so light-only values are written as `:root:not(.dark)` — that selector
+   outranks it and cannot accidentally repaint the dark theme. Accent hues are
+   deliberately left out; the theme picker owns those ramps and `ocean` is now
+   the default, which is what makes the buttons blue.
+--------------------------------------------------------------------------- */
+
+@theme {
+  --font-sans: "Mukta", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Baloo 2", "Mukta", ui-rounded, sans-serif;
+
+  /* The 14 `font-serif` headings were the old display face. Pointing that
+     token at the rounded one restyles all of them at once. */
+  --font-serif: "Baloo 2", "Mukta", ui-rounded, sans-serif;
+
+  --radius-xl: 0.95rem;
+  --radius-2xl: 1.4rem;
+  --radius-3xl: 2rem;
+}
+
+:root:not(.dark) {
+  --color-slate-50: #eaf3fd;
+  --color-slate-100: #f5faff;
+  --color-slate-200: #d5e6f7;
+  --color-slate-300: #bcd6ef;
+  --color-slate-400: #7ea4c6;
+  --color-slate-500: #4f7ba6;
+  --color-slate-600: #33608c;
+  --color-slate-700: #204d76;
+  --color-slate-900: #102a47;
+  --color-slate-950: #0a1f36;
+}
+
+/* Headings get the rounded face; body copy stays on Mukta. */
+h1,
+h2,
+h3,
+.qd-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.005em;
+}
+
+/* The card in the reference sits on white paper over a bright scene, so it is
+   lifted by a cool shadow rather than a grey one. */
+:root:not(.dark) .qd-paper {
+  box-shadow:
+    0 1px 2px rgb(16 42 71 / 0.06),
+    0 18px 40px -18px rgb(16 42 71 / 0.28);
+}
+
+/* ---------------------------------------------------------------------------
+   Illustration bands
+
+   `school-hero.jpg` is the drawn scene and `school-motif.jpg` is the same art
+   cropped tighter. Both were generated on a white ground rather than with an
+   alpha channel, so they are multiplied into the surface instead of floated on
+   top of it: white becomes transparent, and the pale sky stays pale.
+
+   A band always carries its own gradient so text over the art remains readable
+   whatever the theme.
+--------------------------------------------------------------------------- */
+
+.qd-art {
+  background-image:
+    linear-gradient(
+      to top,
+      color-mix(in oklab, var(--color-emerald-950) 76%, transparent),
+      color-mix(in oklab, var(--color-emerald-900) 34%, transparent) 46%,
+      transparent 72%
+    ),
+    url("./assets/school-hero.jpg");
+  background-size: cover;
+  background-position: center 68%;
+}
+
+.qd-art-soft {
+  background-image:
+    linear-gradient(
+      to bottom right,
+      color-mix(in oklab, var(--color-slate-50) 88%, transparent),
+      color-mix(in oklab, var(--color-emerald-100) 62%, transparent)
+    ),
+    url("./assets/school-motif.jpg");
+  background-size: cover;
+  background-position: center 30%;
+  background-blend-mode: multiply;
+}
+
+/* A watermark for chrome that must stay legible: the art laid over a dark
+   surface at a low opacity, softened so it never fogs the text on it. Mount it
+   as the first child of a positioned element so it sits under the content. */
+.qd-art-wash {
+  background-image: url("./assets/school-motif.jpg");
+  background-size: 135% auto;
+  background-position: center 20%;
+  opacity: 0.13;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+/* The sky behind the auth screens, before the art loads. Scoped to light mode
+   and to a column that is not itself a `.qd-canvas`, so it layers over the
+   backdrop rather than replacing the wallpaper, and a dark shell keeps its
+   own depth instead of acquiring a pale glow behind the card. */
+:root:not(.dark) .qd-sky {
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--color-slate-200) 65%, white),
+    transparent 58%
+  );
+}

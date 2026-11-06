@@ -214,6 +214,9 @@ export default function PortalShell({
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
+        {/* The school scene, kept well below the menu so it never fogs it. */}
+        <div aria-hidden="true" className="qd-art-wash absolute inset-0 -z-10" />
+
         {sidebar}
       </aside>
 

@@ -39,6 +39,11 @@ export const ACCENTS = [
   { id: "graphite", label: "Graphite", primary: "#64748b", highlight: "#a1a1aa" },
 ];
 
+// Only `emerald` is unattributed — it is the palette index.css was written
+// with. Everyone else starts on `ocean`, the royal blue of the illustration.
+export const BARE_ACCENT = "emerald";
+export const DEFAULT_ACCENT = "ocean";
+
 // Degrees, not a switch: `full` is the value the timings in index.css were
 // written for, so it is the one that needs no attribute at all.
 export const MOTIONS = [
@@ -92,7 +97,7 @@ const readTheme = () => {
 
 const readAccent = () => {
   const stored = localStorage.getItem(ACCENT_KEY);
-  return ACCENTS.some((a) => a.id === stored) ? stored : "emerald";
+  return ACCENTS.some((a) => a.id === stored) ? stored : DEFAULT_ACCENT;
 };
 
 const readMotion = () => {
@@ -132,7 +137,7 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     const root = document.documentElement;
 
-    if (accent === "emerald") {
+    if (accent === BARE_ACCENT) {
       root.removeAttribute("data-accent");
     } else {
       root.setAttribute("data-accent", accent);
