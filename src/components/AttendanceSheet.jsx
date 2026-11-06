@@ -330,7 +330,7 @@ export default function AttendanceSheet({ kind, title, subtitle }) {
         </p>
       )}
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-sm">
+      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-card shadow-sm">
         {loading ? (
           <div className="flex min-h-48 items-center justify-center gap-2 text-sm text-slate-500">
             <Loader2 size={20} className="animate-spin" />
@@ -351,7 +351,7 @@ export default function AttendanceSheet({ kind, title, subtitle }) {
             </p>
           </div>
         ) : (
-          <table className="w-full text-left">
+          <table className="w-full min-w-[560px] text-left">
             <thead className="bg-slate-50 dark:bg-slate-800">
               <tr className="border-b border-slate-200">
                 <th className="px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">

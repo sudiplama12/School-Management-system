@@ -349,8 +349,8 @@ export default function ActiveVisit() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 p-6">
-        <div className="flex min-h-[400px] items-center justify-center">
+      <div>
+        <div className="flex min-h-[280px] sm:min-h-[400px] items-center justify-center">
 
           <div className="text-center">
 
@@ -373,7 +373,7 @@ export default function ActiveVisit() {
 
   if (!visit) {
     return (
-      <div className="min-h-screen bg-slate-50 p-4 md:p-6">
+      <div>
 
         <div className="mx-auto max-w-6xl">
 
@@ -417,7 +417,7 @@ export default function ActiveVisit() {
   // =====================================================
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
+    <div>
 
       <div className="mx-auto max-w-6xl">
 

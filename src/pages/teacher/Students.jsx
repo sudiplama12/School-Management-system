@@ -928,7 +928,7 @@ function Modal({ children, onClose }) {
         className="absolute inset-0 cursor-default"
       />
 
-      <div className="relative z-10 max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-card shadow-2xl">
+      <div className="relative z-10 max-h-[90dvh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-card shadow-2xl">
         {children}
       </div>
     </div>

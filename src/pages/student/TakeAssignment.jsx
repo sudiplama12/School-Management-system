@@ -105,7 +105,7 @@ export default function TakeAssignment() {
     date ? new Date(date).toLocaleString() : "No deadline";
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-6 lg:p-8">
+    <div>
       <div className="mx-auto max-w-4xl space-y-6">
 
         {/* HEADER */}

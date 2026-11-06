@@ -80,7 +80,7 @@ export default function PublishedResults({ heading = "My Results", blurb }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center gap-2 text-sm text-slate-500">
+      <div className="flex min-h-[280px] sm:min-h-[400px] items-center justify-center gap-2 text-sm text-slate-500">
         <Loader2 size={20} className="animate-spin" />
         Loading your grade sheets…
       </div>

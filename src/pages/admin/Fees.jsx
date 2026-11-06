@@ -66,7 +66,7 @@ const toDateInput = (value) => {
 function Modal({ title, subtitle, onClose, children }) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-slate-950/60 p-4">
-      <div className="w-full max-w-lg rounded-2xl bg-card p-6 shadow-2xl">
+      <div className="w-full max-w-lg rounded-2xl bg-card p-6 shadow-2xl my-auto">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <h2 className="text-xl font-bold text-slate-900">{title}</h2>

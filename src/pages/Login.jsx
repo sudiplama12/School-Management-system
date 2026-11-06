@@ -138,6 +138,7 @@ export default function Login() {
       }
       blurb="Sign in with your school code and the account your school gave you. Your school’s name appears the moment you are in."
       highlights={portals}
+      cardEyebrow="Welcome back"
       cardTitle="Sign in to your school portal"
       lead="The same school code works for every portal."
       footer={
@@ -197,21 +198,25 @@ export default function Login() {
                 type="button"
                 onClick={() => setRole(value)}
                 aria-pressed={role === value}
-                className={`relative z-10 flex items-center justify-center gap-1.5 rounded-xl px-1 py-1.5 text-[11px] font-semibold transition-colors duration-200 ${
+                aria-label={label}
+                title={label}
+                className={`relative z-10 flex items-center justify-center gap-1.5 rounded-xl px-1 py-2 text-[11px] font-semibold transition-colors duration-200 ${
                   role === value
                     ? "text-emerald-800 dark:text-emerald-300"
                     : "text-slate-500 hover:text-emerald-700 dark:hover:text-emerald-300"
                 }`}
               >
                 <Icon
-                  size={16}
+                  size={17}
                   className={
                     role === value
                       ? "scale-110 text-emerald-700 dark:text-emerald-300 transition-transform duration-200"
                       : "transition-transform duration-200"
                   }
                 />
-                {label}
+                {/* Four names will not fit a 320px phone; the icons carry it
+                    there and the label comes back as soon as there is room. */}
+                <span className="hidden min-[380px]:inline">{label}</span>
               </button>
             ))}
           </div>

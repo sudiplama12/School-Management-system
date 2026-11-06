@@ -201,7 +201,7 @@ export default function ThemeSettings({ align = "right", className = "" }) {
         <div
           role="dialog"
           aria-label="Theme settings"
-          className={`qd-scrollbar absolute top-12 z-50 max-h-[min(41rem,85vh)] w-[20rem] overflow-y-auto rounded-2xl border border-slate-200 bg-card p-4 shadow-2xl shadow-slate-900/10 ${
+          className={`qd-scrollbar absolute top-12 z-50 max-h-[min(41rem,85dvh)] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto rounded-2xl border border-slate-200 bg-card p-4 shadow-2xl shadow-slate-900/10 ${
             align === "right" ? "qd-pop-tr right-0" : "qd-pop-tl left-0"
           }`}
         >

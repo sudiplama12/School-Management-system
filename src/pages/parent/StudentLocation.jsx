@@ -293,7 +293,7 @@ export default function StudentLocation() {
               center={[latitude, longitude]}
               zoom={16}
               scrollWheelZoom={true}
-              className="h-[500px] w-full"
+              className="h-[320px] w-full sm:h-[430px] lg:h-[500px]"
             >
 
               <TileLayer

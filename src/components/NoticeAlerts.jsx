@@ -172,7 +172,7 @@ function NoticeAlertsModal() {
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/60 p-4">
-      <div className="max-h-[85vh] w-full max-w-lg overflow-hidden rounded-3xl bg-card shadow-2xl">
+      <div className="max-h-[85dvh] w-full max-w-lg overflow-hidden rounded-3xl bg-card shadow-2xl">
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100">
@@ -199,7 +199,7 @@ function NoticeAlertsModal() {
           </button>
         </div>
 
-        <div className="max-h-[52vh] space-y-3 overflow-y-auto px-6 py-5">
+        <div className="max-h-[52dvh] space-y-3 overflow-y-auto px-6 py-5">
           {unread.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-8 text-center">
               <BellOff className="h-7 w-7 text-slate-400" />

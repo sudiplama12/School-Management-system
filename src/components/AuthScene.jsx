@@ -1,11 +1,15 @@
+import SchoolBrand from "./SchoolBrand";
 import ThemeToggle from "./ThemeToggle";
 import ThemeSettings from "./ThemeSettings";
-import SchoolBrand from "./SchoolBrand";
 
-// The two auth screens are the same picture: a drawn Nepali school scene on one
-// side and a rounded sheet of paper overlapping its edge on the other. Only the
-// card contents differ, so the scene — and the way it collapses into a strip on
-// a phone — is written once here.
+// The two auth screens are the same picture: a drawn Nepali school scene and a
+// rounded sheet of paper overlapping its edge. Only the card contents differ,
+// so the scene — and the way it collapses into a strip above the card — is
+// written once here.
+//
+// Responsiveness rule: the page is a normal scrolling document up to `lg`,
+// where it becomes one fixed viewport with the card as the only scroller. A
+// phone never gets two scrollbars, and nothing is ever clipped off the bottom.
 //
 // Nothing in the scene may name the school. It is mounted with `school={null}`
 // so the wordmark falls back to the product name; the real name only appears
@@ -16,25 +20,28 @@ export default function AuthScene({
   headline,
   blurb,
   highlights,
+  cardEyebrow,
   cardTitle,
   lead,
   children,
   footer,
 }) {
   return (
-    <main className="qd-canvas relative min-h-dvh overflow-hidden bg-slate-50 lg:grid lg:grid-cols-[1.05fr_1fr]">
-      {/* Scene. Tall on a desktop, a strip above the card on a phone. */}
-      <section className="qd-ink relative h-40 overflow-hidden lg:h-auto">
+    <main className="qd-canvas relative bg-slate-50 lg:h-dvh lg:grid lg:grid-cols-[1.05fr_1fr] lg:overflow-hidden">
+      {/* Scene: a strip on a phone, a full column from lg up. */}
+      <section className="qd-ink relative h-40 overflow-hidden sm:h-52 lg:h-auto">
         <div className="qd-art absolute inset-0" aria-hidden="true" />
         <div className="qd-drift absolute -left-16 top-6 h-44 w-44 rounded-full bg-white/20 blur-3xl" />
 
-        <div className="relative flex h-full flex-col justify-between p-6 lg:p-10 xl:p-12">
+        <div className="relative flex h-full flex-col justify-between p-5 sm:p-6 lg:p-10 xl:p-12">
+          {/* The crest is printed on the art, so on a short strip it would sit
+              on the bright sky. It only appears once the column is tall. */}
           <SchoolBrand
             school={null}
             portal="School Portal"
             tone="dark"
             size="lg"
-            className="relative qd-slide-right lg:mt-2"
+            className="qd-slide-right hidden lg:flex"
           />
 
           <div className="hidden max-w-xl lg:block">
@@ -51,7 +58,7 @@ export default function AuthScene({
             </p>
 
             {highlights && (
-              <div className="qd-stagger mt-6 grid grid-cols-2 gap-3">
+              <div className="qd-stagger mt-6 grid grid-cols-1 gap-3 min-[430px]:grid-cols-2">
                 {highlights.map(([title, subtitle]) => (
                   <div
                     key={title}
@@ -73,18 +80,29 @@ export default function AuthScene({
         </div>
       </section>
 
-      {/* Card column. Negative margin pulls the paper over the scene. */}
-      <section className="qd-sky relative flex justify-center px-4 pb-6 sm:px-8 lg:items-center lg:pb-8">
-        <div className="qd-fade-up absolute right-4 top-4 z-10 flex items-center gap-2 sm:right-7 sm:top-6">
-          <ThemeToggle />
-          <ThemeSettings />
-        </div>
+      {/* Card column. The negative margin pulls the paper over the scene. */}
+      <section className="qd-sky relative flex justify-center px-4 pb-10 sm:px-6 lg:items-center lg:px-8 lg:py-6">
+        <div className="w-full max-w-md lg:max-h-[calc(100dvh-3rem)] lg:overscroll-contain lg:overflow-y-auto qd-scrollbar lg:py-1">
+          <div className="qd-paper -mt-12 rounded-3xl border border-white/70 bg-card p-5 text-slate-900 sm:p-6 dark:border-slate-700/70 lg:mt-0">
+            {/* The wordmark and the theme chips live inside the card, so they
+                can never land on top of the form at any width. */}
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <SchoolBrand
+                school={null}
+                portal="School Portal"
+                tone="light"
+                className="min-w-0 lg:hidden"
+              />
 
-        <div className="qd-scrollbar relative -mt-10 max-h-[calc(100dvh-6rem)] w-full max-w-md overflow-y-auto overscroll-contain pb-2 lg:my-6 lg:-ml-24 lg:max-h-[calc(100dvh-3rem)] lg:py-2">
-          <div className="qd-paper rounded-3xl border border-white/70 bg-card p-5 text-slate-900 sm:p-6 dark:border-slate-700/70">
+              <div className="ml-auto flex shrink-0 items-center gap-2">
+                <ThemeToggle />
+                <ThemeSettings />
+              </div>
+            </div>
+
             <div className="qd-fade-up qd-d-1 mb-4">
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">
-                {eyebrow}
+                {cardEyebrow}
               </p>
 
               <h2 className="mt-1 font-display text-[25px] font-extrabold leading-tight tracking-tight text-slate-900 dark:text-slate-50">
@@ -100,7 +118,7 @@ export default function AuthScene({
           </div>
 
           {footer && (
-            <p className="qd-fade-up qd-d-4 mt-4 flex items-center justify-center gap-1.5 text-[13px] text-slate-600 dark:text-slate-400">
+            <p className="qd-fade-up qd-d-4 mt-4 flex flex-wrap items-center justify-center gap-1.5 text-[13px] text-slate-600 dark:text-slate-400">
               {footer}
             </p>
           )}

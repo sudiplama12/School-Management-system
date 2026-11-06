@@ -210,7 +210,7 @@ export default function PortalShell({
       )}
 
       <aside
-        className={`qd-ink qd-side fixed inset-y-0 left-0 z-50 flex w-72 flex-col overflow-hidden bg-gradient-to-b from-emerald-950 via-emerald-950 to-slate-950 transition-transform duration-300 ease-out ${
+        className={`qd-ink qd-side fixed inset-y-0 left-0 z-50 flex w-[86vw] max-w-72 flex-col overflow-hidden bg-gradient-to-b from-emerald-950 via-emerald-950 to-slate-950 transition-transform duration-300 ease-out ${
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >

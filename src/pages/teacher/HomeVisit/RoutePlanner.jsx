@@ -415,7 +415,7 @@ export default function RoutePlanner() {
               }
               zoom={destination ? 14 : 11}
               scrollWheelZoom
-              className="h-[520px] w-full"
+              className="h-[320px] w-full sm:h-[430px] lg:h-[520px]"
             >
               <TileLayer
                 attribution="&copy; OpenStreetMap contributors"

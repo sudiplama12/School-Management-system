@@ -134,6 +134,7 @@ export default function Register() {
       }
       blurb="Connect with your school, keep track of learning, and stay informed. Your school’s name appears once you sign in."
       highlights={perks}
+      cardEyebrow="Get started"
       cardTitle="Create your account"
       lead="Join your school portal with the code the office gave you."
       footer={

@@ -715,7 +715,7 @@ export default function Fee() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
+      <div className="flex min-h-[280px] sm:min-h-[400px] items-center justify-center">
         <div className="text-center">
           <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-600" />
 
@@ -733,7 +733,7 @@ export default function Fee() {
 
   if (error) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
+      <div className="flex min-h-[280px] sm:min-h-[400px] items-center justify-center">
         <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
           <p className="text-sm font-semibold text-red-700 dark:text-red-300">{error}</p>
 

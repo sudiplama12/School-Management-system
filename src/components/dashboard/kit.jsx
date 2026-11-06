@@ -116,7 +116,7 @@ export function QuickAction({ icon: Icon, title, description, onClick, accent = 
 
       <p className="mt-1.5 text-xs leading-5 text-slate-500">{description}</p>
 
-      <span className="mt-3 inline-block text-xs font-semibold text-emerald-600 dark:text-emerald-400 opacity-0 transition group-hover:opacity-100">
+      <span className="mt-3 inline-block text-xs font-semibold text-emerald-600 dark:text-emerald-400 opacity-100 transition group-hover:opacity-100 lg:opacity-0 lg:group-hover:opacity-100">
         Open →
       </span>
     </button>

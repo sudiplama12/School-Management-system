@@ -649,7 +649,7 @@ export default function UserManagement({ role }) {
               role="dialog"
               aria-modal="true"
               aria-labelledby="ua-title"
-              className="qd-scale-in flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-card shadow-2xl"
+              className="qd-scale-in flex max-h-[90dvh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-card shadow-2xl"
             >
               <header className="flex shrink-0 items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
                 <div className="min-w-0">

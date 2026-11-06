@@ -55,7 +55,7 @@ export default function Assignments() {
   const completedCount = assignments.filter((a) => a.submitted).length;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-6 lg:p-8">
+    <div>
 
       {/* HEADER */}
       <div className="mb-8">

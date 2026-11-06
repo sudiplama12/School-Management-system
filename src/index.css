@@ -1893,6 +1893,15 @@ h3,
   pointer-events: none;
 }
 
+/* A phone must never be able to scroll sideways. One wide table or one long
+   coordinate should scroll inside its own card, not drag the whole page with
+   it. `clip` rather than `hidden`: it stops the overflow without creating a
+   scroll container, so the sticky portal header keeps working. */
+html,
+body {
+  overflow-x: clip;
+}
+
 /* The sky behind the auth screens, before the art loads. Scoped to light mode
    and to a column that is not itself a `.qd-canvas`, so it layers over the
    backdrop rather than replacing the wallpaper, and a dark shell keeps its

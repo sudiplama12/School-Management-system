@@ -143,8 +143,8 @@ export default function VisitHistory() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 p-4 md:p-6">
-        <div className="mx-auto flex min-h-[400px] max-w-7xl items-center justify-center">
+      <div>
+        <div className="mx-auto flex min-h-[280px] sm:min-h-[400px] max-w-7xl items-center justify-center">
           <div className="text-center">
             <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-600" />
 
@@ -162,7 +162,7 @@ export default function VisitHistory() {
   // =====================================================
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
+    <div>
       <div className="mx-auto max-w-7xl">
 
         {/* =================================================
@@ -507,7 +507,7 @@ export default function VisitHistory() {
 
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
 
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-card shadow-xl">
+          <div className="max-h-[90dvh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-card shadow-xl">
 
             {/* HEADER */}
 

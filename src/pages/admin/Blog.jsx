@@ -282,7 +282,7 @@ function PostComposer({ post, onClose, onSaved }) {
           </button>
         </div>
 
-        <div className="max-h-[70vh] space-y-5 overflow-y-auto px-6 py-5">
+        <div className="max-h-[70dvh] space-y-5 overflow-y-auto px-6 py-5">
           {error && (
             <p
               role="alert"

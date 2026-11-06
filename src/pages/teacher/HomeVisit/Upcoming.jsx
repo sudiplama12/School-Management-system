@@ -241,8 +241,8 @@ export default function Upcoming() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 p-6">
-        <div className="flex min-h-[400px] items-center justify-center rounded-2xl bg-card shadow-sm">
+      <div>
+        <div className="flex min-h-[280px] sm:min-h-[400px] items-center justify-center rounded-2xl bg-card shadow-sm">
           <div className="text-center">
             <div className="mx-auto h-9 w-9 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-600" />
 
@@ -256,7 +256,7 @@ export default function Upcoming() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
+    <div>
       <div className="mx-auto max-w-7xl">
 
         {/* HEADER */}

@@ -1195,7 +1195,7 @@ function TeacherDetail({ teacher, onClose, onEdit, onToggle, onReset }) {
   return createPortal(
     <div className="qd-fade-in fixed inset-0 z-[110] flex justify-end bg-slate-950/60 backdrop-blur-sm">
       <aside className="qd-drawer flex h-full w-full max-w-md flex-col bg-card shadow-2xl">
-        <header className="qd-ink relative overflow-hidden border-b border-slate-200 bg-gradient-to-br from-emerald-950 via-emerald-900 to-slate-950 p-5">
+        <header className="qd-ink relative overflow-hidden border-b border-slate-200 bg-gradient-to-br from-emerald-950 via-emerald-900 to-slate-950 p-5 pt-[calc(1.25rem+env(safe-area-inset-top))]">
           <span className="qd-drift pointer-events-none absolute -right-10 -top-16 h-44 w-44 rounded-full bg-emerald-400/15 blur-2xl" />
 
           <div className="relative flex items-start justify-between gap-4">
