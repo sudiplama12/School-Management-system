@@ -46,12 +46,15 @@
   --chart-track: #1b2735;
   --chart-ink: #f1f6fb;
 
-  /* Neutral ramp: light steps become surfaces, dark steps become text. */
+  /* Neutral ramp: light steps become surfaces, dark steps become text.
+     400 and 500 are the caption pair and are nearly always text rather than a
+     border, so they are set to clear AA against a *glass* card, which is the
+     brightest surface they ever sit on — the old values reached only 4.0 there. */
   --color-slate-50: #070c13;
   --color-slate-100: #0e1720;
   --color-slate-200: #1d2937;
   --color-slate-300: #2c3c4f;
-  --color-slate-400: #7c91a6;
+  --color-slate-400: #94a8bc;
   --color-slate-500: #9cb0c4;
   --color-slate-600: #bccddd;
   --color-slate-700: #dae5ef;
@@ -668,10 +671,6 @@
   animation: qd-fade-up-rich 0.9s var(--qd-ease) both;
 }
 
-:root[data-motion="rich"] .qd-stagger-side > * {
-  animation: qd-slide-right-rich 0.75s var(--qd-ease) both;
-}
-
 :root[data-motion="rich"] .qd-float {
   animation-duration: 4.5s;
 }
@@ -1167,26 +1166,55 @@
 --------------------------------------------------------------------------- */
 
 :root[data-surface="frosted"] {
-  --qd-surface: rgb(255 255 255 / 0.8);
-  --qd-surface-blur: blur(6px) saturate(1.2);
+  --qd-surface: rgb(255 255 255 / 0.82);
+  --qd-surface-edge: rgb(255 255 255 / 0.9);
+  --qd-surface-sheen: rgb(255 255 255 / 0.5);
+  --qd-surface-shadow: rgb(16 42 71 / 0.16);
+  --qd-surface-blur: blur(8px) saturate(1.25);
 }
 :root[data-surface="glass"] {
-  --qd-surface: rgb(255 255 255 / 0.6);
-  --qd-surface-blur: blur(14px) saturate(1.5);
-}
-:root.dark[data-surface="frosted"] {
-  --qd-surface: rgb(16 26 36 / 0.78);
-  --qd-surface-blur: blur(6px) saturate(1.15);
-}
-:root.dark[data-surface="glass"] {
-  --qd-surface: rgb(16 26 36 / 0.56);
-  --qd-surface-blur: blur(14px) saturate(1.3);
+  --qd-surface: rgb(255 255 255 / 0.62);
+  --qd-surface-edge: rgb(255 255 255 / 0.85);
+  --qd-surface-sheen: rgb(255 255 255 / 0.6);
+  --qd-surface-shadow: rgb(16 42 71 / 0.2);
+  --qd-surface-blur: blur(16px) saturate(1.5);
 }
 
-:root[data-surface] .bg-card {
+/* A dark card tinted with the page's own colour has no luminance to separate it
+   by, which is why Glass on dark looked like an empty screen with text floating
+   in it. In dark the surface becomes a cool *light* tint instead: the card turns
+   into the brightest layer beneath it, so it lifts off the backdrop, and the
+   edge and sheen are what make it read as glass rather than a grey box. */
+:root.dark[data-surface="frosted"] {
+  --qd-surface: rgb(150 180 210 / 0.11);
+  --qd-surface-edge: rgb(205 228 250 / 0.16);
+  --qd-surface-sheen: rgb(205 228 250 / 0.07);
+  --qd-surface-shadow: rgb(0 0 0 / 0.5);
+  --qd-surface-blur: blur(8px) saturate(1.3);
+}
+:root.dark[data-surface="glass"] {
+  --qd-surface: rgb(150 180 210 / 0.17);
+  --qd-surface-edge: rgb(205 228 250 / 0.26);
+  --qd-surface-sheen: rgb(205 228 250 / 0.1);
+  --qd-surface-shadow: rgb(0 0 0 / 0.58);
+  --qd-surface-blur: blur(16px) saturate(1.45);
+}
+
+/* The three exclusions each carry their own background and must keep it: the two
+   illustration bands paint the school art, and `.qd-panel` is the floating-panel
+   treatment below. */
+:root[data-surface] .bg-card:not(.qd-art):not(.qd-art-soft):not(.qd-panel) {
   background-color: var(--qd-surface);
+  background-image: linear-gradient(
+    to bottom,
+    var(--qd-surface-sheen),
+    transparent 46%
+  );
   -webkit-backdrop-filter: var(--qd-surface-blur);
   backdrop-filter: var(--qd-surface-blur);
+  box-shadow:
+    inset 0 0 0 1px var(--qd-surface-edge),
+    0 16px 36px -22px var(--qd-surface-shadow);
 }
 
 /* Two surfaces have to stay opaque no matter what, and both are heavier than
@@ -1198,18 +1226,10 @@
 :root[data-surface] .qd-ink .bg-card,
 :root[data-surface] .fixed .bg-card {
   background-color: var(--color-card);
+  background-image: none;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
-}
-
-/* A translucent card blends its caption text with the wallpaper behind it, which
-   costs a muted colour most of its margin: slate-500 on Glass over the darkest
-   nature bloom lands at 4.2:1. The same variable the utilities already use is
-   pushed one step darker while any transparent degree is on, so every caption
-   inherits the budget back (6.3:1) without a single class changing. Dark mode
-   needs none of this — there the muted ramp is already the light end. */
-:root[data-surface]:not(.dark) {
-  --color-slate-500: #475569;
+  box-shadow: revert;
 }
 
 /* The sticky header already lets the page scroll under it, so on a transparent
@@ -1248,6 +1268,47 @@
   background-image: var(--qd-side);
   -webkit-backdrop-filter: var(--qd-side-blur);
   backdrop-filter: var(--qd-side-blur);
+}
+
+/* Floating panels — a theme popover, a menu, a dropdown. Unlike a card these
+   sit *over* the page rather than on the canvas, so at a transparent degree the
+   content underneath bleeds straight through the panel and collides with its
+   own labels. A panel keeps a little of the backdrop for depth but holds enough
+   opacity that nothing behind it is readable through it, whatever `data-surface`
+   is set to. Opt in by adding `.qd-panel` to the panel.
+
+   Not `.qd-float`, which is the bob further down: a popover that drifts up and
+   down while you read it is not a popover. */
+:root {
+  --qd-panel: rgb(255 255 255 / 0.94);
+  --qd-panel-edge: rgb(15 23 42 / 0.1);
+}
+:root.dark {
+  --qd-panel: rgb(18 29 41 / 0.94);
+  --qd-panel-edge: rgb(205 228 250 / 0.18);
+}
+
+/* The picker previews all three surface degrees at once, so each degree needs a
+   value that exists whether or not the app itself is set to one. These are the
+   same numbers the rules above paint with, given a second name. */
+:root {
+  --qd-preview-solid: var(--color-card);
+  --qd-preview-frosted: rgb(255 255 255 / 0.82);
+  --qd-preview-glass: rgb(255 255 255 / 0.62);
+}
+:root.dark {
+  --qd-preview-frosted: rgb(150 180 210 / 0.11);
+  --qd-preview-glass: rgb(150 180 210 / 0.17);
+}
+
+:root[data-surface] .qd-panel {
+  background-color: var(--qd-panel);
+  background-image: none;
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  backdrop-filter: blur(20px) saturate(1.5);
+  box-shadow:
+    inset 0 0 0 1px var(--qd-panel-edge),
+    0 26px 60px -24px rgb(2 6 23 / 0.55);
 }
 
 
@@ -1689,38 +1750,11 @@
   pointer-events: none;
 }
 
-/* Sidebar nav cascade: children slide in from the crest side. */
-.qd-stagger-side > * {
-  animation: qd-slide-right 0.45s var(--qd-ease) both;
-}
-
-.qd-stagger-side > *:nth-child(1) {
-  animation-delay: calc(var(--qd-stagger-step) * 1);
-}
-.qd-stagger-side > *:nth-child(2) {
-  animation-delay: calc(var(--qd-stagger-step) * 2);
-}
-.qd-stagger-side > *:nth-child(3) {
-  animation-delay: calc(var(--qd-stagger-step) * 3);
-}
-.qd-stagger-side > *:nth-child(4) {
-  animation-delay: calc(var(--qd-stagger-step) * 4);
-}
-.qd-stagger-side > *:nth-child(5) {
-  animation-delay: calc(var(--qd-stagger-step) * 5);
-}
-.qd-stagger-side > *:nth-child(6) {
-  animation-delay: calc(var(--qd-stagger-step) * 6);
-}
-.qd-stagger-side > *:nth-child(7) {
-  animation-delay: calc(var(--qd-stagger-step) * 7);
-}
-.qd-stagger-side > *:nth-child(8) {
-  animation-delay: calc(var(--qd-stagger-step) * 8);
-}
-.qd-stagger-side > *:nth-child(n + 9) {
-  animation-delay: calc(var(--qd-stagger-step) * 9);
-}
+/* The sidebar's own entrance cascade used to live here as a transform
+   animation on every nav child. The menu rows are draggable now, and a CSS
+   transform on a row the library is positioning is how the role selector on
+   the sign-in card came to be frozen in place, so the rows fade in through
+   the library instead. */
 
 html {
   scroll-behavior: smooth;
@@ -1818,8 +1852,15 @@ body {
   --color-slate-100: #f5faff;
   --color-slate-200: #d5e6f7;
   --color-slate-300: #bcd6ef;
-  --color-slate-400: #7ea4c6;
-  --color-slate-500: #4f7ba6;
+
+  /* 400 and 500 are caption and secondary-text colours — 275 of their 285 uses
+     are `text-` or `placeholder-`, none is a border — so they have to clear 4.5
+     against paper, the tinted input fill and a glass card alike. The original
+     sky-leaning values landed at 2.6 and 4.4; these hold the same hue one step
+     darker and pass everywhere, which is why the surface-specific override that
+     used to patch slate-500 for glass is gone. */
+  --color-slate-400: #476f93;
+  --color-slate-500: #3f6a92;
   --color-slate-600: #33608c;
   --color-slate-700: #204d76;
   --color-slate-900: #102a47;

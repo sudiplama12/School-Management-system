@@ -83,7 +83,7 @@ export default function AuthScene({
       {/* Card column. The negative margin pulls the paper over the scene. */}
       <section className="qd-sky relative flex justify-center px-4 pb-10 sm:px-6 lg:items-center lg:px-8 lg:py-6">
         <div className="w-full max-w-md lg:max-h-[calc(100dvh-3rem)] lg:overscroll-contain lg:overflow-y-auto qd-scrollbar lg:py-1">
-          <div className="qd-paper -mt-12 rounded-3xl border border-white/70 bg-card p-5 text-slate-900 sm:p-6 dark:border-slate-700/70 lg:mt-0">
+          <div className="qd-paper -mt-12 rounded-3xl border border-slate-200 bg-card p-5 text-slate-900 sm:p-6 lg:mt-0">
             {/* The wordmark and the theme chips live inside the card, so they
                 can never land on top of the form at any width. */}
             <div className="mb-5 flex items-center justify-between gap-3">
@@ -105,11 +105,11 @@ export default function AuthScene({
                 {cardEyebrow}
               </p>
 
-              <h2 className="mt-1 font-display text-[25px] font-extrabold leading-tight tracking-tight text-slate-900 dark:text-slate-50">
+              <h2 className="mt-1 font-display text-[25px] font-extrabold leading-tight tracking-tight text-slate-900">
                 {cardTitle}
               </h2>
 
-              <p className="mt-1.5 text-[13px] leading-5 text-slate-600 dark:text-slate-400">
+              <p className="mt-1.5 text-[13px] leading-5 text-slate-600">
                 {lead}
               </p>
             </div>
@@ -118,7 +118,7 @@ export default function AuthScene({
           </div>
 
           {footer && (
-            <p className="qd-fade-up qd-d-4 mt-4 flex flex-wrap items-center justify-center gap-1.5 text-[13px] text-slate-600 dark:text-slate-400">
+            <p className="qd-fade-up qd-d-4 mt-4 flex flex-wrap items-center justify-center gap-1.5 text-[13px] text-slate-600">
               {footer}
             </p>
           )}

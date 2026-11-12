@@ -31,7 +31,7 @@ const GRADE_TONE = {
   C: "bg-sky-50 text-sky-700 dark:text-sky-300",
   D: "bg-amber-50 text-amber-700 dark:text-amber-300",
   F: "bg-red-50 text-red-700 dark:text-red-300",
-  Ab: "bg-slate-100 text-slate-500 dark:text-slate-300",
+  Ab: "bg-slate-100 text-slate-500",
 };
 
 // One screen for both family portals: the student's own card and a parent's
@@ -108,7 +108,7 @@ export default function PublishedResults({ heading = "My Results", blurb }) {
           <div className="flex gap-2">
             <button
               onClick={() => printReportCard({ school, result: card })}
-              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-card px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:text-slate-200"
+              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-card px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               <Printer size={18} /> Print
             </button>
@@ -155,7 +155,7 @@ export default function PublishedResults({ heading = "My Results", blurb }) {
                     : "border-slate-200 bg-card hover:border-emerald-300"
                 }`}
               >
-                <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                <p className="text-sm font-bold text-slate-800">
                   {item.term?.name}
                 </p>
                 <p className="mt-0.5 text-xs text-slate-500">
@@ -185,7 +185,7 @@ export default function PublishedResults({ heading = "My Results", blurb }) {
                 </div>
 
                 <div className="text-right text-sm text-slate-500">
-                  <p className="font-semibold text-slate-800 dark:text-slate-200">
+                  <p className="font-semibold text-slate-800">
                     {card.term?.name} — {card.term?.academicYear}
                   </p>
                   <p>
@@ -215,7 +215,7 @@ export default function PublishedResults({ heading = "My Results", blurb }) {
                   <tbody className="divide-y divide-slate-100">
                     {card.subjects.map((row) => (
                       <tr key={String(row.subject)}>
-                        <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">
+                        <td className="px-4 py-3 font-medium text-slate-800">
                           {row.subjectName}
                           {row.remarks && (
                             <p className="text-xs font-normal text-slate-400">{row.remarks}</p>
@@ -227,7 +227,7 @@ export default function PublishedResults({ heading = "My Results", blurb }) {
                         <td className="px-3 py-3 text-slate-600">
                           {row.absent ? "Ab" : `${row.practical ?? "-"} / ${row.practicalFull}`}
                         </td>
-                        <td className="px-3 py-3 font-bold text-slate-800 dark:text-slate-200">
+                        <td className="px-3 py-3 font-bold text-slate-800">
                           {row.absent ? "Ab" : row.total ?? "-"}
                           <span className="ml-1 text-xs font-normal text-slate-400">
                             /{row.fullMarks}
@@ -278,7 +278,7 @@ export default function PublishedResults({ heading = "My Results", blurb }) {
                 ].map((item) => (
                   <div
                     key={item.label}
-                    className="rounded-xl bg-slate-50 p-4 dark:bg-transparent dark:ring-1 dark:ring-slate-200"
+                    className="rounded-xl bg-slate-50 p-4 dark:bg-transparent dark:ring-1"
                   >
                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                       {item.label}
@@ -296,7 +296,7 @@ export default function PublishedResults({ heading = "My Results", blurb }) {
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                     Office remarks
                   </p>
-                  <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
+                  <p className="mt-1 text-sm text-slate-700">
                     {card.officeRemarks}
                   </p>
                 </div>

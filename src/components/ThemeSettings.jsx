@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { Ban, Check, Monitor, Moon, Palette, Sun } from "lucide-react";
 
+import { AnimatePresence, Pop } from "./Motion";
 import {
   ACCENTS,
   APPEARANCES,
   MOTIONS,
+  PRESETS,
   SURFACES,
   WALLPAPERS,
+  presetFor,
   useTheme,
 } from "../context/ThemeContext";
 
@@ -74,7 +77,7 @@ function Preview({ appearance }) {
 function WallpaperTile({ option }) {
   if (!option.css) {
     return (
-      <span className="relative flex h-10 w-full items-center justify-center rounded-lg border border-slate-200 bg-slate-50 dark:bg-slate-800">
+      <span className="relative flex h-10 w-full items-center justify-center rounded-lg border border-slate-200 bg-card">
         <Ban size={13} className="text-slate-400" />
       </span>
     );
@@ -83,13 +86,45 @@ function WallpaperTile({ option }) {
   return (
     <span
       aria-hidden="true"
-      className="block h-10 w-full rounded-lg border border-slate-200 bg-slate-50 dark:bg-slate-800"
+      className="block h-10 w-full rounded-lg border border-slate-200 bg-card"
       style={{
         backgroundImage: option.css,
         backgroundSize: option.size || "auto",
         backgroundRepeat: option.size ? "repeat" : "no-repeat",
       }}
     />
+  );
+}
+
+// A preset tile is the wallpaper it picks with a card floated on it in the
+// surface it picks — both read the very variables the app paints with, so the
+// tile and the result cannot disagree.
+const SURFACE_PREVIEW = {
+  solid: "var(--qd-preview-solid)",
+  frosted: "var(--qd-preview-frosted)",
+  glass: "var(--qd-preview-glass)",
+};
+
+function PresetTile({ preset }) {
+  const wp = WALLPAPERS.find((w) => w.id === preset.wallpaper);
+
+  return (
+    <span
+      aria-hidden="true"
+      className="relative block h-10 w-full overflow-hidden rounded-lg border border-slate-200"
+      style={{
+        backgroundColor: "var(--color-card)",
+        backgroundImage: wp?.css || "none",
+      }}
+    >
+      <span
+        className="absolute inset-x-1.5 inset-y-1.5 rounded-md"
+        style={{
+          backgroundColor: SURFACE_PREVIEW[preset.surface],
+          boxShadow: "inset 0 0 0 1px rgb(148 163 184 / 0.5)",
+        }}
+      />
+    </span>
   );
 }
 
@@ -149,6 +184,7 @@ export default function ThemeSettings({ align = "right", className = "" }) {
     setMotion,
     setWallpaper,
     setSurface,
+    setPreset,
   } = useTheme();
 
   const [open, setOpen] = useState(false);
@@ -177,6 +213,8 @@ export default function ThemeSettings({ align = "right", className = "" }) {
 
   const label = (list, id) => list.find((o) => o.id === id)?.label || id;
 
+  const activePreset = presetFor(surface, wallpaper, motion);
+
   const wallpaperGroup = (group) => WALLPAPERS.filter((w) => group.includes(w.group));
 
   return (
@@ -197,14 +235,18 @@ export default function ThemeSettings({ align = "right", className = "" }) {
         <Palette size={17} />
       </button>
 
-      {open && (
-        <div
-          role="dialog"
-          aria-label="Theme settings"
-          className={`qd-scrollbar absolute top-12 z-50 max-h-[min(41rem,85dvh)] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto rounded-2xl border border-slate-200 bg-card p-4 shadow-2xl shadow-slate-900/10 ${
-            align === "right" ? "qd-pop-tr right-0" : "qd-pop-tl left-0"
-          }`}
-        >
+      {/* Hinges from the button it belongs to, and animates back out. */}
+      <AnimatePresence>
+        {open && (
+          <Pop
+            as="div"
+            role="dialog"
+            aria-label="Theme settings"
+            origin={align === "right" ? "top right" : "top left"}
+            className={`qd-scrollbar qd-panel absolute top-12 z-50 max-h-[min(41rem,85dvh)] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto rounded-2xl border border-slate-200 bg-card p-4 shadow-2xl shadow-slate-900/10 ${
+              align === "right" ? "right-0" : "left-0"
+            }`}
+          >
           <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">
             Appearance
           </p>
@@ -247,6 +289,46 @@ export default function ThemeSettings({ align = "right", className = "" }) {
               );
             })}
           </div>
+
+          <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">
+            UI style
+          </p>
+
+          <div role="radiogroup" aria-label="UI style" className="mt-2 grid grid-cols-5 gap-1.5">
+            {PRESETS.map((preset) => {
+              const on = activePreset === preset.id;
+
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={on}
+                  title={preset.hint}
+                  aria-label={preset.label}
+                  onClick={() => setPreset(preset)}
+                  className={`rounded-lg p-0.5 transition ${
+                    on ? "ring-2 ring-emerald-500 ring-offset-1 ring-offset-card" : "hover:scale-105"
+                  }`}
+                >
+                  <PresetTile preset={preset} />
+
+                  <span
+                    className={`mt-1 block text-[10px] font-semibold ${
+                      on ? "text-emerald-700 dark:text-emerald-300" : "text-slate-500"
+                    }`}
+                  >
+                    {preset.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <p className="mt-1 text-[10px] leading-snug text-slate-500">
+            One click sets the card surface, wallpaper and animation together.
+            Changing any of the three below moves you off the preset.
+          </p>
 
           <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">
             Accent colour
@@ -337,7 +419,7 @@ export default function ThemeSettings({ align = "right", className = "" }) {
                         className={`h-1 w-1 rounded-full ${
                           active && SURFACES.indexOf(option) >= SURFACES.indexOf(dot)
                             ? "bg-emerald-500"
-                            : "bg-slate-300 dark:bg-slate-600"
+                            : "bg-slate-400/60"
                         }`}
                       />
                     ))}
@@ -377,7 +459,7 @@ export default function ThemeSettings({ align = "right", className = "" }) {
                         className={`h-1 w-1 rounded-full ${
                           active && MOTIONS.indexOf(option) >= MOTIONS.indexOf(dot)
                             ? "bg-emerald-500"
-                            : "bg-slate-300 dark:bg-slate-600"
+                            : "bg-slate-400/60"
                         }`}
                       />
                     ))}
@@ -389,11 +471,13 @@ export default function ThemeSettings({ align = "right", className = "" }) {
 
           <p className="mt-3 text-[11px] leading-snug text-slate-500">
             {isDark ? "Dark" : "Light"} · {label(ACCENTS, accent)} ·{" "}
+            {activePreset === "custom" ? "Custom" : label(PRESETS, activePreset)} ·{" "}
             {label(WALLPAPERS, wallpaper)} · {label(SURFACES, surface)} ·{" "}
             {label(MOTIONS, motion)} — saved on this device.
           </p>
-        </div>
-      )}
+          </Pop>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

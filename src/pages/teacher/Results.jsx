@@ -365,7 +365,7 @@ export default function TeacherResults() {
           <div className="rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-500 dark:bg-transparent">
             {subject ? (
               <>
-                <span className="font-semibold text-slate-700 dark:text-slate-300">
+                <span className="font-semibold text-slate-700">
                   {subject.name}
                 </span>{" "}
                 is out of {subject.fullMarks} ({subject.theoryFull} theory + {subject.practicalFull}{" "}
@@ -483,7 +483,7 @@ export default function TeacherResults() {
                               <User size={16} />
                             </div>
                             <div>
-                              <p className="font-semibold text-slate-800 dark:text-slate-200">
+                              <p className="font-semibold text-slate-800">
                                 {row.name}
                               </p>
                               <p className="text-xs text-slate-500">
@@ -547,7 +547,7 @@ export default function TeacherResults() {
                           />
                         </td>
 
-                        <td className="px-3 py-3 font-semibold text-slate-800 dark:text-slate-200">
+                        <td className="px-3 py-3 font-semibold text-slate-800">
                           {result ? `${result.total}` : "—"}
                         </td>
 
@@ -598,7 +598,7 @@ export default function TeacherResults() {
 const STATUS_TONE = {
   published: "bg-emerald-50 text-emerald-700 dark:text-emerald-300",
   draft: "bg-amber-50 text-amber-700 dark:text-amber-300",
-  empty: "bg-slate-100 text-slate-500 dark:text-slate-300",
+  empty: "bg-slate-100 text-slate-500",
 };
 
 // A teacher prints cards for the forms they teach. Cards are fetched once per
@@ -801,7 +801,7 @@ function ReportCards({ terms, subjects }) {
                 {roster.students.map((row) => (
                   <tr key={row.student} className="hover:bg-slate-50/70">
                     <td className="px-5 py-3">
-                      <p className="font-semibold text-slate-800 dark:text-slate-200">{row.name}</p>
+                      <p className="font-semibold text-slate-800">{row.name}</p>
                       <p className="text-xs text-slate-500">
                         {row.studentId}
                         {row.rollNumber ? ` · Roll ${row.rollNumber}` : ""}
@@ -818,11 +818,11 @@ function ReportCards({ terms, subjects }) {
                       </span>
                     </td>
 
-                    <td className="px-3 py-3 text-slate-700 dark:text-slate-300">
+                    <td className="px-3 py-3 text-slate-700">
                       {row.gpa ?? "—"}
                     </td>
 
-                    <td className="px-3 py-3 text-slate-700 dark:text-slate-300">
+                    <td className="px-3 py-3 text-slate-700">
                       {row.obtained === null || row.obtained === undefined
                         ? "—"
                         : `${row.obtained}/${row.maximum}`}

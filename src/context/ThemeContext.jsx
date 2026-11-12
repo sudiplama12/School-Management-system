@@ -90,6 +90,61 @@ export const SURFACES = [
   { id: "glass", label: "Glass", hint: "Cards turn to frosted glass" },
 ];
 
+// Whole looks, so reaching one is a single click instead of three pickers.
+// A preset only ever sets surface, wallpaper and motion — the accent stays
+// whatever the person chose, because a colour is theirs and a texture is ours.
+// `clean` is deliberately the same triple the app already defaults to, so
+// adopting a preset changes nothing for anyone until they pick one.
+export const PRESETS = [
+  {
+    id: "clean",
+    label: "Clean",
+    hint: "Solid cards, plain backdrop",
+    surface: "solid",
+    wallpaper: "plain",
+    motion: "full",
+  },
+  {
+    id: "soft",
+    label: "Soft",
+    hint: "Frosted cards, light aurora",
+    surface: "frosted",
+    wallpaper: "aurora",
+    motion: "full",
+  },
+  {
+    id: "glass",
+    label: "Glass",
+    hint: "Frosted glass, drifting light",
+    surface: "glass",
+    wallpaper: "aurora",
+    motion: "rich",
+  },
+  {
+    id: "vivid",
+    label: "Vivid",
+    hint: "Solid cards, patterned backdrop",
+    surface: "solid",
+    wallpaper: "beams",
+    motion: "rich",
+  },
+  {
+    id: "nature",
+    label: "Nature",
+    hint: "Frosted cards over the hills",
+    surface: "frosted",
+    wallpaper: "hills",
+    motion: "full",
+  },
+];
+
+// Derived rather than stored: a preset is exactly these three values, so the
+// row can never claim to be on one after a picker moved away from it.
+export const presetFor = (surface, wallpaper, motion) =>
+  PRESETS.find(
+    (p) => p.surface === surface && p.wallpaper === wallpaper && p.motion === motion
+  )?.id ?? "custom";
+
 const readTheme = () => {
   const stored = localStorage.getItem(THEME_KEY);
   return APPEARANCES.some((a) => a.id === stored) ? stored : "system";
@@ -213,6 +268,12 @@ export function ThemeProvider({ children }) {
     setSurface(next);
   }, []);
 
+  const applyPreset = useCallback((preset) => {
+    applySurface(preset.surface);
+    applyWallpaper(preset.wallpaper);
+    applyMotion(preset.motion);
+  }, [applyMotion, applySurface, applyWallpaper]);
+
   const toggle = useCallback(() => applyTheme(isDark ? "light" : "dark"), [applyTheme, isDark]);
 
   const value = useMemo(
@@ -228,6 +289,7 @@ export function ThemeProvider({ children }) {
       setMotion: applyMotion,
       setWallpaper: applyWallpaper,
       setSurface: applySurface,
+      setPreset: applyPreset,
       toggleTheme: toggle,
     }),
     [
@@ -242,6 +304,7 @@ export function ThemeProvider({ children }) {
       applyMotion,
       applyWallpaper,
       applySurface,
+      applyPreset,
       toggle,
     ]
   );

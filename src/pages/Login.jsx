@@ -16,6 +16,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import AuthScene from "../components/AuthScene";
+import { Slide } from "../components/Motion";
 import { useAuth } from "../context/AuthContext";
 
 const roles = [
@@ -183,13 +184,16 @@ export default function Login() {
           <span className={labelClass}>Sign in as</span>
 
           <div className="relative grid grid-cols-4 rounded-2xl border border-slate-300 bg-slate-100/70 p-1">
-            <span
+            {/* The chip used to be a CSS transform with a calc() width, which
+                could not spring and, worse, was overridden frame by frame by
+                the `qd-float` bob that shared the class name — so it never
+                actually moved. The library measures the row instead. */}
+            <Slide
+              as="span"
               aria-hidden="true"
-              className="absolute bottom-1 left-1 top-1 rounded-xl bg-card shadow-md ring-1 ring-emerald-700/15 transition-transform duration-300 ease-out"
-              style={{
-                width: "calc((100% - 0.5rem) / 4)",
-                transform: `translateX(${roleIndex * 100}%)`,
-              }}
+              x={`${roleIndex * 100}%`}
+              className="qd-panel absolute bottom-1 left-1 top-1 rounded-xl bg-card shadow-md ring-1 ring-emerald-700/15"
+              style={{ width: "calc((100% - 0.5rem) / 4)" }}
             />
 
             {roles.map(({ value, label, icon: Icon }) => (

@@ -35,7 +35,7 @@ const RESULT_TONES = {
   pass: "bg-emerald-50 text-emerald-700 dark:text-emerald-300",
   fail: "bg-red-50 text-red-700 dark:text-red-300",
   absent: "bg-amber-50 text-amber-700 dark:text-amber-300",
-  pending: "bg-slate-100 text-slate-600 dark:text-slate-300",
+  pending: "bg-slate-100 text-slate-600",
 };
 
 const emptySubject = {
@@ -130,7 +130,7 @@ const inputClass =
 function Label({ text, children }) {
   return (
     <label className="block text-sm">
-      <span className="mb-1.5 block font-semibold text-slate-700 dark:text-slate-300">{text}</span>
+      <span className="mb-1.5 block font-semibold text-slate-700">{text}</span>
       {children}
     </label>
   );
@@ -633,7 +633,7 @@ export default function AdminResults() {
                   visibleSubjects.map((subject) => (
                     <tr key={subject._id} className="hover:bg-slate-50/70">
                       <td className="px-5 py-3">
-                        <p className="font-semibold text-slate-800 dark:text-slate-200">
+                        <p className="font-semibold text-slate-800">
                           {subject.name}
                         </p>
                         {subject.code && (
@@ -643,7 +643,7 @@ export default function AdminResults() {
                       <td className="px-4 py-3 text-slate-600">{subject.className}</td>
                       <td className="px-4 py-3 text-slate-600">{subject.theoryFull}</td>
                       <td className="px-4 py-3 text-slate-600">{subject.practicalFull}</td>
-                      <td className="px-4 py-3 font-semibold text-slate-800 dark:text-slate-200">
+                      <td className="px-4 py-3 font-semibold text-slate-800">
                         {subject.fullMarks}
                       </td>
                       <td className="px-4 py-3 text-slate-600">{subject.passMarks}</td>
@@ -744,7 +744,7 @@ export default function AdminResults() {
               ) : (
                 terms.map((term) => (
                   <tr key={term._id} className="hover:bg-slate-50/70">
-                    <td className="px-5 py-3 font-semibold text-slate-800 dark:text-slate-200">
+                    <td className="px-5 py-3 font-semibold text-slate-800">
                       {term.name}
                     </td>
                     <td className="px-4 py-3 text-slate-600">{term.academicYear}</td>
@@ -896,7 +896,7 @@ export default function AdminResults() {
                       className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-sm dark:bg-transparent"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <p className="font-semibold text-slate-800 dark:text-slate-200">
+                        <p className="font-semibold text-slate-800">
                           {row.subjectName}
                         </p>
                         <span
@@ -912,7 +912,7 @@ export default function AdminResults() {
                       <p className="mt-1 text-xs text-slate-500">
                         {row.teacherName || "any teacher of the class"} · out of {row.fullMarks}
                       </p>
-                      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200">
                         <div
                           className="h-full rounded-full bg-emerald-500"
                           style={{
@@ -950,7 +950,7 @@ export default function AdminResults() {
                     {review.students.map((row) => (
                       <tr key={row.student} className="hover:bg-slate-50/70">
                         <td className="px-5 py-3">
-                          <p className="font-semibold text-slate-800 dark:text-slate-200">
+                          <p className="font-semibold text-slate-800">
                             {row.name}
                           </p>
                           <p className="text-xs text-slate-500">
@@ -965,7 +965,7 @@ export default function AdminResults() {
                           );
 
                           return (
-                            <td key={subject._id} className="px-3 py-3 text-slate-700 dark:text-slate-300">
+                            <td key={subject._id} className="px-3 py-3 text-slate-700">
                               {cell ? (
                                 <span className="flex items-center gap-1.5">
                                   {cell.absent ? "Ab" : cell.total}
@@ -978,7 +978,7 @@ export default function AdminResults() {
                           );
                         })}
 
-                        <td className="px-3 py-3 font-semibold text-slate-800 dark:text-slate-200">
+                        <td className="px-3 py-3 font-semibold text-slate-800">
                           {row.obtained !== null ? `${row.obtained}/${row.maximum}` : "—"}
                         </td>
                         <td className="px-3 py-3">{row.gpa ?? "—"}</td>
@@ -1350,7 +1350,7 @@ export default function AdminResults() {
                   <tbody className="divide-y divide-slate-100">
                     {card.subjects.map((row) => (
                       <tr key={row.subject}>
-                        <td className="px-4 py-2.5 font-medium text-slate-800 dark:text-slate-200">
+                        <td className="px-4 py-2.5 font-medium text-slate-800">
                           {row.subjectName}
                         </td>
                         <td className="px-3 py-2.5 text-slate-600">
@@ -1359,7 +1359,7 @@ export default function AdminResults() {
                         <td className="px-3 py-2.5 text-slate-600">
                           {row.absent ? "Ab" : `${row.practical ?? "-"} / ${row.practicalFull}`}
                         </td>
-                        <td className="px-3 py-2.5 font-semibold text-slate-800 dark:text-slate-200">
+                        <td className="px-3 py-2.5 font-semibold text-slate-800">
                           {row.absent ? "Ab" : row.total}
                         </td>
                         <td className="px-3 py-2.5 text-slate-600">

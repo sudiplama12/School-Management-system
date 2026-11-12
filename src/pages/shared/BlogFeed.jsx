@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { CalendarDays, ImageOff, Loader2, Megaphone } from "lucide-react";
 import api, { apiMessage } from "../../api/axios";
+import { Reveal } from "../../components/Motion";
 
 // Published school news, read-only in every portal. The office writes it from
 // the admin blog desk.
@@ -32,7 +33,7 @@ export default function BlogFeed({ title = "School Blog", subtitle }) {
         </div>
 
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+          <h1 className="text-2xl font-bold text-slate-800">
             {title}
           </h1>
           <p className="text-sm text-slate-500">
@@ -58,7 +59,7 @@ export default function BlogFeed({ title = "School Blog", subtitle }) {
       ) : posts.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-card p-10 text-center">
           <ImageOff size={28} className="mx-auto mb-3 text-slate-400" />
-          <h3 className="font-semibold text-slate-700 dark:text-slate-200">
+          <h3 className="font-semibold text-slate-700">
             No posts yet
           </h3>
           <p className="mt-1 text-sm text-slate-500">
@@ -67,21 +68,23 @@ export default function BlogFeed({ title = "School Blog", subtitle }) {
         </div>
       ) : (
         <div className="space-y-6">
-          {posts.map((post) => (
-            <article
+          {posts.map((post, index) => (
+            <Reveal
+              as="article"
               key={post._id}
-              className="qd-rise overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-sm"
+              index={index}
+              className="overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-sm"
             >
               {post.imageUrl && (
                 <img
                   src={post.imageUrl}
                   alt=""
-                  className="max-h-80 w-full bg-slate-100 object-cover dark:bg-slate-800"
+                  className="max-h-80 w-full bg-slate-100 object-cover"
                 />
               )}
 
               <div className="space-y-3 p-6">
-                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+                <h2 className="text-xl font-bold text-slate-800">
                   {post.title}
                 </h2>
 
@@ -94,11 +97,11 @@ export default function BlogFeed({ title = "School Blog", subtitle }) {
                   {post.authorName && ` · ${post.authorName}`}
                 </p>
 
-                <p className="whitespace-pre-line text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                <p className="whitespace-pre-line text-sm leading-relaxed text-slate-600">
                   {post.body}
                 </p>
               </div>
-            </article>
+            </Reveal>
           ))}
         </div>
       )}

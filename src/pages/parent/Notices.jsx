@@ -206,7 +206,7 @@ export default function Notices() {
 
       {/* Notice Details Modal */}
       {selectedNotice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 dark:bg-slate-950/70 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
           <div className="max-h-[90dvh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-card shadow-2xl">
             {/* Modal Header */}
             <div className="flex items-start justify-between border-b border-slate-200 p-6">
