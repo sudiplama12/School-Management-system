@@ -1,3 +1,13 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://backend-smart-lms.onrender.com/api/$1"
+    },
+    {
+      "source": "/uploads/(.*)",
+      "destination": "https://backend-smart-lms.onrender.com/uploads/$1"
+    },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
