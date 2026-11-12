@@ -8,13 +8,24 @@ import axios from "axios";
 // stale; VITE_API_URL still wins when it is set and correct.
 const DEPLOYED_API_URL = "https://backend-smart-lms.onrender.com/api";
 
+// Every route hangs off the /api prefix, so a base that omits it does not fail
+// loudly: the request reaches the API, misses every mount point, and the server's
+// not-found handler sends back "Route not found: /auth/login", which the form then
+// shows the family as if their password were wrong. Vercel is configured that way
+// today, so the base is repaired here rather than trusted to the env var.
+const withApi = (base) => {
+  const trimmed = String(base).replace(/\/+$/, "");
+  return trimmed.endsWith("/api") ? trimmed : `${trimmed}/api`;
+};
+
 // No default Content-Type: axios keeps one it finds, and with
 // "application/json" set here it JSON-stringifies FormData and silently drops
 // every file part. Plain objects still get application/json automatically.
 const api = axios.create({
-  baseURL:
+  baseURL: withApi(
     import.meta.env.VITE_API_URL ||
-    (import.meta.env.PROD ? DEPLOYED_API_URL : "/api"),
+      (import.meta.env.PROD ? DEPLOYED_API_URL : "/api")
+  ),
 });
 
 api.interceptors.request.use(
