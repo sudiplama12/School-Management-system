@@ -1,26 +1,20 @@
 import axios from "axios";
 
-// Every request goes to this site's own /api and vercel.json forwards it to the API
-// host, which is the same shape as the Vite dev proxy in vite.config.js. One origin
-// is what takes CORS out of the deployment entirely: nothing about the API's address
-// is baked into the build, so no environment variable can go stale, and the backend
-// can move to another host without a single rebuild.
+// Every call goes to this site's own /api, in development and in production alike:
+// vite.config.js forwards it to the local backend and vercel.json forwards it to the
+// deployed one. Nothing about the API's address is ever baked into the bundle, so the
+// build cannot go stale, moving the backend needs no rebuild, and no request is ever
+// cross-origin — which is why CORS plays no part in the deployment.
 //
-// Set VITE_API_URL only to point a build at a different API, such as a laptop backend
-// for a demo. A value missing the /api suffix is repaired here, because otherwise the
-// request slips past every mount point and the server's own "Route not found:
-// /auth/login" text lands in the sign-in form as if the family had mistyped a password.
-const withApi = (base) => {
-  const trimmed = String(base).replace(/\/+$/, "");
-  return trimmed.endsWith("/api") ? trimmed : `${trimmed}/api`;
-};
+// VITE_API_URL is deliberately ignored. It overrode the fallback twice and broke
+// sign-in both times: once naming a host that no longer exists, once missing /api.
+// To develop against a different backend, change the proxy target in vite.config.js,
+// which runs on your machine and never reaches the built site.
+const api = axios.create({ baseURL: "/api" });
 
-// No default Content-Type: axios keeps one it finds, and with
-// "application/json" set here it JSON-stringifies FormData and silently drops
-// every file part. Plain objects still get application/json automatically.
-const api = axios.create({
-  baseURL: withApi(import.meta.env.VITE_API_URL || "/api"),
-});
+// No default Content-Type is set on purpose: axios keeps one it finds, and with
+// "application/json" here it JSON-stringifies FormData and silently drops every file
+// part. Plain objects still get application/json automatically.
 
 api.interceptors.request.use(
   (config) => {
