@@ -1,29 +1,60 @@
-import { useEffect, useMemo, useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { ChevronDown, LogOut, Menu, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { LogOut, Menu, Move, Pin, X } from "lucide-react";
+import { useMotionValue } from "motion/react";
 
 import SchoolBrand from "./SchoolBrand";
 import ThemeToggle from "./ThemeToggle";
 import ThemeSettings from "./ThemeSettings";
+import SideNav from "./SideNav";
+import { AnimatePresence, Fade, Float } from "./Motion";
 import { NoticeBell } from "./NoticeAlerts";
 import { useAuth } from "../context/AuthContext";
 
-// One shell for all four role portals: the same emerald sidebar, the same amber
-// active pill, the same header and the same entrance motion. A portal supplies
-// only its navigation, its label and its page content.
+// One shell for all four role portals: the same emerald sidebar, the same header,
+// the same entrance motion. A portal supplies only its navigation, its label and
+// its page content.
 //
 //   navigation = [{ name, path, icon, end }]                    (flat list)
 //   groups     = [{ title, icon, items: [{ title, path, icon }] }]  (collapsible)
+//
+// The sidebar is a working surface on a desktop: drag its right edge to make it
+// wider, drag its rows to reorder them (see SideNav), or lift the whole thing off
+// the edge with the grip in its header and put it wherever you are working. All
+// three are remembered for the signed-in account. On a phone none of this applies
+// — there the menu is a drawer, and a drawer you can resize is just a drawer you
+// cannot close.
 
-const IDLE_LINK =
-  "text-emerald-100/65 hover:bg-white/5 hover:text-white hover:translate-x-1";
-const ACTIVE_LINK = "bg-amber-400 text-emerald-950 shadow-lg shadow-amber-500/20";
+const MIN_W = 13;
+const MAX_W = 28;
+const DEFAULT_W = 18;
+
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+const readStored = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem(key);
+
+    return raw === null ? fallback : JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+};
+
+const writeStored = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Private mode or a full quota: the menu still works, it just forgets.
+  }
+};
 
 export default function PortalShell({
   portal,
   navigation = [],
   groups = [],
   actions,
+  sideDraggable = false,
   children,
 }) {
   const navigate = useNavigate();
@@ -31,6 +62,35 @@ export default function PortalShell({
   const { user, school, logout } = useAuth();
 
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Preferences are keyed by account and portal, so the administrator's layout
+  // does not follow you into the portal you use for a different job.
+  const sideKey = `${user?.username || "anon"}:${portal}`;
+
+  const [width, setWidth] = useState(() => {
+    if (!sideDraggable) return DEFAULT_W;
+
+    const stored = Number(readStored(`lms.side.w.${sideKey}`, DEFAULT_W));
+
+    return Number.isFinite(stored) ? clamp(stored, MIN_W, MAX_W) : DEFAULT_W;
+  });
+  const [floating, setFloating] = useState(
+    () => sideDraggable && Boolean(readStored(`lms.side.float.${sideKey}`, false))
+  );
+  const [seed] = useState(() =>
+    sideDraggable ? readStored(`lms.side.pos.${sideKey}`, { x: 0, y: 0 }) : { x: 0, y: 0 }
+  );
+
+  // A detached panel is a desktop idea, and a draggable menu is an admin's idea.
+  // On a phone the menu is a drawer, and a drawer you can resize is just a drawer
+  // you cannot close.
+  const [wide, setWide] = useState(() => window.innerWidth >= 1024);
+  const isFloating = sideDraggable && floating && wide;
+
+  const x = useMotionValue(Number(seed.x) || 0);
+  const y = useMotionValue(Number(seed.y) || 0);
+
+  const asideRef = useRef(null);
 
   // A group opens itself when you land on one of its links, then stays where
   // the administrator left it.
@@ -54,6 +114,37 @@ export default function PortalShell({
 
   useEffect(() => setMobileOpen(false), [location.pathname]);
 
+  useEffect(() => {
+    if (!sideDraggable) return;
+
+    writeStored(`lms.side.w.${sideKey}`, width);
+  }, [sideDraggable, sideKey, width]);
+
+  useEffect(() => {
+    if (!sideDraggable) return;
+
+    writeStored(`lms.side.float.${sideKey}`, floating);
+  }, [sideDraggable, sideKey, floating]);
+
+  // Track the breakpoint, and keep a detached panel on screen when the window
+  // shrinks under it.
+  useEffect(() => {
+    const onResize = () => {
+      setWide(window.innerWidth >= 1024);
+
+      const panel = asideRef.current?.getBoundingClientRect();
+      if (!panel || !isFloating) return;
+
+      x.set(clamp(x.get(), 0, Math.max(0, window.innerWidth - panel.width)));
+      y.set(clamp(y.get(), 0, Math.max(0, window.innerHeight - panel.height)));
+    };
+
+    onResize();
+    window.addEventListener("resize", onResize);
+
+    return () => window.removeEventListener("resize", onResize);
+  }, [isFloating, x, y]);
+
   const handleLogout = () => {
     logout();
     navigate("/login", { replace: true });
@@ -74,102 +165,96 @@ export default function PortalShell({
       return next;
     });
 
+  // Lifting off the edge starts from where the panel already is, so it reads as
+  // the same object coming loose rather than a new one appearing.
+  const detach = () => {
+    const rect = asideRef.current?.getBoundingClientRect();
+
+    if (rect) {
+      x.set(rect.left);
+      y.set(rect.top);
+    }
+
+    setFloating(true);
+  };
+
+  // Motion leaves the transform it wrote behind, so docking has to zero the
+  // offset or the sidebar returns to the edge standing where you dropped it.
+  const dock = () => {
+    x.set(0);
+    y.set(0);
+    writeStored(`lms.side.pos.${sideKey}`, { x: 0, y: 0 });
+    setFloating(false);
+  };
+
+  const dragEdge = (event) => {
+    const strip = event.currentTarget;
+    const { pointerId, clientX } = event;
+
+    strip.setPointerCapture(pointerId);
+
+    const start = { pointer: clientX, width };
+
+    const move = (moveEvent) => {
+      if (!moveEvent.buttons) return;
+
+      setWidth(clamp(start.width + (moveEvent.clientX - start.pointer) / 16, MIN_W, MAX_W));
+    };
+
+    const stop = () => {
+      if (strip.hasPointerCapture(pointerId)) strip.releasePointerCapture(pointerId);
+
+      strip.removeEventListener("pointermove", move);
+      strip.removeEventListener("pointerup", stop);
+      strip.removeEventListener("pointercancel", stop);
+    };
+
+    strip.addEventListener("pointermove", move);
+    strip.addEventListener("pointerup", stop);
+    strip.addEventListener("pointercancel", stop);
+  };
+
   const sidebar = (
     <>
       <div className="flex h-20 shrink-0 items-center justify-between gap-2 border-b border-emerald-900/60 px-5">
         <SchoolBrand school={school} portal={portal} tone="dark" />
 
-        <button
-          type="button"
-          onClick={() => setMobileOpen(false)}
-          aria-label="Close menu"
-          className="rounded-lg p-2 text-emerald-200/70 transition hover:bg-white/5 hover:text-white lg:hidden"
-        >
-          <X size={20} />
-        </button>
+        <div className="flex shrink-0 items-center gap-1">
+          {/* Administrators only, and on a desktop only: the grip that takes the
+              menu off the edge. */}
+          {sideDraggable && (
+            <button
+              type="button"
+              onClick={() => (isFloating ? dock() : detach())}
+              aria-label={isFloating ? "Dock the menu" : "Float the menu"}
+              aria-pressed={isFloating}
+              title={isFloating ? "Dock the menu to the edge" : "Drag the menu anywhere"}
+              className="hidden rounded-lg p-2 text-emerald-200/70 transition hover:bg-white/5 hover:text-white lg:inline-flex"
+            >
+              {isFloating ? <Pin size={17} /> : <Move size={17} />}
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setMobileOpen(false)}
+            aria-label="Close menu"
+            className="rounded-lg p-2 text-emerald-200/70 transition hover:bg-white/5 hover:text-white lg:hidden"
+          >
+            <X size={20} />
+          </button>
+        </div>
       </div>
 
-      <nav className="qd-scrollbar qd-stagger-side min-h-0 flex-1 space-y-1.5 overflow-y-auto overscroll-contain px-3 py-5">
-        <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-300/70">
-          Menu
-        </p>
-
-        {navigation.map((item) => {
-          const Icon = item.icon;
-
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.end}
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition duration-200 ${
-                  isActive ? ACTIVE_LINK : IDLE_LINK
-                }`
-              }
-            >
-              <Icon size={19} />
-              {item.name}
-            </NavLink>
-          );
-        })}
-
-        {groups.map((group) => {
-          const GroupIcon = group.icon;
-          const open = !collapsed.has(group.title) || group.title === owningGroup;
-
-          return (
-            <div key={group.title} className="pt-2">
-              <button
-                type="button"
-                onClick={() => toggleGroup(group.title)}
-                aria-expanded={open}
-                className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-sm font-semibold transition duration-200 ${
-                  group.title === owningGroup
-                    ? "bg-emerald-500/15 text-amber-300"
-                    : "text-emerald-100/75 hover:bg-white/5 hover:text-white"
-                }`}
-              >
-                <GroupIcon size={19} />
-
-                <span className="min-w-0 flex-1">{group.title}</span>
-
-                <ChevronDown
-                  size={16}
-                  className={`shrink-0 transition-transform duration-300 ${
-                    open ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-
-              {open && (
-                <div className="qd-fade-in mt-1 space-y-1 border-l border-emerald-800/70 pl-3">
-                  {group.items.map((item) => {
-                    const ItemIcon = item.icon;
-
-                    return (
-                      <NavLink
-                        key={item.path}
-                        to={item.path}
-                        className={({ isActive }) =>
-                          `flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition duration-200 ${
-                            isActive
-                              ? "bg-amber-400/15 font-semibold text-amber-300"
-                              : "text-emerald-100/55 hover:bg-white/5 hover:text-white"
-                          }`
-                        }
-                      >
-                        <ItemIcon size={17} />
-                        {item.title}
-                      </NavLink>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </nav>
+      <SideNav
+        draggable={sideDraggable}
+        storageKey={sideKey}
+        navigation={navigation}
+        groups={groups}
+        collapsed={collapsed}
+        onToggleGroup={toggleGroup}
+        owningGroup={owningGroup}
+      />
 
       <div className="shrink-0 border-t border-emerald-900/60 p-4">
         <div className="qd-slide-right flex items-center gap-3 rounded-xl bg-white/5 px-3 py-2.5">
@@ -197,30 +282,69 @@ export default function PortalShell({
           Sign out
         </button>
       </div>
+
+      {/* The grab line. Double-click puts the width back to the default. */}
+      {sideDraggable && !isFloating && (
+        <div
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize the menu"
+          title="Drag to resize · double-click to reset"
+          onPointerDown={dragEdge}
+          onDoubleClick={() => setWidth(DEFAULT_W)}
+          className="group/edge absolute inset-y-0 right-0 z-10 hidden w-3 cursor-ew-resize touch-none lg:block"
+        >
+          <span className="absolute inset-y-6 left-1/2 w-px -translate-x-1/2 bg-emerald-300/10 transition group-hover/edge:bg-amber-300/60" />
+          <span className="absolute left-1/2 top-1/2 h-10 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-300/20 transition group-hover/edge:bg-amber-300/80" />
+        </div>
+      )}
     </>
   );
 
   return (
-    <div className="qd-canvas min-h-screen bg-slate-50">
-      {mobileOpen && (
-        <div
-          onClick={() => setMobileOpen(false)}
-          className="qd-ink fixed inset-0 z-40 bg-emerald-950/50 backdrop-blur-sm lg:hidden"
-        />
-      )}
+    <div
+      className="qd-canvas min-h-screen bg-slate-50"
+      style={{ "--side-w": `${width}rem` }}
+    >
+      <AnimatePresence>
+        {mobileOpen && (
+          <Fade
+            onClick={() => setMobileOpen(false)}
+            className="qd-ink fixed inset-0 z-40 bg-emerald-950/50 backdrop-blur-sm lg:hidden"
+          />
+        )}
+      </AnimatePresence>
 
-      <aside
-        className={`qd-ink qd-side fixed inset-y-0 left-0 z-50 flex w-[86vw] max-w-72 flex-col overflow-hidden bg-gradient-to-b from-emerald-950 via-emerald-950 to-slate-950 transition-transform duration-300 ease-out ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      {/* Keyed by state, so docking hands the element back to CSS clean. The
+          library writes an inline transform while dragging and does not remove it
+          afterwards, and an inline `translate(0, 0)` beats the `-translate-x-full`
+          the mobile drawer needs — the same class of collision that used to freeze
+          the role selector on the sign-in card. */}
+      <Float
+        key={isFloating ? "side-float" : "side-dock"}
+        as="aside"
+        ref={asideRef}
+        floating={isFloating}
+        x={x}
+        y={y}
+        onDragEnd={(_, info) =>
+          writeStored(`lms.side.pos.${sideKey}`, { x: info.offset.x, y: info.offset.y })
+        }
+        style={{ width: isFloating ? `${width}rem` : undefined }}
+        className={`qd-ink qd-side fixed flex flex-col overflow-hidden bg-gradient-to-b from-emerald-950 via-emerald-950 to-slate-950 ${
+          isFloating
+            ? "left-0 top-0 z-50 h-[min(78vh,44rem)] rounded-2xl shadow-2xl shadow-emerald-950/60 ring-1 ring-emerald-900/70"
+            : "inset-y-0 left-0 z-50 w-[86vw] max-w-72 transition-transform duration-300 ease-out lg:w-[var(--side-w)] lg:max-w-[28rem] " +
+              (mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0")
         }`}
       >
         {/* The school scene, kept well below the menu so it never fogs it. */}
         <div aria-hidden="true" className="qd-art-wash absolute inset-0 -z-10" />
 
         {sidebar}
-      </aside>
+      </Float>
 
-      <div className="lg:pl-72">
+      <div className={isFloating ? "" : "lg:pl-[var(--side-w)]"}>
         <header className="qd-fade-in qd-bar sticky top-0 z-30 flex h-20 items-center justify-between gap-4 border-b border-slate-200 bg-card/85 px-4 backdrop-blur sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-4">
             <button
@@ -258,10 +382,14 @@ export default function PortalShell({
         </header>
 
         <main className="p-4 sm:p-6 lg:p-8">
-          {/* Keyed by path so every page entering the portal fades up together. */}
-          <div key={location.pathname} className="qd-fade-up mx-auto max-w-7xl">
-            {children}
-          </div>
+          {/* Keyed by path, so the page being left animates out *before* the
+              one arriving takes its place instead of two layouts flashing on
+              top of each other. The first render of a portal is not animated. */}
+          <AnimatePresence mode="wait" initial={false}>
+            <Fade key={location.pathname} className="mx-auto max-w-7xl">
+              {children}
+            </Fade>
+          </AnimatePresence>
         </main>
       </div>
     </div>

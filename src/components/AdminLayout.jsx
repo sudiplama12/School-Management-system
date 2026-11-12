@@ -89,7 +89,7 @@ const groups = [
 
 export default function AdminLayout() {
   return (
-    <PortalShell portal="Admin Portal" navigation={navigation} groups={groups}>
+    <PortalShell portal="Admin Portal" navigation={navigation} groups={groups} sideDraggable>
       <Outlet />
     </PortalShell>
   );
