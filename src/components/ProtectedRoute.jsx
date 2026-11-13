@@ -7,7 +7,7 @@ export default function ProtectedRoute({
 }) {
   const { user, loading } = useAuth();
 
-  const token = localStorage.getItem("lms_token");
+  const token = sessionStorage.getItem("lms_token");
 
   // Loading authentication state
   if (loading) {

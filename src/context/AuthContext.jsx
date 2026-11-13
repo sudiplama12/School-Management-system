@@ -3,9 +3,14 @@ import api from "../api/axios";
 
 const AuthContext = createContext(null);
 
+// The whole session — token, account, and the school's name — is stored in
+// sessionStorage, which the browser discards when it is closed. Nobody is
+// therefore still signed in from a previous session, and the school's name
+// cannot be read off the sign-in screen. Within a session nothing changes: a
+// refresh keeps you signed in, and signing out still clears all of it.
 const readSchool = () => {
   try {
-    const saved = localStorage.getItem("lms_school");
+    const saved = sessionStorage.getItem("lms_school");
     return saved ? JSON.parse(saved) : null;
   } catch {
     return null;
@@ -15,7 +20,7 @@ const readSchool = () => {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
-      const savedUser = localStorage.getItem("lms_user");
+      const savedUser = sessionStorage.getItem("lms_user");
       return savedUser ? JSON.parse(savedUser) : null;
     } catch {
       return null;
@@ -37,7 +42,7 @@ export function AuthProvider({ children }) {
   const storeSchool = (next) => {
     if (!next) return;
 
-    localStorage.setItem("lms_school", JSON.stringify(next));
+    sessionStorage.setItem("lms_school", JSON.stringify(next));
     setSchool(next);
   };
 
@@ -52,8 +57,8 @@ export function AuthProvider({ children }) {
         schoolCode: (schoolCode || "").trim(),
       });
 
-      localStorage.setItem("lms_token", data.token);
-      localStorage.setItem("lms_user", JSON.stringify(data.user));
+      sessionStorage.setItem("lms_token", data.token);
+      sessionStorage.setItem("lms_user", JSON.stringify(data.user));
 
       setUser(data.user);
       storeSchool(data.school);
@@ -77,9 +82,9 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    localStorage.removeItem("lms_token");
-    localStorage.removeItem("lms_user");
-    localStorage.removeItem("lms_school");
+    sessionStorage.removeItem("lms_token");
+    sessionStorage.removeItem("lms_user");
+    sessionStorage.removeItem("lms_school");
     setUser(null);
     setSchool(null);
     setReveal(0);
@@ -89,13 +94,13 @@ export function AuthProvider({ children }) {
   // login — so any change made through /profile or by an administrator stayed
   // invisible until the next sign-in. This pulls the live account document.
   const refreshUser = async () => {
-    if (!localStorage.getItem("lms_token")) return null;
+    if (!sessionStorage.getItem("lms_token")) return null;
 
     try {
       const { data } = await api.get("/auth/me");
 
       if (data?.user) {
-        localStorage.setItem("lms_user", JSON.stringify(data.user));
+        sessionStorage.setItem("lms_user", JSON.stringify(data.user));
         setUser(data.user);
       }
 

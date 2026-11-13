@@ -92,7 +92,7 @@ export default function Login() {
         schoolCode.trim().toUpperCase()
       );
 
-      const storedUser = localStorage.getItem("lms_user");
+      const storedUser = sessionStorage.getItem("lms_user");
       const user =
         result?.user ||
         (typeof result === "object" ? result : null) ||

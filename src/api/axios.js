@@ -18,7 +18,7 @@ const api = axios.create({ baseURL: "/api" });
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("lms_token");
+    const token = sessionStorage.getItem("lms_token");
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -35,8 +35,10 @@ api.interceptors.response.use(
     const onLogin = window.location.pathname === "/login";
 
     if (error.response?.status === 401 && !onLogin) {
-      localStorage.removeItem("lms_token");
-      localStorage.removeItem("lms_user");
+      // The session is over, so the school's name goes with it.
+      sessionStorage.removeItem("lms_token");
+      sessionStorage.removeItem("lms_user");
+      sessionStorage.removeItem("lms_school");
       window.location.href = "/login";
     }
 
