@@ -13,6 +13,18 @@ import {
   AlertCircle,
 } from "lucide-react";
 import api from "../../api/axios";
+import { AnimatePresence, Fade, Pop } from "../../components/Motion";
+import { sheetProps } from "../../utils/paper";
+
+// Every field in this page is written on paper, so the inputs are ruled boxes in
+// white ink: a cream sheet with a slate border turns into a cream sheet with a
+// near-white border in dark mode, which is the same invisible-text trap the
+// notices fell into before the paper layer existed.
+const FIELD =
+  "w-full rounded-sm border border-[color:var(--qd-sheet-edge)] bg-white/70 px-4 py-3 text-[color:var(--qd-sheet-ink)] outline-none focus:border-[color:var(--qd-pen)] placeholder:text-[color:var(--qd-sheet-muted)]";
+
+const LABEL =
+  "mb-1.5 block text-sm font-semibold text-[color:var(--qd-sheet-muted)]";
 
 const emptyBook = {
   title: "",
@@ -394,208 +406,232 @@ export default function Library() {
             Loading library data...
           </div>
         ) : activeTab === "books" ? (
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-card">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[750px] text-left text-sm">
-                <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-                  <tr>
-                    <th className="px-5 py-4">Book</th>
-                    <th className="px-5 py-4">ISBN</th>
-                    <th className="px-5 py-4">Category</th>
-                    <th className="px-5 py-4">Total</th>
-                    <th className="px-5 py-4">Available</th>
-                    <th className="px-5 py-4">Action</th>
+          <div className="qd-register qd-margin overflow-x-auto">
+            <table className="w-full min-w-[750px] text-left text-sm">
+              <thead>
+                <tr className="qd-reg-row">
+                  <th className="px-5 py-3.5 pl-12 text-[11px] font-bold uppercase tracking-[0.12em]">
+                    Book
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.12em]">
+                    ISBN
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.12em]">
+                    Category
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.12em]">
+                    Total
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.12em]">
+                    Available
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.12em]">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredBooks.map((book) => (
+                  <tr key={book._id} className="qd-reg-row">
+                    <td className="px-5 py-4 pl-12">
+                      <div className="flex items-start gap-3">
+                        {/* The title as it stands on the shelf. */}
+                        <span
+                          aria-hidden="true"
+                          className="qd-kraft qd-book mt-0.5 block h-9 w-6 shrink-0"
+                        />
+
+                        <div>
+                          <p className="font-semibold">{book.title}</p>
+                          <p className="mt-1 text-xs text-[color:var(--qd-sheet-muted)]">
+                            {book.author}
+                            {book.code ? ` · ${book.code}` : ""}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4">{book.isbn || "—"}</td>
+                    <td className="px-5 py-4">
+                      {book.category || "General"}
+                      {book.type === "PDF" && (
+                        <span className="qd-hand ml-2 text-base text-[color:var(--qd-pen)]">
+                          pdf
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-5 py-4 font-semibold">{book.quantity ?? 0}</td>
+                    <td className="px-5 py-4">
+                      <span
+                        className={`qd-total inline-block px-3 py-1 font-bold ${
+                          Number(book.availableCopies ?? book.quantity ?? 0) > 0
+                            ? "text-[color:var(--qd-pen)]"
+                            : "text-[color:var(--qd-pen-red)]"
+                        }`}
+                      >
+                        {book.availableCopies ?? book.quantity ?? 0}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => openBookForm(book)}
+                          aria-label={`Edit ${book.title}`}
+                          className="rounded-sm border border-[color:var(--qd-sheet-edge)] px-3 py-2 text-xs font-semibold text-[color:var(--qd-pen)] transition hover:bg-white/60"
+                        >
+                          <Pencil size={12} className="mr-1 inline" />
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={() => deleteBook(book._id)}
+                          aria-label={`Delete ${book.title}`}
+                          className="rounded-sm border border-[color:var(--qd-pen-red)] px-3 py-2 text-xs font-semibold text-[color:var(--qd-pen-red)] transition hover:bg-white/60"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredBooks.map((book) => (
-                    <tr key={book._id} className="hover:bg-slate-50">
+                ))}
+                {filteredBooks.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan="6"
+                      className="px-5 py-12 pl-12 text-[color:var(--qd-sheet-muted)]"
+                    >
+                      No books found. Add your first book.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        ) : activeTab === "issues" ? (
+          <div className="qd-register qd-margin overflow-x-auto">
+            <table className="w-full min-w-[800px] text-left text-sm">
+              <thead>
+                <tr className="qd-reg-row">
+                  <th className="px-5 py-3.5 pl-12 text-[11px] font-bold uppercase tracking-[0.12em]">
+                    Book
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.12em]">
+                    Student
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.12em]">
+                    Issue Date
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.12em]">
+                    Due Date
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.12em]">
+                    Status
+                  </th>
+                  <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.12em]">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredIssues.map((issue) => {
+                  const open = OPEN_STATUSES.includes(issue.status);
+                  const label =
+                    issue.status === "returned"
+                      ? "Returned"
+                      : issue.status === "lost"
+                        ? "Lost"
+                        : issue.overdue
+                          ? "Overdue"
+                          : "Issued";
+
+                  // Only two inks on this page: the clerk's blue for a loan that
+                  // is still tidy, red for the ones somebody has to chase.
+                  const tone =
+                    issue.status === "returned"
+                      ? "text-[color:var(--qd-sheet-muted)]"
+                      : issue.status === "lost" || issue.overdue
+                        ? "text-[color:var(--qd-pen-red)]"
+                        : "text-[color:var(--qd-pen)]";
+
+                  return (
+                    <tr key={issue._id} className="qd-reg-row">
+                      <td className="px-5 py-4 pl-12 font-semibold">
+                        {issue.book?.title || issue.bookTitle || "Book"}
+                      </td>
                       <td className="px-5 py-4">
-                        <p className="font-semibold text-slate-800">
-                          {book.title}
-                        </p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          {book.author}
-                          {book.code ? ` · ${book.code}` : ""}
-                        </p>
-                      </td>
-                      <td className="px-5 py-4 text-slate-600">
-                        {book.isbn || "—"}
-                      </td>
-                      <td className="px-5 py-4 text-slate-600">
-                        {book.category || "General"}
-                        {book.type === "PDF" && (
-                          <span className="ml-2 rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-semibold text-teal-700 dark:text-teal-300">
-                            PDF
-                          </span>
+                        {issue.student?.name ||
+                          issue.studentName ||
+                          "Student"}
+                        {issue.student?.studentId && (
+                          <p className="mt-1 text-xs font-normal text-[color:var(--qd-sheet-muted)]">
+                            {issue.student.studentId}
+                          </p>
                         )}
                       </td>
-                      <td className="px-5 py-4">{book.quantity ?? 0}</td>
+                      <td className="px-5 py-4">
+                        {formatDate(issue.issueDate || issue.createdAt)}
+                      </td>
+                      <td className="px-5 py-4">{formatDate(issue.dueDate)}</td>
                       <td className="px-5 py-4">
                         <span
-                          className={`rounded-full px-3 py-1 font-semibold ${
-                            Number(book.availableCopies ?? book.quantity ?? 0) > 0
-                              ? "bg-emerald-50 text-emerald-700 dark:text-emerald-300"
-                              : "bg-red-50 text-red-700 dark:text-red-300"
-                          }`}
+                          className={`qd-cell inline-block rounded-sm px-3 py-1 text-xs font-bold uppercase tracking-wide ${tone}`}
                         >
-                          {book.availableCopies ?? book.quantity ?? 0}
+                          {label}
                         </span>
                       </td>
                       <td className="px-5 py-4">
-                        <div className="flex gap-2">
+                        {open && (
                           <button
-                            onClick={() => openBookForm(book)}
-                            aria-label={`Edit ${book.title}`}
-                            className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                          >
-                            <Pencil size={14} />
-                            Edit
-                          </button>
-
-                          <button
-                            onClick={() => deleteBook(book._id)}
-                            aria-label={`Delete ${book.title}`}
-                            className="rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                  {filteredBooks.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan="6"
-                        className="px-5 py-12 text-center text-slate-500"
-                      >
-                        No books found. Add your first book.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ) : activeTab === "issues" ? (
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-card">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[800px] text-left text-sm">
-                <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-                  <tr>
-                    <th className="px-5 py-4">Book</th>
-                    <th className="px-5 py-4">Student</th>
-                    <th className="px-5 py-4">Issue Date</th>
-                    <th className="px-5 py-4">Due Date</th>
-                    <th className="px-5 py-4">Status</th>
-                    <th className="px-5 py-4">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredIssues.map((issue) => {
-                    const open = OPEN_STATUSES.includes(issue.status);
-                    const label =
-                      issue.status === "returned"
-                        ? "Returned"
-                        : issue.status === "lost"
-                          ? "Lost"
-                          : issue.overdue
-                            ? "Overdue"
-                            : "Issued";
-
-                    return (
-                      <tr key={issue._id} className="hover:bg-slate-50">
-                        <td className="px-5 py-4 font-semibold text-slate-800">
-                          {issue.book?.title || issue.bookTitle || "Book"}
-                        </td>
-                        <td className="px-5 py-4">
-                          {issue.student?.name ||
-                            issue.studentName ||
-                            "Student"}
-                          {issue.student?.studentId && (
-                            <p className="mt-1 text-xs font-normal text-slate-500">
-                              {issue.student.studentId}
-                            </p>
-                          )}
-                        </td>
-                        <td className="px-5 py-4">
-                          {formatDate(issue.issueDate || issue.createdAt)}
-                        </td>
-                        <td className="px-5 py-4">
-                          {formatDate(issue.dueDate)}
-                        </td>
-                        <td className="px-5 py-4">
-                          <span
-                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                              issue.status === "returned"
-                                ? "bg-emerald-50 text-emerald-700 dark:text-emerald-300"
-                                : issue.status === "lost"
-                                  ? "bg-slate-200 text-slate-700"
-                                  : issue.overdue
-                                    ? "bg-red-50 text-red-700 dark:text-red-300"
-                                    : "bg-amber-50 text-amber-700 dark:text-amber-300"
+                            onClick={() => returnBook(issue._id)}
+                            aria-label={`Return ${issue.book?.title || "book"} for ${
+                              issue.student?.name || "student"
                             }`}
+                            className="flex items-center gap-2 rounded-sm border border-[color:var(--qd-pen)] px-3 py-2 text-xs font-semibold text-[color:var(--qd-pen)] transition hover:bg-white/60"
                           >
-                            {label}
-                          </span>
-                        </td>
-                        <td className="px-5 py-4">
-                          {open && (
-                            <button
-                              onClick={() => returnBook(issue._id)}
-                              aria-label={`Return ${issue.book?.title || "book"} for ${
-                                issue.student?.name || "student"
-                              }`}
-                              className="flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
-                            >
-                              <RotateCcw size={14} />
-                              Return
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {filteredIssues.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan="6"
-                        className="px-5 py-12 text-center text-slate-500"
-                      >
-                        No issue records found.
+                            <RotateCcw size={14} />
+                            Return
+                          </button>
+                        )}
                       </td>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  );
+                })}
+                {filteredIssues.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan="6"
+                      className="px-5 py-12 pl-12 text-[color:var(--qd-sheet-muted)]"
+                    >
+                      No issue records found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         ) : (
           <form
             onSubmit={issueBook}
-            className="mx-auto max-w-2xl space-y-5 rounded-2xl border border-slate-200 bg-card p-6 shadow-sm"
+            {...sheetProps(0, {
+              tilt: 0,
+              className: "mx-auto max-w-2xl space-y-5 p-6 sm:p-8",
+            })}
           >
             <div>
-              <h2 className="text-xl font-bold text-slate-900">
-                Issue Book to Student
-              </h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <h2 className="text-xl font-bold">Issue Book to Student</h2>
+              <p className="mt-1 text-sm text-[color:var(--qd-sheet-muted)]">
                 Only books with available copies can be issued.
               </p>
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
-                Select Book
-              </label>
+              <label className={LABEL}>Select Book</label>
               <select
                 required
                 value={issueForm.bookId}
                 onChange={(e) =>
                   setIssueForm({ ...issueForm, bookId: e.target.value })
                 }
-                className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-emerald-500"
+                className={FIELD}
               >
                 <option value="">Choose a book</option>
                 {books
@@ -610,16 +646,14 @@ export default function Library() {
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
-                Select Student
-              </label>
+              <label className={LABEL}>Select Student</label>
               <select
                 required
                 value={issueForm.studentId}
                 onChange={(e) =>
                   setIssueForm({ ...issueForm, studentId: e.target.value })
                 }
-                className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-emerald-500"
+                className={FIELD}
               >
                 <option value="">Choose a student</option>
                 {students.map((student) => (
@@ -631,9 +665,7 @@ export default function Library() {
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
-                Return Due Date
-              </label>
+              <label className={LABEL}>Return Due Date</label>
               <input
                 type="date"
                 required
@@ -642,136 +674,132 @@ export default function Library() {
                 onChange={(e) =>
                   setIssueForm({ ...issueForm, dueDate: e.target.value })
                 }
-                className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-emerald-500"
+                className={FIELD}
               />
             </div>
 
             <button
               type="submit"
-              className="w-full rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white hover:bg-emerald-700"
+              className="w-full rounded-sm bg-[color:var(--qd-pen)] px-5 py-3 font-semibold text-white transition hover:bg-[#16294a]"
             >
               Issue Book
             </button>
           </form>
         )}
 
-        {showBookForm && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-slate-950/60 p-4">
-            <form
-              onSubmit={saveBook}
-              className="my-auto w-full max-w-lg space-y-4 rounded-2xl bg-card p-6 shadow-xl"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-bold text-slate-900">
-                    {editing ? "Edit Book" : "Add New Book"}
-                  </h2>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {editing
-                      ? `Accession ${editing.code || "—"} · ${
-                          editing.availableCopies ?? editing.quantity ?? 0
-                        } of ${editing.quantity ?? 0} copies on the shelf`
-                      : "New copies go straight onto the shelf."}
-                  </p>
+        <AnimatePresence>
+          {showBookForm && (
+            <Fade className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-slate-950/60 p-4">
+              <Pop
+                as="form"
+                origin="center"
+                onSubmit={saveBook}
+                className="qd-sheet qd-scrollbar my-auto max-h-[92dvh] w-full max-w-lg space-y-4 overflow-y-auto p-6"
+              >
+                <div className="flex items-start justify-between gap-4 border-b-2 border-[color:var(--qd-sheet-rule)] pb-4">
+                  <div>
+                    <h2 className="text-xl font-bold">
+                      {editing ? "Edit Book" : "Add New Book"}
+                    </h2>
+                    <p className="mt-1 text-xs text-[color:var(--qd-sheet-muted)]">
+                      {editing
+                        ? `Accession ${editing.code || "—"} · ${
+                            editing.availableCopies ?? editing.quantity ?? 0
+                          } of ${editing.quantity ?? 0} copies on the shelf`
+                        : "New copies go straight onto the shelf."}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowBookForm(false)}
+                    className="rounded-lg p-2 text-[color:var(--qd-sheet-muted)] transition hover:bg-white/70 hover:text-[color:var(--qd-sheet-ink)]"
+                    aria-label="Close"
+                  >
+                    <X size={20} />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setShowBookForm(false)}
-                  className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
-                  aria-label="Close"
-                >
-                  <X size={20} />
-                </button>
-              </div>
 
-              {[
-                ["title", "Book Title", "Enter book title"],
-                ["author", "Author", "Enter author name"],
-                ["isbn", "ISBN", "Enter ISBN (optional)"],
-                ["category", "Category", "e.g. Science, Math, English"],
-              ].map(([name, label, placeholder]) => (
-                <div key={name}>
-                  <label className="mb-1.5 block text-sm font-semibold text-slate-700">
-                    {label}
-                  </label>
-                  <input
-                    required={name === "title" || name === "author"}
-                    value={bookForm[name]}
+                {[
+                  ["title", "Book Title", "Enter book title"],
+                  ["author", "Author", "Enter author name"],
+                  ["isbn", "ISBN", "Enter ISBN (optional)"],
+                  ["category", "Category", "e.g. Science, Math, English"],
+                ].map(([name, label, placeholder]) => (
+                  <div key={name}>
+                    <label className={LABEL}>{label}</label>
+                    <input
+                      required={name === "title" || name === "author"}
+                      value={bookForm[name]}
+                      onChange={(e) =>
+                        setBookForm({ ...bookForm, [name]: e.target.value })
+                      }
+                      placeholder={placeholder}
+                      className={FIELD}
+                    />
+                  </div>
+                ))}
+
+                <div>
+                  <label className={LABEL}>Format</label>
+                  <select
+                    value={bookForm.type}
                     onChange={(e) =>
-                      setBookForm({ ...bookForm, [name]: e.target.value })
+                      setBookForm({ ...bookForm, type: e.target.value })
                     }
-                    placeholder={placeholder}
-                    className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-emerald-500"
+                    className={FIELD}
+                  >
+                    <option value="Book">Book (issued to a student)</option>
+                    <option value="PDF">PDF (downloadable reference)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className={LABEL}>Description</label>
+                  <textarea
+                    rows={3}
+                    value={bookForm.description}
+                    onChange={(e) =>
+                      setBookForm({ ...bookForm, description: e.target.value })
+                    }
+                    placeholder="Shown to students in the catalogue (optional)"
+                    className={`${FIELD} resize-y`}
                   />
                 </div>
-              ))}
 
-              <div>
-                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
-                  Format
-                </label>
-                <select
-                  value={bookForm.type}
-                  onChange={(e) =>
-                    setBookForm({ ...bookForm, type: e.target.value })
-                  }
-                  className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-emerald-500"
+                <div>
+                  <label className={LABEL}>Number of Copies</label>
+                  <input
+                    type="number"
+                    min="0"
+                    required
+                    value={bookForm.quantity}
+                    onChange={(e) =>
+                      setBookForm({ ...bookForm, quantity: e.target.value })
+                    }
+                    className={FIELD}
+                  />
+                  <p className="mt-1.5 text-xs text-[color:var(--qd-sheet-muted)]">
+                    {editing
+                      ? "Raising the count adds the difference to the shelf. Stock cannot fall below the copies still on loan."
+                      : "Use 0 to catalogue a title before its copies arrive."}
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="w-full rounded-sm bg-[color:var(--qd-pen)] px-5 py-3 font-semibold text-white transition hover:bg-[#16294a] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <option value="Book">Book (issued to a student)</option>
-                  <option value="PDF">PDF (downloadable reference)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
-                  Description
-                </label>
-                <textarea
-                  rows={3}
-                  value={bookForm.description}
-                  onChange={(e) =>
-                    setBookForm({ ...bookForm, description: e.target.value })
-                  }
-                  placeholder="Shown to students in the catalogue (optional)"
-                  className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
-                  Number of Copies
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  required
-                  value={bookForm.quantity}
-                  onChange={(e) =>
-                    setBookForm({ ...bookForm, quantity: e.target.value })
-                  }
-                  className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-emerald-500"
-                />
-                <p className="mt-1.5 text-xs text-slate-500">
-                  {editing
-                    ? "Raising the count adds the difference to the shelf. Stock cannot fall below the copies still on loan."
-                    : "Use 0 to catalogue a title before its copies arrive."}
-                </p>
-              </div>
-
-              <button
-                type="submit"
-                disabled={saving}
-                className="w-full rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {saving
-                  ? "Saving..."
-                  : editing
-                    ? "Save Changes"
-                    : "Save Book"}
-              </button>
-            </form>
-          </div>
-        )}
+                  {saving
+                    ? "Saving..."
+                    : editing
+                      ? "Save Changes"
+                      : "Save Book"}
+                </button>
+              </Pop>
+            </Fade>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

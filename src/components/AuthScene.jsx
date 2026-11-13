@@ -1,4 +1,6 @@
 import SchoolBrand from "./SchoolBrand";
+import SchoolKids from "./SchoolKids";
+import SchoolReaders from "./SchoolReaders";
 import ThemeToggle from "./ThemeToggle";
 import ThemeSettings from "./ThemeSettings";
 
@@ -31,6 +33,8 @@ export default function AuthScene({
       {/* Scene: a strip on a phone, a full column from lg up. */}
       <section className="qd-ink relative h-40 overflow-hidden sm:h-52 lg:h-auto">
         <div className="qd-art absolute inset-0" aria-hidden="true" />
+        <SchoolKids />
+        <SchoolReaders />
         <div className="qd-drift absolute -left-16 top-6 h-44 w-44 rounded-full bg-white/20 blur-3xl" />
 
         <div className="relative flex h-full flex-col justify-between p-5 sm:p-6 lg:p-10 xl:p-12">

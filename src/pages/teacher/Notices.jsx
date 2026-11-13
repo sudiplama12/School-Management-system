@@ -2,11 +2,18 @@ import { useEffect, useState } from "react";
 import {
   Plus,
   Trash2,
-  Bell,
   X,
 } from "lucide-react";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
+import { AnimatePresence, Tear } from "../../components/Motion";
+import { Pin } from "../../components/Paper";
+import { sheetProps } from "../../utils/paper";
+
+// A field printed on the paper, not on the page behind it: the fill is the
+// white of a printed form box and the type stays ink in both themes.
+const FIELD =
+  "w-full rounded-sm border border-[color:var(--qd-sheet-edge)] bg-white/70 px-4 py-3 text-[color:var(--qd-sheet-ink)] outline-none focus:border-[color:var(--qd-pen)]";
 
 export default function Notices() {
   const { user } = useAuth();
@@ -97,9 +104,11 @@ export default function Notices() {
       </div>
 
       {showForm && (
+        // The draft: a straight sheet on the desk with the pen still on it, so
+        // it reads as the thing that becomes one of the sheets below.
         <form
           onSubmit={publishNotice}
-          className="rounded-2xl border border-slate-200 bg-card p-6 shadow-sm"
+          {...sheetProps(0, { tilt: 0, className: "p-6" })}
         >
           <div className="mb-5 flex items-center justify-between">
             <h2 className="text-xl font-bold">
@@ -109,7 +118,8 @@ export default function Notices() {
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="rounded-lg p-2 hover:bg-slate-100"
+              aria-label="Discard draft"
+              className="rounded-sm p-2 text-[color:var(--qd-sheet-muted)] transition hover:bg-[#1f3a63]/10 hover:text-[color:var(--qd-pen)]"
             >
               <X size={20} />
             </button>
@@ -120,13 +130,13 @@ export default function Notices() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Notice title"
-              className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              className={FIELD}
             />
 
             <select
               value={className}
               onChange={(e) => setClassName(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              className={FIELD}
             >
               {classOptions.map((cls) => (
                 <option key={cls} value={cls}>
@@ -140,12 +150,12 @@ export default function Notices() {
               onChange={(e) => setMessage(e.target.value)}
               rows="5"
               placeholder="Write notice..."
-              className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              className={`${FIELD} qd-hand text-lg`}
             />
 
             <button
               type="submit"
-              className="w-full rounded-xl bg-emerald-600 px-5 py-3 font-bold text-white hover:bg-emerald-700"
+              className="w-full rounded-sm border border-[#1f3a63] bg-[#1f3a63] px-5 py-3 font-bold text-[#fbf5e4] transition hover:bg-[#16294a]"
             >
               Publish Notice
             </button>
@@ -153,51 +163,58 @@ export default function Notices() {
         </form>
       )}
 
-      <div className="space-y-4">
-        {notices.map((notice) => (
-          <div
-            key={notice.id}
-            className="rounded-2xl border border-slate-200 bg-card p-6 shadow-sm"
-          >
-            <div className="flex gap-4">
-              <div className="rounded-xl bg-emerald-100 p-3">
-                <Bell className="text-emerald-600 dark:text-emerald-400" />
-              </div>
+      <div className="qd-board space-y-6 p-4 pt-6 sm:p-6 sm:pt-8">
+        <AnimatePresence initial={false}>
+          {notices.map((notice, index) => (
+            // Deleting a notice tears its sheet off the board and the rest of
+            // the pile takes up the slack, which is what a notice board does.
+            <Tear
+              as="article"
+              key={notice.id}
+              index={index}
+              {...sheetProps(index, { fold: true, className: "p-5 sm:p-6" })}
+            >
+              <Pin />
 
-              <div className="flex-1">
-                <div className="flex flex-col justify-between gap-3 sm:flex-row">
-                  <div>
-                    <h2 className="text-lg font-bold text-slate-900">
-                      {notice.title}
-                    </h2>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <div className="flex flex-col justify-between gap-3 sm:flex-row">
+                    <div>
+                      <h2 className="text-lg font-bold">
+                        {notice.title}
+                      </h2>
 
-                    <p className="text-sm text-emerald-600 dark:text-emerald-400">
-                      {notice.className}
-                    </p>
+                      <p className="qd-hand mt-0.5 text-base text-[color:var(--qd-pen)]">
+                        {notice.className}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => deleteNotice(notice.id)}
+                      aria-label={`Delete ${notice.title}`}
+                      className="self-start rounded-sm p-2 text-[#a52a37] transition hover:bg-[#a52a37]/10"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </div>
 
-                  <button
-                    onClick={() => deleteNotice(notice.id)}
-                    className="self-start rounded-lg p-2 text-red-600 dark:text-red-400 hover:bg-red-50"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  <p className="mt-4 leading-7">
+                    {notice.message}
+                  </p>
+
+                  <p className="qd-hand mt-4 text-base text-[color:var(--qd-sheet-muted)]">
+                    {notice.date} • {notice.time}
+                  </p>
                 </div>
-
-                <p className="mt-4 leading-7 text-slate-600">
-                  {notice.message}
-                </p>
-
-                <p className="mt-4 text-sm text-slate-400">
-                  {notice.date} • {notice.time}
-                </p>
               </div>
-            </div>
-          </div>
-        ))}
+            </Tear>
+          ))}
+        </AnimatePresence>
 
         {!loading && notices.length === 0 && (
-          <p className="text-sm text-slate-500">You have not posted any notices yet.</p>
+          <p className="text-sm text-[color:var(--qd-kraft-type)]">
+            You have not posted any notices yet.
+          </p>
         )}
       </div>
     </div>

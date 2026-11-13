@@ -11,7 +11,9 @@ import {
   X,
 } from "lucide-react";
 import api, { apiMessage } from "../../api/axios";
-import { AnimatePresence, Fade, Pop, Reveal } from "../../components/Motion";
+import { AnimatePresence, Fade, Pop, Tear } from "../../components/Motion";
+import { Pin, Stamp } from "../../components/Paper";
+import { sheetProps } from "../../utils/paper";
 
 // The school blog desk: write a post, attach a photo, publish or keep it as a
 // draft. Only the office can post; every portal reads what is published.
@@ -119,58 +121,67 @@ export default function AdminBlog() {
           Loading posts...
         </div>
       ) : posts.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-card p-10 text-center">
-          <ImageOff size={28} className="mx-auto mb-3 text-slate-400" />
-          <h3 className="font-semibold text-slate-700">
-            Nothing posted yet
-          </h3>
-          <p className="mt-1 text-sm text-slate-500">
-            Write the first entry and it appears in every portal.
-          </p>
+        <div className="qd-board p-5 sm:p-7">
+          <div {...sheetProps(0, { fold: true, className: "px-6 py-10 text-center" })}>
+            <Pin />
+            <ImageOff
+              size={28}
+              className="mx-auto mb-3 text-[color:var(--qd-sheet-muted)]"
+            />
+            <h3 className="font-semibold">
+              Nothing posted yet
+            </h3>
+            <p className="mt-1 text-sm text-[color:var(--qd-sheet-muted)]">
+              Write the first entry and it appears in every portal.
+            </p>
+          </div>
         </div>
       ) : (
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="qd-board grid gap-7 p-5 pt-8 sm:p-7 sm:pt-9 md:grid-cols-2 xl:grid-cols-3">
           {posts.map((post, index) => (
-            <Reveal
+            <Tear
               as="article"
               key={post._id}
               index={index}
-              inView
-              className="overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-sm"
+              {...sheetProps(index, { fold: true, className: "p-3 pb-4" })}
             >
+              <Pin />
+
+              {/* A photo stuck on with a white mount, the way an office photo
+                  is glued to a write-up. */}
               {post.imageUrl ? (
                 <img
                   src={post.imageUrl}
                   alt=""
-                  className="h-40 w-full bg-slate-100 object-cover"
+                  className="h-40 w-full rounded-sm border border-[color:var(--qd-sheet-edge)] bg-white p-1 object-cover shadow-sm"
                 />
               ) : (
-                <div className="flex h-40 w-full items-center justify-center bg-slate-100">
-                  <ImageOff size={26} className="text-slate-400" />
+                <div className="flex h-40 w-full items-center justify-center rounded-sm border border-dashed border-[color:var(--qd-sheet-edge)] bg-white/50">
+                  <ImageOff size={26} className="text-[color:var(--qd-sheet-muted)]" />
                 </div>
               )}
 
-              <div className="space-y-3 p-5">
+              <div className="space-y-3 px-2 pt-4">
                 <div className="flex items-start justify-between gap-3">
-                  <h2 className="font-bold text-slate-800">
+                  <h2 className="font-bold">
                     {post.title}
                   </h2>
-                  <span
-                    className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase ${
-                      post.status === "published"
-                        ? "bg-emerald-100 text-emerald-700 dark:text-emerald-300"
-                        : "bg-slate-100 text-slate-500"
-                    }`}
-                  >
-                    {post.status}
-                  </span>
+
+                  {/* Published gets stamped; a draft is only ever pencilled. */}
+                  {post.status === "published" ? (
+                    <Stamp className="shrink-0">Published</Stamp>
+                  ) : (
+                    <span className="qd-hand shrink-0 text-base text-[color:var(--qd-sheet-muted)]">
+                      draft
+                    </span>
+                  )}
                 </div>
 
-                <p className="line-clamp-3 text-sm text-slate-600">
+                <p className="line-clamp-3 text-sm">
                   {post.body}
                 </p>
 
-                <p className="text-xs text-slate-400">
+                <p className="qd-hand text-base text-[color:var(--qd-sheet-muted)]">
                   {post.authorName || "School office"} ·{" "}
                   {new Date(post.createdAt).toLocaleDateString()}
                 </p>
@@ -179,7 +190,7 @@ export default function AdminBlog() {
                   <button
                     type="button"
                     onClick={() => setEditing(post)}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+                    className="inline-flex items-center gap-1.5 rounded-sm border border-[color:var(--qd-pen)] px-3 py-1.5 text-xs font-semibold text-[color:var(--qd-pen)] transition hover:bg-[color:var(--qd-pen)] hover:text-[#fbf5e4]"
                   >
                     <Pencil size={14} />
                     Edit
@@ -188,7 +199,7 @@ export default function AdminBlog() {
                   <button
                     type="button"
                     onClick={() => toggleStatus(post)}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+                    className="inline-flex items-center gap-1.5 rounded-sm border border-[color:var(--qd-pen)] px-3 py-1.5 text-xs font-semibold text-[color:var(--qd-pen)] transition hover:bg-[color:var(--qd-pen)] hover:text-[#fbf5e4]"
                   >
                     {post.status === "published" ? (
                       <>
@@ -204,14 +215,14 @@ export default function AdminBlog() {
                   <button
                     type="button"
                     onClick={() => remove(post)}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50"
+                    className="inline-flex items-center gap-1.5 rounded-sm border border-[#a52a37] px-3 py-1.5 text-xs font-semibold text-[#a52a37] transition hover:bg-[#a52a37] hover:text-[#fbf5e4]"
                   >
                     <Trash2 size={14} />
                     Delete
                   </button>
                 </div>
               </div>
-            </Reveal>
+            </Tear>
           ))}
         </div>
       )}
@@ -275,22 +286,26 @@ function PostComposer({ post, onClose, onSaved }) {
 
   return (
     <Fade className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
-      <Pop origin="center" className="w-full max-w-xl overflow-hidden rounded-2xl bg-card shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-          <h2 className="text-lg font-bold text-slate-800">
+      {/* The manuscript, on the same stock the finished sheet is printed on. */}
+      <Pop
+        origin="center"
+        className="qd-sheet qd-scrollbar max-h-[88dvh] w-full max-w-xl overflow-y-auto"
+      >
+        <div className="flex items-center justify-between border-b-2 border-[color:var(--qd-sheet-rule)] px-6 py-4">
+          <h2 className="text-lg font-bold">
             {isNew ? "Write a post" : "Edit post"}
           </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            className="rounded-sm p-2 text-[color:var(--qd-sheet-muted)] transition hover:bg-[#1f3a63]/10 hover:text-[color:var(--qd-pen)]"
           >
             <X size={20} />
           </button>
         </div>
 
-        <div className="max-h-[70dvh] space-y-5 overflow-y-auto px-6 py-5">
+        <div className="space-y-5 px-6 py-5">
           {error && (
             <p
               role="alert"
@@ -303,7 +318,7 @@ function PostComposer({ post, onClose, onSaved }) {
           <div>
             <label
               htmlFor="blog-title"
-              className="mb-2 block text-sm font-semibold text-slate-700"
+              className="mb-2 block text-sm font-semibold text-[color:var(--qd-sheet-muted)]"
             >
               Title
             </label>
@@ -312,14 +327,14 @@ function PostComposer({ post, onClose, onSaved }) {
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               placeholder="Annual sports week begins"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
+              className="w-full rounded-sm border border-[color:var(--qd-sheet-edge)] bg-white/70 px-3 py-2.5 text-sm text-[color:var(--qd-sheet-ink)] outline-none focus:border-[color:var(--qd-pen)]"
             />
           </div>
 
           <div>
             <label
               htmlFor="blog-body"
-              className="mb-2 block text-sm font-semibold text-slate-700"
+              className="mb-2 block text-sm font-semibold text-[color:var(--qd-sheet-muted)]"
             >
               What happened
             </label>
@@ -329,12 +344,12 @@ function PostComposer({ post, onClose, onSaved }) {
               value={body}
               onChange={(event) => setBody(event.target.value)}
               placeholder="Write it the way you would tell parents."
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
+              className="w-full rounded-sm border border-[color:var(--qd-sheet-edge)] bg-white/70 px-3 py-2.5 text-sm text-[color:var(--qd-sheet-ink)] outline-none focus:border-[color:var(--qd-pen)]"
             />
           </div>
 
           <div>
-            <span className="mb-2 block text-sm font-semibold text-slate-700">
+            <span className="mb-2 block text-sm font-semibold text-[color:var(--qd-sheet-muted)]">
               Photo
             </span>
 
@@ -342,7 +357,7 @@ function PostComposer({ post, onClose, onSaved }) {
               <img
                 src={preview}
                 alt=""
-                className="mb-3 max-h-44 w-full rounded-xl border border-slate-200 object-cover"
+                className="mb-3 max-h-44 w-full rounded-sm border border-[color:var(--qd-sheet-edge)] bg-white p-1 object-cover"
               />
             )}
 
@@ -350,7 +365,7 @@ function PostComposer({ post, onClose, onSaved }) {
               <button
                 type="button"
                 onClick={() => fileInput.current?.click()}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                className="inline-flex items-center gap-2 rounded-sm border border-[color:var(--qd-pen)] px-4 py-2 text-sm font-semibold text-[color:var(--qd-pen)] transition hover:bg-[color:var(--qd-pen)] hover:text-[#fbf5e4]"
               >
                 <Upload size={16} />
                 {file ? file.name : preview ? "Change photo" : "Choose a photo"}
@@ -367,19 +382,19 @@ function PostComposer({ post, onClose, onSaved }) {
               />
 
               {preview && (
-                <label className="inline-flex items-center gap-2 text-sm text-slate-500">
+                <label className="inline-flex items-center gap-2 text-sm text-[color:var(--qd-sheet-muted)]">
                   <input
                     type="checkbox"
                     checked={removePhoto}
                     onChange={(event) => setRemovePhoto(event.target.checked)}
-                    className="rounded border-slate-300"
+                    className="rounded border-[color:var(--qd-sheet-edge)]"
                   />
                   Remove photo
                 </label>
               )}
             </div>
 
-            <p className="mt-2 text-xs text-slate-400">
+            <p className="mt-2 text-xs text-[color:var(--qd-sheet-muted)]">
               JPG, PNG or WebP, up to 3 MB.
             </p>
           </div>
@@ -387,7 +402,7 @@ function PostComposer({ post, onClose, onSaved }) {
           <div>
             <label
               htmlFor="blog-status"
-              className="mb-2 block text-sm font-semibold text-slate-700"
+              className="mb-2 block text-sm font-semibold text-[color:var(--qd-sheet-muted)]"
             >
               Visibility
             </label>
@@ -395,7 +410,7 @@ function PostComposer({ post, onClose, onSaved }) {
               id="blog-status"
               value={status}
               onChange={(event) => setStatus(event.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
+              className="w-full rounded-sm border border-[color:var(--qd-sheet-edge)] bg-white/70 px-3 py-2.5 text-sm text-[color:var(--qd-sheet-ink)] outline-none focus:border-[color:var(--qd-pen)]"
             >
               <option value="published">Published — everyone sees it</option>
               <option value="draft">Draft — only this screen</option>
@@ -403,11 +418,11 @@ function PostComposer({ post, onClose, onSaved }) {
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-slate-200 px-6 py-4">
+        <div className="flex justify-end gap-3 border-t-2 border-[color:var(--qd-sheet-rule)] px-6 py-4">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+            className="rounded-sm border border-[color:var(--qd-sheet-edge)] px-4 py-2.5 text-sm font-semibold text-[color:var(--qd-sheet-muted)] transition hover:bg-white/60"
           >
             Cancel
           </button>

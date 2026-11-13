@@ -1,16 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   CalendarCheck,
-  CheckCircle,
-  Clock,
   Loader2,
   Save,
   Search,
   UserRound,
-  XCircle,
 } from "lucide-react";
 import api, { apiMessage } from "../api/axios";
 import { useAuth } from "../context/AuthContext";
+import { PenMark } from "./Paper";
 
 const todayString = () => {
   const now = new Date();
@@ -19,6 +17,9 @@ const todayString = () => {
     .slice(0, 10);
 };
 
+// `short` is the letter the register prints in a column and `name` is what the
+// button is called out to a screen reader — a box with a single pen stroke in it
+// is not a label, however obvious it looks to somebody reading over the desk.
 const KINDS = {
   student: {
     sheet: "/attendance/sheet",
@@ -27,9 +28,9 @@ const KINDS = {
     label: "class",
     blank: "No class selected.",
     statuses: [
-      { value: "present", name: "Present", icon: CheckCircle },
-      { value: "absent", name: "Absent", icon: XCircle },
-      { value: "late", name: "Late", icon: Clock },
+      { value: "present", name: "Present", short: "P" },
+      { value: "absent", name: "Absent", short: "A" },
+      { value: "late", name: "Late", short: "L" },
     ],
   },
   teacher: {
@@ -39,20 +40,20 @@ const KINDS = {
     label: "staff list",
     blank: "No active staff accounts.",
     statuses: [
-      { value: "present", name: "Present", icon: CheckCircle },
-      { value: "absent", name: "Absent", icon: XCircle },
-      { value: "late", name: "Late", icon: Clock },
-      { value: "leave", name: "Leave", icon: CalendarCheck },
+      { value: "present", name: "Present", short: "P" },
+      { value: "absent", name: "Absent", short: "A" },
+      { value: "late", name: "Late", short: "L" },
+      { value: "leave", name: "Leave", short: "Lv" },
     ],
   },
 };
 
-const PILL = {
-  present: "bg-emerald-500 text-white border-emerald-500",
-  absent: "bg-red-500 text-white border-red-500",
-  late: "bg-amber-400 text-amber-950 border-amber-400",
-  leave: "bg-sky-500 text-white border-sky-500",
-};
+// A box printed on the file cover. The fill is the white of a printed form and
+// the type is ink, both fixed, so the cover does not repaint with the theme.
+const FIELD =
+  "w-full rounded-sm border border-[color:var(--qd-manila-2)] bg-white/75 px-3 py-2.5 text-sm text-[color:var(--qd-sheet-ink)] outline-none focus:border-[color:var(--qd-pen)]";
+
+const LABEL = "mb-2 block text-sm font-semibold text-[color:var(--qd-manila-ink)]";
 
 // One sheet for both registers: the whole list opens already ticked Present and
 // only the exceptions are clicked, so a class of thirty takes a handful of
@@ -202,13 +203,13 @@ export default function AttendanceSheet({ kind, title, subtitle }) {
         )}
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-card p-4 shadow-sm">
+      {/* The cover strip of the register: the class, the day, and the two
+          presses that fill the whole book in one go. Manila, because a
+          register is filed in a folder and the folder is not the page. */}
+      <div className="qd-manila p-4">
         <div className="grid gap-4 md:grid-cols-4">
           <div>
-            <label
-              htmlFor="sheet-date"
-              className="mb-2 block text-sm font-semibold text-slate-700"
-            >
+            <label htmlFor="sheet-date" className={LABEL}>
               Date
             </label>
             <input
@@ -216,7 +217,7 @@ export default function AttendanceSheet({ kind, title, subtitle }) {
               type="date"
               value={date}
               onChange={(event) => setDate(event.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
+              className={FIELD}
             />
           </div>
 
@@ -224,7 +225,7 @@ export default function AttendanceSheet({ kind, title, subtitle }) {
             <div>
               <label
                 htmlFor="sheet-class"
-                className="mb-2 block text-sm font-semibold text-slate-700"
+                className={LABEL}
               >
                 Class
               </label>
@@ -232,7 +233,7 @@ export default function AttendanceSheet({ kind, title, subtitle }) {
                 id="sheet-class"
                 value={className}
                 onChange={(event) => setClassName(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500"
+                className={FIELD}
               >
                 {classes.map((option) => (
                   <option key={option} value={option}>
@@ -246,42 +247,42 @@ export default function AttendanceSheet({ kind, title, subtitle }) {
           <div>
             <label
               htmlFor="sheet-search"
-              className="mb-2 block text-sm font-semibold text-slate-700"
+              className={LABEL}
             >
               Find
             </label>
             <div className="relative">
               <Search
                 size={17}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--qd-sheet-muted)]"
               />
               <input
                 id="sheet-search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Name or ID"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none focus:border-emerald-500"
+                className={`${FIELD} pl-10`}
               />
             </div>
           </div>
 
           {canMark && (
             <div>
-              <span className="mb-2 block text-sm font-semibold text-slate-700">
+              <span className={LABEL}>
                 Whole sheet
               </span>
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => markAll("present")}
-                  className="flex-1 rounded-xl border border-slate-200 px-3 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-emerald-50"
+                  className="flex-1 rounded-sm border border-[color:var(--qd-manila-2)] px-3 py-2.5 text-xs font-semibold text-[color:var(--qd-manila-ink)] transition hover:bg-emerald-50"
                 >
                   All present
                 </button>
                 <button
                   type="button"
                   onClick={() => markAll("absent")}
-                  className="flex-1 rounded-xl border border-slate-200 px-3 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-red-50"
+                  className="flex-1 rounded-sm border border-[color:var(--qd-manila-2)] px-3 py-2.5 text-xs font-semibold text-[color:var(--qd-manila-ink)] transition hover:bg-red-50"
                 >
                   All absent
                 </button>
@@ -291,25 +292,24 @@ export default function AttendanceSheet({ kind, title, subtitle }) {
         </div>
       </div>
 
+      {/* The day's totals, foot-ruled like the bottom of a column in the book
+          itself rather than floated above it in chips. */}
       <div className="flex flex-wrap gap-3">
         {config.statuses.map((status) => (
-          <div
-            key={status.value}
-            className="rounded-2xl border border-slate-200 bg-card px-5 py-3 shadow-sm"
-          >
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <div key={status.value} className="qd-total px-5 py-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--qd-sheet-muted)]">
               {status.name}
             </p>
-            <p className="mt-1 text-xl font-bold text-slate-800">
+            <p className="qd-hand mt-1 text-2xl leading-7">
               {counts[status.value] ?? 0}
             </p>
           </div>
         ))}
-        <div className="rounded-2xl border border-slate-200 bg-card px-5 py-3 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <div className="qd-total px-5 py-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--qd-sheet-muted)]">
             On the list
           </p>
-          <p className="mt-1 text-xl font-bold text-slate-800">
+          <p className="qd-hand mt-1 text-2xl leading-7">
             {rows.length}
           </p>
         </div>
@@ -330,21 +330,23 @@ export default function AttendanceSheet({ kind, title, subtitle }) {
         </p>
       )}
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-card shadow-sm">
+      {/* The register: cream stock ruled one line per name, with the red margin
+          down the left and the mark boxes lined up under their column. */}
+      <div className="qd-register qd-margin overflow-x-auto">
         {loading ? (
-          <div className="flex min-h-48 items-center justify-center gap-2 text-sm text-slate-500">
+          <div className="flex min-h-48 items-center justify-center gap-2 text-sm text-[color:var(--qd-sheet-muted)]">
             <Loader2 size={20} className="animate-spin" />
-            Loading the sheet...
+            Opening the book...
           </div>
         ) : shown.length === 0 ? (
           <div className="flex min-h-48 flex-col items-center justify-center px-4 text-center">
-            <div className="mb-3 rounded-full bg-slate-100 p-4">
-              <UserRound size={26} className="text-slate-400" />
+            <div className="mb-3 rounded-full border border-[color:var(--qd-sheet-edge)] p-4">
+              <UserRound size={26} className="text-[color:var(--qd-sheet-muted)]" />
             </div>
-            <h3 className="font-semibold text-slate-700">
+            <h3 className="font-semibold">
               {rows.length === 0 ? config.blank : "No match"}
             </h3>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-[color:var(--qd-sheet-muted)]">
               {rows.length === 0
                 ? "Check the class or add accounts to it first."
                 : "Nothing here fits that search."}
@@ -352,18 +354,18 @@ export default function AttendanceSheet({ kind, title, subtitle }) {
           </div>
         ) : (
           <table className="w-full min-w-[560px] text-left">
-            <thead className="bg-card">
-              <tr className="border-b border-slate-200">
-                <th className="px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+            <thead>
+              <tr className="qd-reg-row">
+                <th className="px-5 py-3 pl-12 text-xs font-bold uppercase tracking-wide">
                   Name
                 </th>
-                <th className="px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                <th className="px-5 py-3 text-xs font-bold uppercase tracking-wide">
                   ID
                 </th>
-                <th className="px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                <th className="px-5 py-3 text-xs font-bold uppercase tracking-wide">
                   Status
                 </th>
-                <th className="px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                <th className="px-5 py-3 text-xs font-bold uppercase tracking-wide">
                   Remark
                 </th>
               </tr>
@@ -374,29 +376,25 @@ export default function AttendanceSheet({ kind, title, subtitle }) {
                 const status = row.status ?? "present";
 
                 return (
-                  <tr
-                    key={row[config.idField]}
-                    className="border-b border-slate-100 last:border-0"
-                  >
-                    <td className="px-5 py-3">
-                      <p className="text-sm font-semibold text-slate-700">
+                  <tr key={row[config.idField]} className="qd-reg-row">
+                    <td className="px-5 py-3 pl-12">
+                      <p className="text-sm font-semibold">
                         {row.name}
                       </p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-[color:var(--qd-sheet-muted)]">
                         {[row.subject, row.rollNumber && `Roll ${row.rollNumber}`]
                           .filter(Boolean)
                           .join(" · ")}
                       </p>
                     </td>
 
-                    <td className="px-5 py-3 text-sm text-slate-600">
+                    <td className="px-5 py-3 text-sm">
                       {row[config.idField] || "—"}
                     </td>
 
                     <td className="px-5 py-3">
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex gap-1.5">
                         {config.statuses.map((option) => {
-                          const Icon = option.icon;
                           const active = status === option.value;
 
                           return (
@@ -406,14 +404,25 @@ export default function AttendanceSheet({ kind, title, subtitle }) {
                               disabled={!canMark}
                               onClick={() => setStatus(index, option.value)}
                               aria-pressed={active}
-                              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                              aria-label={`${row.name}: ${option.name}`}
+                              title={option.name}
+                              className={`qd-cell relative flex h-10 w-11 shrink-0 flex-col items-center justify-center rounded-sm transition disabled:cursor-not-allowed ${
                                 active
-                                  ? PILL[option.value]
-                                  : "border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+                                  ? ""
+                                  : "opacity-55 hover:opacity-100 disabled:opacity-40"
                               }`}
                             >
-                              <Icon size={14} />
-                              {option.name}
+                              {/* An empty box shows the letter it would be
+                                  marked with; a marked box shows the stroke the
+                                  pen actually made, and the letter goes under
+                                  it so the column still reads. */}
+                              {active ? (
+                                <PenMark kind={option.value} size={19} />
+                              ) : (
+                                <span className="qd-hand text-base leading-5">
+                                  {option.short}
+                                </span>
+                              )}
                             </button>
                           );
                         })}
@@ -426,7 +435,7 @@ export default function AttendanceSheet({ kind, title, subtitle }) {
                         disabled={!canMark}
                         onChange={(event) => setRemark(index, event.target.value)}
                         placeholder="Optional"
-                        className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none focus:border-emerald-500 disabled:opacity-60"
+                        className="qd-cell qd-hand w-full rounded-sm px-3 py-1.5 text-base text-[color:var(--qd-pen)] outline-none placeholder:text-[color:var(--qd-sheet-muted)] focus:border-[color:var(--qd-pen)] disabled:opacity-60"
                       />
                     </td>
                   </tr>

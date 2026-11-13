@@ -3,8 +3,9 @@ import {
   BookOpen,
   Search,
   Filter,
-  Download,
-  ExternalLink,
+  X,
+  ChevronLeft,
+  ChevronRight,
   Clock,
   CheckCircle2,
   BookMarked,
@@ -14,6 +15,9 @@ import {
   CircleDollarSign,
 } from "lucide-react";
 import api from "../../api/axios";
+import { AnimatePresence, Fade, Pop, Turn } from "../../components/Motion";
+import { Stamp } from "../../components/Paper";
+import { sheetProps } from "../../utils/paper";
 
 /* =========================
    DATE HELPERS
@@ -39,6 +43,10 @@ export default function Library() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
+
+  // Which title is lying open on the desk, and which way its leaf is turning.
+  const [open, setOpen] = useState(-1);
+  const [dir, setDir] = useState(1);
 
   /* =========================
      LOAD CATALOGUE + ISSUES
@@ -111,6 +119,41 @@ export default function Library() {
       return matchesCategory && matchesSearch;
     });
   }, [search, category, resources]);
+
+  const openBook = (index) => {
+    setDir(index >= open ? 1 : -1);
+    setOpen(index);
+  };
+
+  // Walking the catalogue is turning its pages: the next title comes over the
+  // gutter from the right, the previous one comes back.
+  const turnTo = (step) => {
+    const next = open + step;
+
+    if (next < 0 || next >= filteredResources.length) return;
+
+    setDir(step);
+    setOpen(next);
+  };
+
+  useEffect(() => {
+    if (open < 0) return undefined;
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") setOpen(-1);
+      if (event.key === "ArrowRight") turnTo(1);
+      if (event.key === "ArrowLeft") turnTo(-1);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => window.removeEventListener("keydown", onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, filteredResources]);
+
+  // The shelf can shrink under a search, so the open title is read out of the
+  // filtered list rather than held as an object that may no longer be there.
+  const opened = filteredResources[open] ?? null;
 
   const availableCount = resources.filter(
     (resource) => resource.status === "Available"
@@ -247,71 +290,57 @@ export default function Library() {
           </span>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-card">
+        {/* The loan book: ruled stock and a red margin, one line per copy out.
+            On a phone the same records become one slip each, because a
+            five-column register cannot be read down the width of a screen. */}
+        <div className="qd-register qd-margin hidden overflow-x-auto md:block">
 
-          {/* Desktop table */}
+            <table className="w-full text-left text-sm">
 
-          <div className="hidden overflow-x-auto md:block">
+              <thead>
 
-            <table className="w-full text-left">
-
-              <thead className="border-b border-slate-200 bg-slate-50">
-
-                <tr>
-                  <th className="px-5 py-4 text-xs font-semibold text-slate-500">
+                <tr className="qd-reg-row">
+                  <th className="px-5 py-3 pl-12 text-[11px] font-bold uppercase tracking-[0.12em]">
                     Book
                   </th>
 
-                  <th className="px-5 py-4 text-xs font-semibold text-slate-500">
+                  <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.12em]">
                     Issue Date
                   </th>
 
-                  <th className="px-5 py-4 text-xs font-semibold text-slate-500">
+                  <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.12em]">
                     Return Date
                   </th>
 
-                  <th className="px-5 py-4 text-xs font-semibold text-slate-500">
+                  <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.12em]">
                     Status
                   </th>
 
-                  <th className="px-5 py-4 text-xs font-semibold text-slate-500">
+                  <th className="px-5 py-3 text-[11px] font-bold uppercase tracking-[0.12em]">
                     Fine
                   </th>
                 </tr>
 
               </thead>
 
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
 
                 {issuedBooks.map((book) => (
-                  <tr
-                    key={book.id}
-                    className="transition hover:bg-slate-50"
-                  >
+                  <tr key={book.id} className="qd-reg-row">
 
-                    <td className="px-5 py-4">
+                    <td className="px-5 py-4 pl-12">
 
-                      <div className="flex items-center gap-3">
+                      <p className="text-sm font-semibold">
+                        {book.title}
+                      </p>
 
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950">
-                          <BookOpen className="h-4 w-4 text-amber-400" />
-                        </div>
+                      <p className="mt-1 text-xs text-[color:var(--qd-sheet-muted)]">
+                        {book.author}
+                      </p>
 
-                        <div>
-                          <p className="text-sm font-semibold text-slate-900">
-                            {book.title}
-                          </p>
-
-                          <p className="mt-1 text-xs text-slate-400">
-                            {book.author}
-                          </p>
-
-                          <p className="mt-1 text-[10px] text-slate-400">
-                            ID: {book.bookId}
-                          </p>
-                        </div>
-
-                      </div>
+                      <p className="mt-1 text-[10px] uppercase tracking-wide text-[color:var(--qd-sheet-muted)]">
+                        ID: {book.bookId}
+                      </p>
 
                     </td>
 
@@ -330,11 +359,11 @@ export default function Library() {
                     <td className="px-5 py-4">
 
                       {book.fine > 0 ? (
-                        <span className="font-semibold text-red-600 dark:text-red-400">
+                        <span className="qd-hand text-xl leading-6 text-[color:var(--qd-pen-red)]">
                           NPR {book.fine}
                         </span>
                       ) : (
-                        <span className="text-sm text-emerald-600 dark:text-emerald-400">
+                        <span className="text-xs font-semibold uppercase tracking-wide text-[color:var(--qd-sheet-muted)]">
                           No Fine
                         </span>
                       )}
@@ -344,30 +373,39 @@ export default function Library() {
                   </tr>
                 ))}
 
+                {!issuedBooks.length && (
+                  <tr>
+                    <td
+                      colSpan="5"
+                      className="px-5 py-10 pl-12 text-sm text-[color:var(--qd-sheet-muted)]"
+                    >
+                      Nothing is out on loan to you.
+                    </td>
+                  </tr>
+                )}
+
               </tbody>
 
             </table>
 
-          </div>
+        </div>
 
-          {/* Mobile cards */}
+        <div className="qd-board space-y-5 p-4 md:hidden">
 
-          <div className="space-y-3 p-4 md:hidden">
-
-            {issuedBooks.map((book) => (
+            {issuedBooks.map((book, index) => (
               <div
                 key={book.id}
-                className="rounded-xl border border-slate-200 p-4"
+                {...sheetProps(index, { stack: true, className: "p-4" })}
               >
 
                 <div className="flex items-start justify-between gap-3">
 
                   <div>
-                    <h3 className="text-sm font-semibold text-slate-900">
+                    <h3 className="text-sm font-semibold">
                       {book.title}
                     </h3>
 
-                    <p className="mt-1 text-xs text-slate-400">
+                    <p className="mt-1 text-xs text-[color:var(--qd-sheet-muted)]">
                       {book.author}
                     </p>
                   </div>
@@ -392,17 +430,17 @@ export default function Library() {
 
                 </div>
 
-                <div className="mt-4 border-t pt-3">
+                <div className="mt-4 border-t border-[color:var(--qd-sheet-edge)] pt-3">
 
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs uppercase tracking-wide text-[color:var(--qd-sheet-muted)]">
                     Fine
                   </p>
 
                   <p
                     className={`mt-1 text-sm font-semibold ${
                       book.fine > 0
-                        ? "text-red-600 dark:text-red-400"
-                        : "text-emerald-600 dark:text-emerald-400"
+                        ? "qd-hand text-xl text-[color:var(--qd-pen-red)]"
+                        : "text-[color:var(--qd-pen)]"
                     }`}
                   >
                     {book.fine > 0
@@ -414,8 +452,6 @@ export default function Library() {
 
               </div>
             ))}
-
-          </div>
 
         </div>
 
@@ -474,36 +510,46 @@ export default function Library() {
           </h2>
 
           <p className="text-xs text-slate-400">
-            {filteredResources.length} resource
-            {filteredResources.length !== 1 ? "s" : ""} found
+            {filteredResources.length} title{filteredResources.length !== 1 ? "s" : ""} · tap a
+            cover to open it
           </p>
 
         </div>
 
         {filteredResources.length === 0 ? (
 
-          <div className="rounded-2xl border border-slate-200 bg-card p-10 text-center">
+          <div className="qd-board p-6 sm:p-10">
 
-            <BookOpen className="mx-auto h-10 w-10 text-slate-400" />
+            <div
+              {...sheetProps(0, {
+                fold: true,
+                tilt: 0,
+                className: "mx-auto max-w-sm px-6 py-10 text-center",
+              })}
+            >
+              <BookOpen className="mx-auto h-9 w-9 text-[color:var(--qd-sheet-muted)]" />
 
-            <h3 className="mt-4 font-semibold text-slate-800">
-              No resources found
-            </h3>
+              <h3 className="mt-4 font-serif text-lg font-semibold">
+                No titles on this shelf
+              </h3>
 
-            <p className="mt-1 text-sm text-slate-400">
-              Try another search term or category.
-            </p>
+              <p className="mt-1 text-sm text-[color:var(--qd-sheet-muted)]">
+                Try another search term or category.
+              </p>
+            </div>
 
           </div>
 
         ) : (
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="qd-board grid grid-cols-2 gap-5 p-5 sm:grid-cols-3 sm:gap-6 sm:p-7 lg:grid-cols-4 xl:grid-cols-5">
 
-            {filteredResources.map((resource) => (
-              <ResourceCard
-                key={resource.id}
-                resource={resource}
+            {filteredResources.map((resource, index) => (
+              <BookCover
+                key={resource.id || resource._id}
+                book={resource}
+                index={index}
+                onOpen={() => openBook(index)}
               />
             ))}
 
@@ -512,6 +558,19 @@ export default function Library() {
         )}
 
       </div>
+
+      <AnimatePresence>
+        {opened && (
+          <BookSpread
+            book={opened}
+            dir={dir}
+            index={open}
+            total={filteredResources.length}
+            onClose={() => setOpen(-1)}
+            onTurn={turnTo}
+          />
+        )}
+      </AnimatePresence>
 
     </div>
   );
@@ -599,9 +658,9 @@ function DateValue({ date }) {
   return (
     <div className="flex items-center gap-2">
 
-      <CalendarDays className="h-4 w-4 text-slate-400" />
+      <CalendarDays className="h-4 w-4 text-[color:var(--qd-sheet-muted)]" />
 
-      <span className="text-xs text-slate-600">
+      <span className="text-xs text-[color:var(--qd-sheet-ink)]">
         {date}
       </span>
 
@@ -618,17 +677,17 @@ function DateInfo({ icon: Icon, label, value }) {
   return (
     <div>
 
-      <div className="flex items-center gap-1.5 text-slate-400">
+      <div className="flex items-center gap-1.5 text-[color:var(--qd-sheet-muted)]">
 
         <Icon className="h-3.5 w-3.5" />
 
-        <span className="text-[10px]">
+        <span className="text-[10px] uppercase tracking-wide">
           {label}
         </span>
 
       </div>
 
-      <p className="mt-1 text-xs font-medium text-slate-700">
+      <p className="mt-1 text-xs font-medium text-[color:var(--qd-sheet-ink)]">
         {value}
       </p>
 
@@ -640,40 +699,43 @@ function DateInfo({ icon: Icon, label, value }) {
    BOOK STATUS
 ========================= */
 
+// These sit on paper, so they are pen marks in a ruled box rather than the
+// coloured chips the rest of the app uses: an accent tint on cream turns
+// translucent in dark mode and disappears.
 function BookStatus({ status }) {
 
   const config = {
     Issued: {
-      className: "bg-blue-50 text-blue-600 dark:text-blue-400",
+      className: "text-[color:var(--qd-pen)]",
       icon: BookMarked,
     },
 
     Overdue: {
-      className: "bg-amber-50 text-amber-700 dark:text-amber-300",
+      className: "text-[color:var(--qd-pen-red)]",
       icon: Clock,
     },
 
     Returned: {
-      className: "bg-emerald-50 text-emerald-600 dark:text-emerald-400",
+      className: "text-[color:var(--qd-sheet-muted)]",
       icon: CheckCircle2,
     },
 
     Lost: {
-      className: "bg-red-50 text-red-600 dark:text-red-400",
+      className: "text-[color:var(--qd-pen-red)]",
       icon: AlertTriangle,
     },
   };
 
   // Guard against an unexpected status so the badge never throws.
   const item = config[status] || {
-    className: "bg-slate-100 text-slate-600",
+    className: "text-[color:var(--qd-sheet-ink)]",
     icon: BookOpen,
   };
   const Icon = item.icon;
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold ${item.className}`}
+      className={`qd-cell inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${item.className}`}
     >
       <Icon className="h-3.5 w-3.5" />
       {status}
@@ -682,127 +744,198 @@ function BookStatus({ status }) {
 }
 
 /* =========================
-   RESOURCE CARD
+   BOOK ON THE SHELF
 ========================= */
 
-function ResourceCard({ resource }) {
-
-  const isAvailable = resource.status === "Available";
-
+// A catalogue card used to summarise a book. This is the book: kraft over board,
+// a spine along the hinge, the fore-edge of the leaves showing past the cover,
+// and the title printed into the board rather than floated over it.
+function BookCover({ book, index, onOpen }) {
   return (
-    <div className="group rounded-2xl border border-slate-200 bg-card p-5 transition hover:border-amber-300 hover:shadow-sm">
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={`Open ${book.title}`}
+      className="qd-kraft qd-book qd-book-btn qd-fade-up relative flex aspect-[5/7] w-full flex-col justify-between p-3 pl-5 text-left sm:p-4 sm:pl-6"
+      style={{ animationDelay: `${Math.min(index, 10) * 55}ms` }}
+    >
+      <span aria-hidden="true" className="qd-spine absolute inset-y-0 left-0 w-2 sm:w-2.5" />
 
-      <div className="flex gap-4">
+      <p className="text-[9px] font-bold uppercase tracking-[0.16em] sm:text-[10px]">
+        {book.category || "General"}
+      </p>
 
-        <div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-950 sm:flex">
-          <BookOpen className="h-5 w-5 text-amber-400" />
-        </div>
+      <div className="qd-cover-label px-2.5 py-3 sm:px-3.5 sm:py-4">
+        <h3 className="font-serif text-sm font-semibold leading-snug sm:text-base">
+          {book.title}
+        </h3>
 
-        <div className="min-w-0 flex-1">
-
-          <div className="flex flex-wrap items-center gap-2">
-
-            <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
-              {resource.category}
-            </span>
-
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-              {resource.type}
-            </span>
-
-          </div>
-
-          <h3 className="mt-3 text-base font-semibold text-slate-900">
-            {resource.title}
-          </h3>
-
-          <p className="mt-1 text-xs font-medium text-slate-500">
-            {resource.author}
-          </p>
-
-          <p className="mt-3 text-sm leading-relaxed text-slate-500">
-            {resource.description}
-          </p>
-
-          <div className="mt-4 flex items-center justify-between gap-3">
-
-            <div>
-
-              {isAvailable ? (
-
-                <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-
-                  <CheckCircle2 className="h-4 w-4" />
-
-                  Available
-
-                </div>
-
-              ) : (
-
-                <div>
-
-                  <div className="flex items-center gap-1.5 text-xs font-medium text-amber-700 dark:text-amber-300">
-
-                    <Clock className="h-4 w-4" />
-
-                    Borrowed
-
-                  </div>
-
-                  <p className="mt-1 text-[11px] text-slate-400">
-                    Due: {resource.dueDate}
-                  </p>
-
-                </div>
-
-              )}
-
-            </div>
-
-            {isAvailable ? (
-
-              <button
-                type="button"
-                className="flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
-              >
-
-                {resource.type === "PDF" ? (
-
-                  <>
-                    <Download className="h-4 w-4" />
-                    Download
-                  </>
-
-                ) : (
-
-                  <>
-                    <ExternalLink className="h-4 w-4" />
-                    View
-                  </>
-
-                )}
-
-              </button>
-
-            ) : (
-
-              <button
-                type="button"
-                disabled
-                className="rounded-xl bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-400"
-              >
-                Currently Borrowed
-              </button>
-
-            )}
-
-          </div>
-
-        </div>
-
+        <p className="mt-2 text-[10px] sm:text-xs">{book.author}</p>
       </div>
 
-    </div>
+      <p className="qd-hand text-base leading-5 sm:text-lg">
+        {book.status === "Available" ? "On the shelf" : "Out on loan"}
+      </p>
+    </button>
+  );
+}
+
+/* =========================
+   OPEN BOOK
+========================= */
+
+const NAV =
+  "flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/15 disabled:pointer-events-none disabled:opacity-40";
+
+// The detail view is the book opened flat on the desk. The left-hand leaf is the
+// title page and stays where it is; the right-hand one is a page, and it turns —
+// swinging about the gutter instead of scaling in a corner — every time the
+// reader steps to another title.
+function BookSpread({ book, dir, index, total, onClose, onTurn }) {
+  const isAvailable = book.status === "Available";
+  const copies = Number(book.availableCopies ?? book.quantity ?? 0);
+
+  return (
+    <Fade
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-slate-950/70 p-3 backdrop-blur-sm sm:p-6"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={book.title}
+    >
+      <Pop
+        as="div"
+        origin="center"
+        className="my-auto w-full max-w-3xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white">
+            {book.code ? `Accession ${book.code}` : "Library catalogue"}
+          </p>
+
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close the book"
+            className="rounded-xl p-2 text-white transition hover:bg-white/15"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="qd-kraft qd-book-spread qd-book-open relative p-2 sm:p-3">
+          <div className="flex flex-col sm:flex-row">
+            <div className="qd-page flex-1 p-5 sm:p-7">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[color:var(--qd-sheet-muted)]">
+                {book.type === "PDF"
+                  ? "Digital reference"
+                  : `${book.category || "General"} · ${book.type || "Book"}`}
+              </p>
+
+              <h2 className="mt-3 font-serif text-2xl font-semibold leading-tight sm:text-3xl">
+                {book.title}
+              </h2>
+
+              <p className="qd-hand mt-2 text-2xl leading-7 text-[color:var(--qd-pen)]">
+                by {book.author}
+              </p>
+
+              {!isAvailable && (
+                <div
+                  {...sheetProps(0, {
+                    stack: true,
+                    tilt: -1.6,
+                    className: "mt-5 px-4 py-3",
+                  })}
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[color:var(--qd-sheet-muted)]">
+                    Date due
+                  </p>
+
+                  <p className="qd-hand text-2xl leading-7 text-[color:var(--qd-pen-red)]">
+                    {book.dueDate || "Not dated"}
+                  </p>
+                </div>
+              )}
+
+              <div className="mt-6 flex flex-wrap items-end justify-between gap-4 border-t border-[color:var(--qd-sheet-edge)] pt-4">
+                <div className="text-xs leading-5 text-[color:var(--qd-sheet-muted)]">
+                  <p>{book.isbn ? `ISBN ${book.isbn}` : "No ISBN recorded"}</p>
+
+                  <p>{copies} of {Number(book.quantity ?? 0)} copies on the shelf</p>
+                </div>
+
+                <Stamp>School Library</Stamp>
+              </div>
+            </div>
+
+            <AnimatePresence mode="wait">
+              <Turn
+                key={book.id || book._id}
+                dir={dir}
+                className="qd-page min-h-[17rem] flex-1 p-5 sm:p-7"
+              >
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[color:var(--qd-sheet-muted)]">
+                  About this title
+                </p>
+
+                <p className="mt-3 text-sm leading-7">
+                  {book.description ||
+                    "No description has been written for this title yet."}
+                </p>
+
+                <div className="mt-6 space-y-3">
+                  <p
+                    className={`qd-cell inline-flex rounded-sm px-3 py-2 text-xs font-bold uppercase tracking-wide ${
+                      isAvailable
+                        ? "text-[color:var(--qd-pen)]"
+                        : "text-[color:var(--qd-pen-red)]"
+                    }`}
+                  >
+                    {isAvailable
+                      ? "On the shelf"
+                      : `Out on loan · due ${book.dueDate || "—"}`}
+                  </p>
+
+                  <p className="qd-hand text-xl leading-6 text-[color:var(--qd-pen)]">
+                    {isAvailable
+                      ? "Ask the librarian for this copy."
+                      : "Ask the desk when it is next free."}
+                  </p>
+                </div>
+              </Turn>
+            </AnimatePresence>
+          </div>
+
+          {/* The binding, drawn over the gutter the two leaves meet in. */}
+          <span
+            aria-hidden="true"
+            className="absolute inset-y-3 left-1/2 hidden w-1.5 -translate-x-1/2 bg-[#3a2413]/35 sm:block"
+          />
+        </div>
+
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <button type="button" onClick={() => onTurn(-1)} disabled={index <= 0} className={NAV}>
+            <ChevronLeft size={16} />
+            Previous title
+          </button>
+
+          <p className="text-xs text-white">
+            {index + 1} of {total}
+          </p>
+
+          <button
+            type="button"
+            onClick={() => onTurn(1)}
+            disabled={index >= total - 1}
+            className={NAV}
+          >
+            Next title
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      </Pop>
+    </Fade>
   );
 }

@@ -6,11 +6,13 @@ import {
   GraduationCap,
   Loader2,
   Printer,
-  User,
 } from "lucide-react";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import { downloadReportCard, printReportCard } from "../utils/reportCard";
+import { AnimatePresence, Reveal } from "./Motion";
+import { Stamp } from "./Paper";
+import { sheetProps } from "../utils/paper";
 
 const formatDate = (value) => {
   if (!value) return "—";
@@ -22,17 +24,11 @@ const formatDate = (value) => {
     : date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 };
 
-const GRADE_TONE = {
-  "A+": "bg-emerald-50 text-emerald-700 dark:text-emerald-300",
-  A: "bg-emerald-50 text-emerald-700 dark:text-emerald-300",
-  "B+": "bg-teal-50 text-teal-700 dark:text-teal-300",
-  B: "bg-teal-50 text-teal-700 dark:text-teal-300",
-  "C+": "bg-sky-50 text-sky-700 dark:text-sky-300",
-  C: "bg-sky-50 text-sky-700 dark:text-sky-300",
-  D: "bg-amber-50 text-amber-700 dark:text-amber-300",
-  F: "bg-red-50 text-red-700 dark:text-red-300",
-  Ab: "bg-slate-100 text-slate-500",
-};
+// A printed card carries no coloured chips: the printer's black, and the red
+// pen the checker uses to mark a paper that was not sat or not passed.
+const redPen = (row) => row.absent || row.grade === "F";
+
+const ink = (row) => (redPen(row) ? "var(--qd-pen-red)" : "var(--qd-sheet-ink)");
 
 // One screen for both family portals: the student's own card and a parent's
 // child's card come from the same published-only endpoint.
@@ -144,21 +140,30 @@ export default function PublishedResults({ heading = "My Results", blurb }) {
         </div>
       ) : (
         <>
-          <div className="flex flex-wrap gap-3">
+          {/* One tab per term, cut from the same board as the folder below. */}
+          <div className="flex flex-wrap items-end gap-2">
             {cards.map((item, index) => (
               <button
                 key={item._id}
                 onClick={() => setSelected(index)}
-                className={`rounded-2xl border px-5 py-4 text-left transition ${
+                className={`px-5 py-3 text-left transition ${
                   index === selected
-                    ? "border-emerald-500 bg-emerald-50/70 shadow-sm dark:bg-emerald-500/10"
-                    : "border-slate-200 bg-card hover:border-emerald-300"
+                    ? "qd-manila -mb-px pb-4"
+                    : "rounded-t-xl border border-b-0 border-slate-200 bg-card text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                 }`}
               >
-                <p className="text-sm font-bold text-slate-800">
+                <p
+                  className={`text-sm font-bold ${
+                    index === selected ? "" : "text-slate-800"
+                  }`}
+                >
                   {item.term?.name}
                 </p>
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p
+                  className={`mt-0.5 text-xs ${
+                    index === selected ? "text-[color:var(--qd-manila-ink)]" : "text-slate-500"
+                  }`}
+                >
                   {item.term?.academicYear} · GPA {item.gpa ?? 0}
                   {item._id === best?._id ? " · best term" : ""}
                 </p>
@@ -167,145 +172,204 @@ export default function PublishedResults({ heading = "My Results", blurb }) {
           </div>
 
           {card && (
-            <div className="rounded-2xl border border-slate-200 bg-card p-6 shadow-sm">
-              <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-200 pb-5">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:text-emerald-400">
-                    <User size={22} />
-                  </div>
-                  <div>
-                    <p className="text-lg font-bold text-slate-900">
-                      {card.studentName || user?.name}
-                    </p>
-                    <p className="text-sm text-slate-500">
-                      {card.studentId} · {card.className}
-                      {card.rollNumber ? ` · Roll ${card.rollNumber}` : ""}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="text-right text-sm text-slate-500">
-                  <p className="font-semibold text-slate-800">
-                    {card.term?.name} — {card.term?.academicYear}
-                  </p>
-                  <p>
-                    {card.term?.startDate
-                      ? `${formatDate(card.term.startDate)} → ${formatDate(card.term.endDate)}`
-                      : ""}
-                  </p>
-                  <p>{card.term?.venue || ""}</p>
-                </div>
+            <div className="qd-manila p-3 sm:p-4">
+              <div className="flex flex-wrap items-baseline justify-between gap-2 px-2 pb-3">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em]">
+                  {card.className} · {card.studentId}
+                </p>
+                <p className="qd-hand text-xl leading-6">
+                  {card.term?.name} — {card.term?.academicYear}
+                </p>
               </div>
 
-              <div className="mt-5 overflow-x-auto">
-                <table className="w-full min-w-[640px] text-left text-sm">
-                  <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-                    <tr>
-                      <th className="px-4 py-3">Subject</th>
-                      <th className="px-3 py-3">Theory</th>
-                      <th className="px-3 py-3">Practical</th>
-                      <th className="px-3 py-3">Total</th>
-                      <th className="px-3 py-3">%</th>
-                      <th className="px-3 py-3">Grade</th>
-                      <th className="px-3 py-3">G.P.</th>
-                      <th className="px-3 py-3">Credits</th>
-                    </tr>
-                  </thead>
+              {/* Changing term plays the same gesture as taking a card out of the
+                  file: the page rises up out of the folder below it. */}
+              <AnimatePresence mode="wait">
+                <Reveal
+                  key={card._id}
+                  {...sheetProps(0, { fold: true, tilt: 0, className: "pb-16 sm:pb-20" })}
+                >
+                  <header className="qd-letterhead px-5 py-5 sm:px-8">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[color:var(--qd-sheet-margin)]">
+                      {school?.name || "Smart School Management System"}
+                    </p>
+                    <h2 className="mt-1 text-xl font-bold sm:text-2xl">
+                      Statement of Marks
+                    </h2>
 
-                  <tbody className="divide-y divide-slate-100">
-                    {card.subjects.map((row) => (
-                      <tr key={String(row.subject)}>
-                        <td className="px-4 py-3 font-medium text-slate-800">
-                          {row.subjectName}
-                          {row.remarks && (
-                            <p className="text-xs font-normal text-slate-400">{row.remarks}</p>
-                          )}
-                        </td>
-                        <td className="px-3 py-3 text-slate-600">
-                          {row.absent ? "Ab" : `${row.theory ?? "-"} / ${row.theoryFull}`}
-                        </td>
-                        <td className="px-3 py-3 text-slate-600">
-                          {row.absent ? "Ab" : `${row.practical ?? "-"} / ${row.practicalFull}`}
-                        </td>
-                        <td className="px-3 py-3 font-bold text-slate-800">
-                          {row.absent ? "Ab" : row.total ?? "-"}
-                          <span className="ml-1 text-xs font-normal text-slate-400">
-                            /{row.fullMarks}
-                          </span>
-                        </td>
-                        <td className="px-3 py-3 text-slate-600">
-                          {row.absent ? "—" : row.percentage ?? "-"}
-                        </td>
-                        <td className="px-3 py-3">
-                          <span
-                            className={`rounded-full px-2.5 py-1 text-xs font-bold ${
-                              GRADE_TONE[row.grade] || "bg-slate-100 text-slate-500"
-                            }`}
+                    <div className="mt-4 grid gap-x-6 gap-y-3 sm:grid-cols-3">
+                      {[
+                        { label: "Name", value: card.studentName || user?.name },
+                        { label: "Symbol No.", value: card.studentId },
+                        {
+                          label: "Class",
+                          value: `${card.className}${
+                            card.rollNumber ? ` · Roll ${card.rollNumber}` : ""
+                          }`,
+                        },
+                        { label: "Examination", value: card.term?.name },
+                        { label: "Session", value: card.term?.academicYear },
+                        {
+                          label: "Dates",
+                          value: card.term?.startDate
+                            ? `${formatDate(card.term.startDate)} → ${formatDate(card.term.endDate)}`
+                            : card.term?.venue || "—",
+                        },
+                      ].map((field) => (
+                        <div key={field.label}>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[color:var(--qd-sheet-muted)]">
+                            {field.label}
+                          </p>
+                          <p className="text-sm font-semibold">{field.value || "—"}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </header>
+
+                  <div className="px-5 py-5 sm:px-8">
+                    <div className="qd-register overflow-x-auto">
+                      <table className="w-full min-w-[640px] text-left text-sm">
+                        <thead>
+                          <tr>
+                            <th className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.1em]">
+                              Subject
+                            </th>
+                            <th className="px-3 py-2.5 text-right text-[11px] font-bold uppercase tracking-[0.1em]">
+                              Theory
+                            </th>
+                            <th className="px-3 py-2.5 text-right text-[11px] font-bold uppercase tracking-[0.1em]">
+                              Practical
+                            </th>
+                            <th className="px-3 py-2.5 text-right text-[11px] font-bold uppercase tracking-[0.1em]">
+                              Total
+                            </th>
+                            <th className="px-3 py-2.5 text-right text-[11px] font-bold uppercase tracking-[0.1em]">
+                              %
+                            </th>
+                            <th className="px-3 py-2.5 text-right text-[11px] font-bold uppercase tracking-[0.1em]">
+                              Grade
+                            </th>
+                            <th className="px-3 py-2.5 text-right text-[11px] font-bold uppercase tracking-[0.1em]">
+                              G.P.
+                            </th>
+                            <th className="px-3 py-2.5 text-right text-[11px] font-bold uppercase tracking-[0.1em]">
+                              Credits
+                            </th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {card.subjects.map((row) => (
+                            <tr key={String(row.subject)} className="qd-reg-row">
+                              <td className="px-4 py-2.5 font-medium">
+                                {row.subjectName}
+                                {row.remarks && (
+                                  <p className="qd-hand text-base leading-5 text-[color:var(--qd-pen)]">
+                                    {row.remarks}
+                                  </p>
+                                )}
+                              </td>
+                              <td className="px-3 py-2.5 text-right" style={{ color: ink(row) }}>
+                                {row.absent ? "Ab" : `${row.theory ?? "-"} / ${row.theoryFull}`}
+                              </td>
+                              <td className="px-3 py-2.5 text-right" style={{ color: ink(row) }}>
+                                {row.absent ? "Ab" : `${row.practical ?? "-"} / ${row.practicalFull}`}
+                              </td>
+                              <td
+                                className="px-3 py-2.5 text-right font-bold"
+                                style={{ color: ink(row) }}
+                              >
+                                {row.absent ? "Ab" : row.total ?? "-"}
+                                <span className="ml-1 text-xs font-normal text-[color:var(--qd-sheet-muted)]">
+                                  /{row.fullMarks}
+                                </span>
+                              </td>
+                              <td className="px-3 py-2.5 text-right" style={{ color: ink(row) }}>
+                                {row.absent ? "—" : row.percentage ?? "-"}
+                              </td>
+                              <td
+                                className="px-3 py-2.5 text-right font-bold"
+                                style={{ color: ink(row) }}
+                              >
+                                {row.grade || "—"}
+                              </td>
+                              <td className="px-3 py-2.5 text-right" style={{ color: ink(row) }}>
+                                {row.absent ? "—" : row.gradePoint ?? "-"}
+                              </td>
+                              <td className="px-3 py-2.5 text-right">{row.credits ?? "-"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                      {[
+                        { label: "Obtained", value: `${card.obtained ?? 0} / ${card.maximum ?? 0}` },
+                        { label: "GPA", value: card.gpa ?? 0 },
+                        { label: "Division", value: card.division || "—" },
+                        {
+                          label: "Result",
+                          value: String(card.result || "pending").toUpperCase(),
+                          tone:
+                            card.result === "fail" ? "var(--qd-pen-red)" : "var(--qd-pen)",
+                        },
+                        {
+                          label: "Attendance",
+                          value: card.attendance?.total
+                            ? `${card.attendance.present + card.attendance.late}/${card.attendance.total}`
+                            : "—",
+                          hint: card.attendance?.total
+                            ? `${card.attendance.percentage}% present`
+                            : "",
+                        },
+                      ].map((item) => (
+                        <div key={item.label} className="qd-total px-4 py-3">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[color:var(--qd-sheet-muted)]">
+                            {item.label}
+                          </p>
+                          <p
+                            className="mt-1 text-xl font-bold"
+                            style={{ color: item.tone || "var(--qd-sheet-ink)" }}
                           >
-                            {row.grade || "—"}
-                          </span>
-                        </td>
-                        <td className="px-3 py-3 text-slate-600">
-                          {row.absent ? "—" : row.gradePoint ?? "-"}
-                        </td>
-                        <td className="px-3 py-3 text-slate-600">{row.credits ?? "-"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                            {item.value}
+                          </p>
+                          {item.hint && (
+                            <p className="text-xs text-[color:var(--qd-sheet-muted)]">{item.hint}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
 
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-                {[
-                  { label: "Obtained", value: `${card.obtained ?? 0} / ${card.maximum ?? 0}` },
-                  { label: "GPA", value: card.gpa ?? 0 },
-                  { label: "Division", value: card.division || "—" },
-                  {
-                    label: "Result",
-                    value: String(card.result || "pending").toUpperCase(),
-                    tone:
-                      card.result === "fail"
-                        ? "text-red-600 dark:text-red-400"
-                        : "text-emerald-600 dark:text-emerald-400",
-                  },
-                  {
-                    label: "Attendance",
-                    value: card.attendance?.total
-                      ? `${card.attendance.present + card.attendance.late}/${card.attendance.total}`
-                      : "—",
-                    hint: card.attendance?.total ? `${card.attendance.percentage}% present` : "",
-                  },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="rounded-xl bg-slate-50 p-4 dark:bg-transparent dark:ring-1"
-                  >
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      {item.label}
-                    </p>
-                    <p className={`mt-1 text-xl font-bold ${item.tone || "text-slate-900"}`}>
-                      {item.value}
-                    </p>
-                    {item.hint && <p className="text-xs text-slate-400">{item.hint}</p>}
+                    {card.officeRemarks && (
+                      <div className="mt-5 rounded-sm border border-[color:var(--qd-sheet-edge)] bg-white/45 px-4 py-3">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[color:var(--qd-sheet-muted)]">
+                          Office remarks
+                        </p>
+                        <p className="mt-1 text-sm">{card.officeRemarks}</p>
+                      </div>
+                    )}
+
+                    <div className="mt-6 flex flex-wrap items-end justify-between gap-6">
+                      <p className="max-w-xl text-xs leading-5 text-[color:var(--qd-sheet-muted)]">
+                        Pass mark is 35% of each paper. An absent paper prints as Ab and is left out
+                        of the GPA until it is sat.
+                      </p>
+
+                      <div className="flex flex-col items-center gap-1.5">
+                        <Stamp>{card.publishedAt ? "Published" : "Draft"}</Stamp>
+                        <p className="text-[11px] text-[color:var(--qd-sheet-muted)]">
+                          {formatDate(card.publishedAt)}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                ))}
-              </div>
+                </Reveal>
+              </AnimatePresence>
 
-              {card.officeRemarks && (
-                <div className="mt-5 rounded-xl border border-slate-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Office remarks
-                  </p>
-                  <p className="mt-1 text-sm text-slate-700">
-                    {card.officeRemarks}
-                  </p>
-                </div>
-              )}
-
-              <p className="mt-5 text-xs leading-5 text-slate-400">
-                Pass mark is 35% of each paper. An absent paper prints as Ab and is left out of the
-                GPA until it is sat. Published {formatDate(card.publishedAt)}.
-              </p>
+              {/* The lip of the folder is drawn over the foot of the card, so the
+                  page climbs out of the file instead of standing beside it. */}
+              <div className="qd-folder-pocket -mt-10 h-14 sm:-mt-12 sm:h-16" />
             </div>
           )}
         </>

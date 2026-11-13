@@ -78,14 +78,23 @@ export function Reveal({
 // A popover, menu or dropdown: appears hinged at the control that opened it and
 // collapses back the same way. Put it inside <AnimatePresence>, at the place
 // that decides whether it is open.
-export function Pop({ as = "div", origin = "top right", className = "", children, ...rest }) {
+export function Pop({
+  as = "div",
+  origin = "top right",
+  className = "",
+  style,
+  children,
+  ...rest
+}) {
   const degree = useDegree();
   const Motion = Box(as);
 
+  // `style` is merged, not overridden by the spread below: a caller that hands
+  // a panel its own custom properties must not be able to lose the hinge.
   return (
     <Motion
       className={className}
-      style={{ transformOrigin: origin }}
+      style={{ transformOrigin: origin, ...style }}
       initial={popFrom(degree)}
       animate={grown}
       exit={fadeOut(0.96, degree)}
@@ -160,6 +169,79 @@ export function Float({
       dragElastic={0.06}
       onDragEnd={onDragEnd}
       style={floating ? { ...style, x, y } : style}
+      {...rest}
+    >
+      {children}
+    </Motion>
+  );
+}
+
+// A page turning in a bound book. `dir` is the way the reader went: forward
+// brings the next leaf over the gutter from the right, back returns it.
+//
+// It has to be mounted inside a `.qd-book-open` wrapper and inside an
+// <AnimatePresence>, with a `key` of the page number. The wrapper owns the
+// perspective — a `rotateY` on an element with no perspective is a rectangle
+// that appears to shrink sideways instead of turning.
+export function Turn({
+  as = "div",
+  dir = 1,
+  className = "",
+  style,
+  children,
+  ...rest
+}) {
+  const degree = useDegree();
+  const Motion = Box(as);
+  const swing = degree === "reduced" ? 0 : degree === "rich" ? 82 : 58;
+
+  return (
+    <Motion
+      className={`qd-leaf ${className}`}
+      style={{ transformOrigin: "left center", ...style }}
+      initial={{ rotateY: dir * swing, opacity: 0 }}
+      animate={{ rotateY: 0, opacity: 1 }}
+      exit={{ rotateY: -dir * swing, opacity: 0 }}
+      transition={{
+        duration: degree === "reduced" ? 0 : degree === "rich" ? 0.62 : 0.42,
+        ease: [0.22, 0.61, 0.36, 1],
+      }}
+      {...rest}
+    >
+      {children}
+    </Motion>
+  );
+}
+
+// A pinned sheet: dropped on the board and left to settle, then torn off it.
+// The exit is the point — a notice the reader has dismissed should fall away on
+// a corner, not fade in place like a dialog.
+//
+// The resting tilt stays in CSS (`--qd-tilt`) because it belongs to the sheet,
+// not to the gesture: `rotate` here is a separate property from `transform`, so
+// the two compose and the card can hang at an angle while it is being moved.
+export function Tear({ as = "div", index = 0, className = "", children, ...rest }) {
+  const degree = useDegree();
+  const Motion = Box(as);
+  const live = degree === "reduced" ? 0 : 1;
+
+  return (
+    <Motion
+      className={className}
+      initial={{
+        opacity: 0,
+        y: -16 * live,
+        rotate: -1.6 * live,
+        scale: degree === "rich" ? 1.035 : 1,
+      }}
+      animate={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
+      exit={{
+        opacity: 0,
+        y: 30 * live,
+        rotate: 3 * live,
+        transition: { duration: live ? 0.26 : 0 },
+      }}
+      transition={transitionFor(degree, { delay: revealDelay(degree, index) })}
       {...rest}
     >
       {children}
