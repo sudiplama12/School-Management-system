@@ -65,9 +65,15 @@ export function AuthProvider({ children }) {
 
       return data;
     } catch (err) {
-      // No response at all means the request never reached Express — the usual
-      // cause is a stopped backend, which is not a bad password.
-      if (!err?.response) {
+      // A stopped backend does not always look like a dead request: the proxy
+      // in front of /api answers with its own 5xx page, so `err.response`
+      // exists but carries no message from Express. Both shapes mean the server
+      // was never reached, which is not a bad password — and saying "Unable to
+      // sign in" here sends the office to the credentials instead of the API.
+      const status = err?.response?.status;
+      const unreachable = !err?.response || (status >= 500 && !err?.response?.data?.message);
+
+      if (unreachable) {
         throw new Error(
           "Cannot reach the school server. Check that the backend is running, then try again."
         );
